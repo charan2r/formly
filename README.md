@@ -89,5 +89,7 @@ Margin: 16-32px (between)
 
 ### Choice of the element spacing
 Consistent Spacing - Apply equal padding and margin for a balanced layout (e.g., margin-bottom: 20px;, padding: 20px;).
+
 Proportional Scaling - Set element widths as percentages for responsive scaling (e.g., 50% on large screens, and 80% on small screens).
+
 Typography - comfortable reading with line height: 1.5 and letter spacing: 0.5px.
