@@ -94,25 +94,16 @@ const Sidebar: React.FC = () => {
           }}
         >
           {/* Avatar */}
-          <Box
+          <Avatar
+            src="/path/to/avatar.jpg"
+            alt="Sardor"
             sx={{
-              position: 'relative',
-              width: 30,
-              height: 30,
+              width: 24,
+              height: 24,
               borderRadius: '50%',
+              border: '1px solid white',
             }}
-          >
-            <Avatar
-              src="/path/to/avatar.jpg"
-              alt="Sardor"
-              sx={{
-                width: '100%',
-                height: '100%',
-                borderRadius: '50%',
-                border: '2px solid white',
-              }}
-            />
-          </Box>
+          />
           <Typography fontWeight="bold" sx={{ ml: 1, fontSize: '0.75rem', color: '#333' }}>
             Sardor
           </Typography>
@@ -131,32 +122,50 @@ const Sidebar: React.FC = () => {
               bottom: '100%',
               left: 0,
               mb: 1,
-              width: '180px',
+              width: '160px',  // Reduced width for a smaller card
               backgroundColor: 'white',
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
               borderRadius: '8px',
               overflow: 'hidden',
               border: '1px solid #E0E0E0',
               zIndex: 10,
-              padding: '4px 0', // Small padding for a compact look
+              padding: '4px 0',
             }}
           >
-            <List dense> {/* Makes items compact */}
-              <ListItemButton>
+            {/* Profile Info (Avatar, Name, Email) */}
+            <Stack alignItems="center" spacing={0.5} p={1} sx={{ textAlign: 'center' }}>
+              <Avatar src="/path/to/avatar.jpg" alt="Sardor" sx={{ width: 30, height: 30 }} />
+              <Typography fontSize="0.75rem" fontWeight="bold">
+                Sardor
+              </Typography>
+              <Typography fontSize="0.7rem" color="gray">
+                sardor@gmail.com
+              </Typography>
+            </Stack>
+
+            {/* Divider Line */}
+            <Box sx={{ borderBottom: '1px solid #E0E0E0', mb: 0.5 }} />
+
+            <List dense sx={{ py: 0 }}> {/* Compact items */}
+              <ListItemButton sx={{ py: 0.5 }}>
                 <SettingsOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
-                <ListItemText primary="Profile Settings" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+                <ListItemText primary="Profile Settings" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
-              <ListItemButton>
+              <ListItemButton sx={{ py: 0.5 }}>
                 <HelpOutlineOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
-                <ListItemText primary="Help Center" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+                <ListItemText primary="Help Center" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
-              <ListItemButton>
+              <ListItemButton sx={{ py: 0.5 }}>
                 <DescriptionOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
-                <ListItemText primary="Terms and Conditions" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+                <ListItemText primary="Terms" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
-              <ListItemButton>
+
+              {/* Divider Line Above Sign Out */}
+              <Box sx={{ borderBottom: '1px solid #E0E0E0', mb: 0.5, mt: 0.5 }} />
+
+              <ListItemButton sx={{ py: 0.5 }}>
                 <ExitToAppOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
-                <ListItemText primary="Sign Out" primaryTypographyProps={{ fontSize: '0.875rem' }} />
+                <ListItemText primary="Sign Out" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
             </List>
           </Box>
