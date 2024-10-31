@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { DataSource } from "typeorm";
 import * as dotenv from "dotenv";
 
@@ -10,8 +11,9 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'postgres',
-  entities: [__dirname + "/src/entity/*ts"],
+  entities: [__dirname + "/src/entity/*.ts"],
   migrations: [__dirname + "/migrations/*.ts"],
+  synchronize: true,
 });
 
 export default AppDataSource;
