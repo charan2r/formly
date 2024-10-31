@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import { Box, Typography, List, ListItemButton, ListItemText, Stack, Avatar } from '@mui/material';
 import { Link } from 'react-router-dom';
-import { HiOutlineCog, HiOutlineQuestionMarkCircle, HiOutlineDocumentText, HiOutlineLogout, HiChevronUp, HiChevronDown } from 'react-icons/hi';
+import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
+import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
+import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
+import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
+import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 
 const Sidebar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleProfileClick = () => {
-    setIsDropdownOpen((prev) => !prev); // Toggle dropdown visibility
+    setIsDropdownOpen((prev) => !prev);
   };
 
   return (
@@ -74,10 +79,10 @@ const Sidebar: React.FC = () => {
           sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            justifyContent: 'space-between', // Space between avatar and icon
+            justifyContent: 'space-between',
             cursor: 'pointer',
-            borderRadius: '8px', // Adjusted for a smaller button
-            padding: '4px 8px', // Adjusted padding for a smaller button
+            borderRadius: '8px',
+            padding: '4px 8px',
             boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
             backgroundColor: '#fff',
             border: '1px solid #E0E0E0',
@@ -88,12 +93,12 @@ const Sidebar: React.FC = () => {
             },
           }}
         >
-          {/* Avatar with Stroke */}
+          {/* Avatar */}
           <Box
             sx={{
               position: 'relative',
-              width: 30, // Adjusted width for a smaller button
-              height: 30, // Adjusted height for a smaller button
+              width: 30,
+              height: 30,
               borderRadius: '50%',
             }}
           >
@@ -104,18 +109,17 @@ const Sidebar: React.FC = () => {
                 width: '100%',
                 height: '100%',
                 borderRadius: '50%',
-                border: '2px solid white', // Inner border
+                border: '2px solid white',
               }}
             />
           </Box>
           <Typography fontWeight="bold" sx={{ ml: 1, fontSize: '0.75rem', color: '#333' }}>
             Sardor
           </Typography>
-          {/* Drop-Up Icon */}
           {isDropdownOpen ? (
-            <HiChevronUp size={20} style={{ color: '#333', marginLeft: 'auto' }} />
+            <KeyboardArrowUpOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} />
           ) : (
-            <HiChevronDown size={20} style={{ color: '#333', marginLeft: 'auto' }} />
+            <KeyboardArrowDownOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} />
           )}
         </Box>
 
@@ -124,34 +128,35 @@ const Sidebar: React.FC = () => {
           <Box
             sx={{
               position: 'absolute',
-              bottom: '100%', // Position above the profile section
+              bottom: '100%',
               left: 0,
               mb: 1,
-              width: '180px', // Adjusted for better fit
+              width: '180px',
               backgroundColor: 'white',
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
               borderRadius: '8px',
               overflow: 'hidden',
               border: '1px solid #E0E0E0',
               zIndex: 10,
+              padding: '4px 0', // Small padding for a compact look
             }}
           >
-            <List>
+            <List dense> {/* Makes items compact */}
               <ListItemButton>
-                <HiOutlineCog className="mr-2 text-gray-600" />
-                <ListItemText primary="Profile Settings" />
+                <SettingsOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
+                <ListItemText primary="Profile Settings" primaryTypographyProps={{ fontSize: '0.875rem' }} />
               </ListItemButton>
               <ListItemButton>
-                <HiOutlineQuestionMarkCircle className="mr-2 text-gray-600" />
-                <ListItemText primary="Help Center" />
+                <HelpOutlineOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
+                <ListItemText primary="Help Center" primaryTypographyProps={{ fontSize: '0.875rem' }} />
               </ListItemButton>
               <ListItemButton>
-                <HiOutlineDocumentText className="mr-2 text-gray-600" />
-                <ListItemText primary="Terms and Conditions" />
+                <DescriptionOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
+                <ListItemText primary="Terms and Conditions" primaryTypographyProps={{ fontSize: '0.875rem' }} />
               </ListItemButton>
               <ListItemButton>
-                <HiOutlineLogout className="mr-2 text-gray-600" />
-                <ListItemText primary="Sign Out" />
+                <ExitToAppOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
+                <ListItemText primary="Sign Out" primaryTypographyProps={{ fontSize: '0.875rem' }} />
               </ListItemButton>
             </List>
           </Box>
