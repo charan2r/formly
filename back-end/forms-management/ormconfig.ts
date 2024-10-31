@@ -12,6 +12,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE || 'postgres',
   entities: [__dirname + "/src/entity/*ts"],
   migrations: [__dirname + "/migrations/*.ts"],
+  synchronize: false
 });
 
 export default AppDataSource;
