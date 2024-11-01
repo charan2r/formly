@@ -1,20 +1,30 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm'; 
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { Organization } from './entity/organization'; 
-import { User } from './entity/user';
-import AppDataSource from 'ormconfig'; 
-import { OrganizationRepository } from './app.repository';
-//import { DataSource } from 'typeorm';
+import { OrganizationController } from './organization/organization.controller';
+import { OrganizationService } from './organization/organization.service';
+import { OrganizationModule } from './organization/organization.module';
+import { OrganizationRepository } from './organization/organization.repository';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(AppDataSource.options), 
-    TypeOrmModule.forFeature([Organization, User]),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'postgres',
+      database: 'postgres',
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      synchronize: true,
+    }),
+    OrganizationModule
   ],
-  controllers: [AppController],
-  providers: [AppService, OrganizationRepository],
+  controllers: [AppController, OrganizationController],
+  providers: [AppService, OrganizationService, OrganizationRepository],
 })
-export class AppModule {}
+export class AppModule { }

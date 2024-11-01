@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable prettier/prettier */
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class  $npmConfigName1730394054107 implements MigrationInterface {
+export class Init1730449935669 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
     }
