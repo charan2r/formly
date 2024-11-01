@@ -125,13 +125,11 @@ const DataTable: React.FC = () => {
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
           <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <CircleIcon />
+            <CircleIcon style={{ color: 'black' }}/>
           </IconButton>
-          <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <ArrowForward />
-          </IconButton>
+            <ArrowForward style={{ color: 'black' }}/>
           <Typography variant="body2" color="textSecondary">
-            Organizations
+            Overview
           </Typography>
         </Box>
         <Typography variant="h5" fontWeight="bold">Organization Management</Typography>
@@ -201,9 +199,9 @@ const DataTable: React.FC = () => {
           </Box>
         </Box>
       </Box>
-      <TableContainer sx={{ maxHeight: '400px' }}>
-        <Table stickyHeader sx={{ marginTop: '10px' }}>
-          <TableHead>
+      <TableContainer sx={{ maxHeight: '400px', height: 'auto', overflow: 'auto' }}>
+      <Table stickyHeader sx={{ marginTop: '10px' }}>
+       <TableHead>
             <TableRow>
               <TableCell
                 padding="checkbox"
@@ -281,7 +279,7 @@ const DataTable: React.FC = () => {
                   backgroundColor: '#f9f9f9',
                   borderStartEndRadius: '20px',
                   borderEndEndRadius: '20px',
-                  padding: '4px', // Adjust top and bottom padding here
+                  padding: '1px', // Adjust top and bottom padding here
                 }}
               />
             </TableRow>
