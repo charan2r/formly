@@ -23,24 +23,14 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircleIcon from '@mui/icons-material/Circle';
 import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
-import { Delete } from '@mui/icons-material';
+import { ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-interface Organization {
-  id: number;
-  name: string;
-  email: string;
-  type: string;
-  lastActive: string;
-}
 
-const sampleData: Organization[] = [
-  { id: 1, name: 'Organization1', email: 'org1@example.com', type: 'IT', lastActive: 'Oct 6, 2024' },
-  { id: 2, name: 'Organization2', email: 'org2@example.com', type: 'Finance', lastActive: 'Oct 7, 2024' },
-  // Add more sample data as needed
-];
+// Import the sample data and Organization interface from the data file
+import sampleData, { Organization } from '../data/organizationData';
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
   '& .MuiPaginationItem-root': {
@@ -69,6 +59,7 @@ const DataTable: React.FC = () => {
   const [filters, setFilters] = useState({ name: '', type: '', lastActive: '' });
   const [orderBy, setOrderBy] = useState<keyof Organization>('name');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
+
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchor(event.currentTarget);
@@ -132,19 +123,25 @@ const DataTable: React.FC = () => {
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3 }}>
       <Box display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
           <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <ArrowBackIcon />
+            <CircleIcon />
+          </IconButton>
+          <IconButton onClick={() => console.log("Back arrow clicked")}>
+            <ArrowForward />
           </IconButton>
           <Typography variant="body2" color="textSecondary">
             Organizations
           </Typography>
         </Box>
         <Typography variant="h5" fontWeight="bold">Organization Management</Typography>
+        <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
+          Manage your organizations and their account permissions here.
+        </Typography>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-         <Typography variant="h6" component="span">
-  <strong>All organizations</strong> <span style={{ color: 'gray' }}>{filteredData.length}</span>
-</Typography>
+          <Typography variant="h6" component="span">
+            <strong>All organizations</strong> <span style={{ color: 'gray' }}>{filteredData.length}</span>
+          </Typography>
           <Box display="flex" alignItems="center" gap={2}>
             <TextField
               variant="outlined"
@@ -169,7 +166,7 @@ const DataTable: React.FC = () => {
               }}
               sx={{
                 border: 'none',
-                borderRadius: '20px', 
+                borderRadius: '20px',
                 '& .MuiOutlinedInput-root': {
                   '& fieldset': {
                     border: 'none',
@@ -177,9 +174,9 @@ const DataTable: React.FC = () => {
                 },
               }}
             />
-            <Box sx={{ backgroundColor: '#f9f9f9', borderRadius: '20px', padding: '2px', paddingRight:'15px', paddingLeft:'15px', display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ backgroundColor: '#f9f9f9', borderRadius: '20px', padding: '2px', paddingRight: '15px', paddingLeft: '15px', display: 'flex', alignItems: 'center' }}>
               <Button
-                sx={{ borderRadius: '20px', color: 'black' }} onClick={handleFilterToggle} 
+                sx={{ borderRadius: '20px', color: 'black' }} onClick={handleFilterToggle}
               >
                 Filters
               </Button>
@@ -205,10 +202,18 @@ const DataTable: React.FC = () => {
         </Box>
       </Box>
       <TableContainer sx={{ maxHeight: '400px' }}>
-        <Table stickyHeader>
+        <Table stickyHeader sx={{ marginTop: '10px' }}>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  borderStartStartRadius: '20px',
+                  borderEndStartRadius: '20px',
+                  padding: '4px', // Adjust top and bottom padding here
+                }}
+              >
                 <Checkbox
                   onChange={(event) => {
                     const checked = event.target.checked;
@@ -221,8 +226,19 @@ const DataTable: React.FC = () => {
                   }}
                 />
               </TableCell>
-              <TableCell padding="checkbox" />
-              <TableCell>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  padding: '4px', // Adjust top and bottom padding here
+                }}
+              />
+              <TableCell
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  padding: '4px', // Adjust top and bottom padding here
+                }}
+              >
                 <TableSortLabel
                   active={orderBy === 'name'}
                   direction={orderDirection}
@@ -231,7 +247,12 @@ const DataTable: React.FC = () => {
                   Organization
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
+              <TableCell
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  padding: '4px', // Adjust top and bottom padding here
+                }}
+              >
                 <TableSortLabel
                   active={orderBy === 'type'}
                   direction={orderDirection}
@@ -240,7 +261,12 @@ const DataTable: React.FC = () => {
                   Type
                 </TableSortLabel>
               </TableCell>
-              <TableCell>
+              <TableCell
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  padding: '4px', // Adjust top and bottom padding here
+                }}
+              >
                 <TableSortLabel
                   active={orderBy === 'lastActive'}
                   direction={orderDirection}
@@ -249,7 +275,15 @@ const DataTable: React.FC = () => {
                   Last Active
                 </TableSortLabel>
               </TableCell>
-              <TableCell padding="checkbox" />
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  borderStartEndRadius: '20px',
+                  borderEndEndRadius: '20px',
+                  padding: '4px', // Adjust top and bottom padding here
+                }}
+              />
             </TableRow>
             {showFilters && (
               <TableRow>
@@ -288,6 +322,7 @@ const DataTable: React.FC = () => {
               </TableRow>
             )}
           </TableHead>
+
           <TableBody>
             {paginatedData.map((row) => (
               <TableRow key={row.id} sx={{ height: '60px' }}>
@@ -304,77 +339,77 @@ const DataTable: React.FC = () => {
                 <TableCell>{row.type}</TableCell>
                 <TableCell>{row.lastActive}</TableCell>
                 <TableCell padding="checkbox">
-  <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
-    <MoreVertIcon />
-  </IconButton>
-  <Popover
-    open={Boolean(menuAnchor) && selectedRowId === row.id}
-    anchorEl={menuAnchor}
-    onClose={handleMenuClose}
-    anchorOrigin={{
-      vertical: 'center',
-      horizontal: 'left',
-    }}
-    transformOrigin={{
-      vertical: 'center',
-      horizontal: 'right',
-    }}
-    PaperProps={{
-      sx: {
-        backgroundColor: 'rgba(0, 0, 0, 0.25)', // Slightly transparent light gray
-        color: 'black',
-        padding: '5px',
-      },
-    }}
-  >
-    <MenuItem
-      onClick={handleMenuClose}
-      sx={{
-        backgroundColor: 'white',
-        borderRadius: '40px',
-        margin: '5px',
-        justifyContent: 'center', // Center align text
-        fontSize: '0.875rem', // Smaller font size
-        minHeight: '30px', // Reduced height
-        minWidth: '100px', // Increased width
-        '&:hover': { backgroundColor: '#f0f0f0' },
-      }}
-    >
-      View
-    </MenuItem>
-    <MenuItem
-      onClick={handleMenuClose}
-      sx={{
-        backgroundColor: 'white',
-        borderRadius: '40px',
-        margin: '5px',
-        justifyContent: 'center', // Center align text
-        fontSize: '0.875rem', // Smaller font size
-        minHeight: '30px', // Reduced height
-        minWidth: '100px', // Increased width
-        '&:hover': { backgroundColor: '#f0f0f0' },
-      }}
-    >
-      Edit
-    </MenuItem>
-    <MenuItem
-      onClick={handleMenuClose}
-      sx={{
-        backgroundColor: 'white',
-        borderRadius: '40px',
-        margin: '5px',
-        justifyContent: 'center', // Center align text
-        color: 'red', // Red text color for "Delete"
-        fontSize: '0.875rem', // Smaller font size
-        minHeight: '30px', // Reduced height
-        minWidth: '100px', // Increased width
-        '&:hover': { backgroundColor: '#f0f0f0' },
-      }}
-    >
-      Delete
-    </MenuItem>
-  </Popover>
-</TableCell>
+                  <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Popover
+                    open={Boolean(menuAnchor) && selectedRowId === row.id}
+                    anchorEl={menuAnchor}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{
+                      vertical: 'center',
+                      horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                      vertical: 'center',
+                      horizontal: 'right',
+                    }}
+                    PaperProps={{
+                      sx: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.25)', // Slightly transparent light gray
+                        color: 'black',
+                        padding: '5px',
+                      },
+                    }}
+                  >
+                    <MenuItem
+                      onClick={handleMenuClose}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '40px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      View
+                    </MenuItem>
+                    <MenuItem
+                      onClick={handleMenuClose}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '40px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Edit
+                    </MenuItem>
+                    <MenuItem
+                      onClick={handleMenuClose}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '40px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        color: 'red', // Red text color for "Delete"
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  </Popover>
+                </TableCell>
 
 
 
@@ -384,14 +419,14 @@ const DataTable: React.FC = () => {
         </Table>
       </TableContainer>
       <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
-  <SquarePagination
-    count={Math.ceil(filteredData.length / rowsPerPage)}
-    page={page}
-    onChange={handleChangePage}
-    variant="outlined"
-    color="primary"
-  />
-</Box>
+        <SquarePagination
+          count={Math.ceil(filteredData.length / rowsPerPage)}
+          page={page}
+          onChange={handleChangePage}
+          variant="outlined"
+          color="primary"
+        />
+      </Box>
     </Paper>
   );
 };
