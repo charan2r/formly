@@ -298,7 +298,7 @@ const DataTable: React.FC = () => {
                   />
                 </TableCell>
                 <TableCell padding="checkbox">
-                  <Avatar sx={{ width: '34px', height: '34px' }}>O</Avatar>
+                  <Avatar sx={{ width: '34px', height: '34px'  }}>O</Avatar>
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.type}</TableCell>
