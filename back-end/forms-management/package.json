@@ -21,7 +21,8 @@
     "typeorm": "ts-node ./node_modules/typeorm/cli",
     "migration:run": "npm run typeorm migration:run -- -d ./ormconfig.ts",
     "migration:generate": "npm run typeorm -- -d ./ormconfig.ts migration:generate .migrations/$npm_config_name",
-    "migration:create": "npm run typeorm -- migration:create ./migrations/$npm_config_name"
+    "migration:create": "npm run typeorm -- migration:create ./migrations/$npm_config_name",
+    "seed:run": "npx ts-node src/seeds/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
