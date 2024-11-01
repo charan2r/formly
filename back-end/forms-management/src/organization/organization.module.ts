@@ -8,7 +8,7 @@ import { OrganizationRepository } from './organization.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Organization, OrganizationRepository])],
-  providers: [OrganizationService],
+  providers: [OrganizationService, OrganizationRepository],
   controllers: [OrganizationController],
 })
 export class OrganizationModule {}

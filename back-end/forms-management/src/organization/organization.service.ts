@@ -1,16 +1,15 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+//import { InjectRepository } from '@nestjs/typeorm';
 import { OrganizationRepository } from './organization.repository';
 import { Organization } from '../model/organization.entity';
-import { Repository } from 'typeorm';
+//import { Repository } from 'typeorm';
 
 @Injectable()
 export class OrganizationService {
     
   constructor(
-    @InjectRepository(OrganizationRepository)
-    private organizationRepository: Repository<Organization>,
+    private organizationRepository:OrganizationRepository,
   ) {}
 
     async getAll(): Promise<Organization[]> {

@@ -1,6 +1,13 @@
 /* eslint-disable prettier/prettier */
-import { EntityRepository, Repository } from 'typeorm';
 import { Organization } from '../model/organization.entity';
+import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 
-@EntityRepository(Organization)
-export class OrganizationRepository extends Repository<Organization> {}
+
+@Injectable()
+export class OrganizationRepository extends Repository<Organization> {
+
+    constructor(private dataSource: DataSource) {
+        super(Organization, dataSource.createEntityManager());
+      }
+}
