@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { DataSource } from 'typeorm';
 import AppDataSource from '../../ormconfig';
-import { Organization } from '../model/organization.entity'
-import { User } from '../model/user.entity'
+import { Organization } from 'src/model/organization.entity';
+import { User } from 'src/model/user.entity';
 
 const seedDatabase = async () => {
     const dataSource: DataSource = await AppDataSource.initialize();

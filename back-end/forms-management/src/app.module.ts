@@ -7,6 +7,8 @@ import { OrganizationController } from './organization/organization.controller';
 import { OrganizationService } from './organization/organization.service';
 import { OrganizationModule } from './organization/organization.module';
 import { OrganizationRepository } from './organization/organization.repository';
+import { Organization } from './entity/organization';
+import { User } from './entity/user';
 
 
 @Module({
@@ -18,10 +20,11 @@ import { OrganizationRepository } from './organization/organization.repository';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      entities: [User, Organization],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
+    TypeOrmModule.forFeature([Organization, User]),
     OrganizationModule
   ],
   controllers: [AppController, OrganizationController],
