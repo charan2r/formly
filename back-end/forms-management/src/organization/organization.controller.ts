@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { Controller, Get, Delete, Param } from '@nestjs/common';
+import { Controller, Get, Delete, Param, NotFoundException } from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 
 @Controller('organization')
@@ -13,7 +13,11 @@ export class OrganizationController {
     }
 
     @Delete(':id')
-    async deleteAll(@Param('id') id: string) {
-        return this.organizationService.deleteAll(id);
+    async deleteOne(@Param('id') id: string): Promise<void> {
+        const result = await this.organizationService.deleteOne(id);
+        if (result.affected === 0) {
+            throw new NotFoundException(`Organization with ID "${id}" not found`);
+        }
     }
+    
 }

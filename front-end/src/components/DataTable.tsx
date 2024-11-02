@@ -134,6 +134,16 @@ const DataTable: React.FC = () => {
     setOrderBy(property);
   };
 
+  const handleDeleteOrganization = async (orgId: string) => {
+    try {
+      await axios.delete(`http://localhost:3001/organization/${orgId}`);
+      setOrganizations((prev) => prev.filter((org) => org.orgId !== orgId));
+      handleMenuClose();
+    } catch (error) {
+      console.error(`Error deleting organization with ID ${orgId}:`, error);
+    }
+  };
+
   const filteredData = organizations
   .filter((org) => {
     const nameMatches = org.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -159,7 +169,7 @@ const DataTable: React.FC = () => {
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   return (
-    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3 }}>
+    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
           <IconButton onClick={() => console.log("Back arrow clicked")}>
@@ -237,23 +247,24 @@ const DataTable: React.FC = () => {
           </Box>
         </Box>
       </Box>
-      <TableContainer sx={{ maxHeight: '400px', height: 'auto', overflow: 'auto' }}>
-      <Table stickyHeader sx={{ marginTop: '10px' }}>
-       <TableHead>
-            <TableRow>
-              <TableCell
-                padding="checkbox"
-                sx={{
-                  backgroundColor: '#f9f9f9',
-                  borderStartStartRadius: '20px',
-                  borderEndStartRadius: '20px',
-                  padding: '4px', // Adjust top and bottom padding here
-                }}
-              >
-               <Checkbox
+      <TableContainer sx={{ maxHeight: '400px', overflow: 'auto' }}>
+      <Table stickyHeader sx={{ marginTop: '25px' }}>
+      <TableHead>
+  <TableRow>
+    <TableCell
+      padding="checkbox"
+      sx={{
+        backgroundColor: '#f9f9f9',
+        borderStartStartRadius: '20px',
+        borderEndStartRadius: '20px',
+        padding: '4px',
+        position: 'relative', // Make this cell relative for absolute positioning of filter input
+      }}
+    >
+      <Checkbox
         onChange={handleSelectAll}
         checked={
-          organizations.length > 0 && 
+          organizations.length > 0 &&
           organizations.every((org) => selectedOrganizations[org.orgId])
         }
         indeterminate={
@@ -261,103 +272,87 @@ const DataTable: React.FC = () => {
           !organizations.every((org) => selectedOrganizations[org.orgId])
         }
       />
-              </TableCell>
-              <TableCell
-                padding="checkbox"
-                sx={{
-                  backgroundColor: '#f9f9f9',
-                  padding: '4px', // Adjust top and bottom padding here
-                }}
-              />
-              <TableCell
-                sx={{
-                  backgroundColor: '#f9f9f9',
-                  padding: '4px', // Adjust top and bottom padding here
-                }}
-              >
-                <TableSortLabel
-                  active={orderBy === 'name'}
-                  direction={orderDirection}
-                  onClick={() => handleRequestSort('name')}
-                >
-                  Organization
-                </TableSortLabel>
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: '#f9f9f9',
-                  padding: '4px', // Adjust top and bottom padding here
-                }}
-              >
-                <TableSortLabel
-                  active={orderBy === 'category'}
-                  direction={orderDirection}
-                  onClick={() => handleRequestSort('category')}
-                >
-                  Type
-                </TableSortLabel>
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: '#f9f9f9',
-                  padding: '4px', // Adjust top and bottom padding here
-                }}
-              >
-                <TableSortLabel
-                  active={orderBy === 'lastActive'}
-                  direction={orderDirection}
-                  onClick={() => handleRequestSort('lastActive')}
-                >
-                  Last Active
-                </TableSortLabel>
-              </TableCell>
-              <TableCell
-                padding="checkbox"
-                sx={{
-                  backgroundColor: '#f9f9f9',
-                  borderStartEndRadius: '20px',
-                  borderEndEndRadius: '20px',
-                  padding: '1px', // Adjust top and bottom padding here
-                }}
-              />
-            </TableRow>
-            {showFilters && (
-              <TableRow>
-                <TableCell padding="checkbox" colSpan={2} />
-                <TableCell>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    placeholder="Name"
-                    value={filters.name}
-                    onChange={(e) => handleFilterChange(e, 'name')}
-                    sx={{ width: '40%', padding: 0, marginRight: '8px' }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    placeholder="Type"
-                    value={filters.type}
-                    onChange={(e) => handleFilterChange(e, 'type')}
-                    sx={{ width: '40%', padding: 0, marginRight: '8px' }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <TextField
-                    variant="outlined"
-                    size="small"
-                    placeholder="Last Active"
-                    value={filters.lastActive}
-                    onChange={(e) => handleFilterChange(e, 'lastActive')}
-                    sx={{ width: '40%', padding: 0, borderRadius: 26 }}
-                  />
-                </TableCell>
-                <TableCell padding="checkbox" />
-              </TableRow>
-            )}
-          </TableHead>
+    </TableCell>
+    <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
+    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+      <TableSortLabel
+        active={orderBy === 'name'}
+        direction={orderDirection}
+        onClick={() => handleRequestSort('name')}
+      >
+        Organization
+      </TableSortLabel>
+      {showFilters && (
+        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
+          <TextField
+            variant="outlined"
+            size="small"
+            inputProps={{
+      style: {
+        height: "10px",
+      },}}
+            placeholder="Filter"
+            value={filters.name}
+            onChange={(e) => handleFilterChange(e, 'name')}
+            sx={{ width: '100%', marginTop: '4px' }}
+          />
+        </div>
+      )}
+    </TableCell>
+    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+      <TableSortLabel
+        active={orderBy === 'category'}
+        direction={orderDirection}
+        onClick={() => handleRequestSort('category')}
+      >
+        Type
+      </TableSortLabel>
+      {showFilters && (
+        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Filter"
+                        inputProps={{
+      style: {
+        height: "10px",
+      },}}
+            value={filters.category}
+            onChange={(e) => handleFilterChange(e, 'category')}
+            sx={{ width: '100%', marginTop: '4px' }}
+          />
+        </div>
+      )}
+    </TableCell>
+    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+      <TableSortLabel
+        active={orderBy === 'lastActive'}
+        direction={orderDirection}
+        onClick={() => handleRequestSort('lastActive')}
+      >
+        Last Active
+      </TableSortLabel>
+      {showFilters && (
+        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
+          <TextField
+            variant="outlined"
+            size="small"
+            placeholder="Filter"
+                        inputProps={{
+      style: {
+        height: "10px",
+      },}}
+            value={filters.lastActive}
+            onChange={(e) => handleFilterChange(e, 'lastActive')}
+            sx={{ width: '100%', marginTop: '4px' }}
+          />
+        </div>
+      )}
+    </TableCell>
+    <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', borderStartEndRadius: '20px', borderEndEndRadius: '20px', padding: '1px' }} />
+  </TableRow>
+</TableHead>
+
 
           <TableBody>
             {paginatedData.map((row) => (
@@ -373,7 +368,7 @@ const DataTable: React.FC = () => {
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.category}</TableCell>
-                <TableCell>{row.lastActive}</TableCell>
+                <TableCell>{row.lastActive ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
                   <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
                     <MoreVertIcon />
@@ -429,7 +424,7 @@ const DataTable: React.FC = () => {
                       Edit
                     </MenuItem>
                     <MenuItem
-                      onClick={handleMenuClose}
+                      onClick={() => handleDeleteOrganization(row.orgId)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',

@@ -25,6 +25,6 @@ export class Organization {
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP" })
     updatedAt: Date;
 
-    @OneToMany(() => User, user => user.organizations)
+    @OneToMany(() => User, (user) => user.organization)
     users: User[];
 }

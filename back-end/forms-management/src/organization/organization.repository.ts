@@ -10,4 +10,6 @@ export class OrganizationRepository extends Repository<Organization> {
     constructor(private dataSource: DataSource) {
         super(Organization, dataSource.createEntityManager());
       }
+
+    
 }
