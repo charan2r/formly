@@ -7,9 +7,8 @@ import { OrganizationController } from './organization/organization.controller';
 import { OrganizationService } from './organization/organization.service';
 import { OrganizationModule } from './organization/organization.module';
 import { OrganizationRepository } from './organization/organization.repository';
-import { Organization } from './entity/organization';
-import { User } from './entity/user';
-
+import { Organization } from './model/organization.entity';
+import { User } from './model/user.entity';
 
 @Module({
   imports: [

@@ -6,16 +6,16 @@ export class User {
     @PrimaryGeneratedColumn("uuid")
     id: string;
 
-    @Column()
+    @Column('text',{nullable:false})
     firstName: string;
 
-    @Column()
+    @Column('text',{nullable:false})
     lastName: string;
 
-    @Column()
+    @Column('text',{nullable:false})
     email: string;
 
-    @Column()
+    @Column('text',{nullable:false})
     passwordHash: string;
 
     @Column({ type: "enum", enum: ["SuperSuperAdmin", "SuperAdmin", "SubUser"] })

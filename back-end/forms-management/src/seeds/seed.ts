@@ -1,64 +1,75 @@
 /* eslint-disable prettier/prettier */
-import { DataSource } from 'typeorm';
-import AppDataSource from '../../ormconfig';
-import { Organization } from 'src/model/organization.entity';
 import { User } from 'src/model/user.entity';
+import { Organization } from 'src/model/organization.entity';
+import bcrypt from 'bcrypt';
+import AppDataSource from 'ormconfig';
 
-const seedDatabase = async () => {
-    const dataSource: DataSource = await AppDataSource.initialize();
-    console.log("Database connected!");
-  
-    const organizationRepo = dataSource.getRepository(Organization);
-    const userRepo = dataSource.getRepository(User);
+async function seed() {
+    // Initialize the data source
+    await AppDataSource.initialize();
 
-    try {
-        const user1 = new User();
-        user1.firstName = 'platform';
-        user1.lastName = 'admin';
-        user1.email = 'padminn@example.com';
-        user1.passwordHash = 'Padmin';
-        user1.userType = 'SuperSuperAdmin';
-        user1.createdAt = new Date();
-        user1.updatedAt = new Date();
+    const userRepository = AppDataSource.getRepository(User);
+    const organizationRepository = AppDataSource.getRepository(Organization);
 
-        const user2 = new User();
-        user2.firstName = 'super';
-        user2.lastName = 'admin';
-        user2.email = 'sadmin@example.com';
-        user2.passwordHash = 'sadmin'; 
-        user2.userType = 'SuperAdmin'; 
-        user2.createdAt = new Date();
-        user2.updatedAt = new Date();
+    // Creating users
+    const hashedPassword = await bcrypt.hash('defaultpassword', 10);
+    
+    const superSuperAdmin = userRepository.create({
+        firstName: 'Alice',
+        lastName: 'Johnson',
+        email: 'alice@admin.com',
+        passwordHash: hashedPassword,
+        userType: 'SuperSuperAdmin',
+        superUserId: null,
+    });
+    
+    const superAdmin = userRepository.create({
+        firstName: 'Bob',
+        lastName: 'Smith',
+        email: 'bob@superadmin.com',
+        passwordHash: hashedPassword,
+        userType: 'SuperAdmin',
+        superUserId: superSuperAdmin.id,
+    });
 
-        const user3 = new User();
-        user3.firstName = 'sub';
-        user3.lastName = 'user';
-        user3.email = 'suser@example.com';
-        user3.passwordHash = 'suser'; 
-        user3.userType = 'SubUser'; 
-        user3.createdAt = new Date();
-        user3.updatedAt = new Date();
+    const subUser = userRepository.create({
+        firstName: 'Charlie',
+        lastName: 'Brown',
+        email: 'charlie@user.com',
+        passwordHash: hashedPassword,
+        userType: 'SubUser',
+        superUserId: superAdmin.id,
+    });
 
-        await userRepo.save([user1, user2,user3]);
-        console.log("Users have been seeded!");
+    // Save users to the database
+    await userRepository.save([superSuperAdmin, superAdmin, subUser]);
 
-        // Create organization
-        const organization = new Organization();
-        organization.orgId = user2.id; 
-        organization.name = 'My Organization';
-        organization.superSuperAdminId = user1.id;
-        organization.createdAt = new Date();
-        organization.updatedAt = new Date();
+    // Creating organizations
+    const organization1 = organizationRepository.create({
+        name: 'Org One',
+        superSuperAdminId: superSuperAdmin.id,
+    });
 
-        await organizationRepo.save(organization);
-        console.log("Organization has been seeded!");
+    const organization2 = organizationRepository.create({
+        name: 'Org Two',
+        superSuperAdminId: superSuperAdmin.id,
+    });
 
-    } catch (error) {
-        console.error("Error during data seeding:", error);
-    } finally {
-        await dataSource.destroy();
-        console.log("Database connection closed.");
-    }
-};
+    // Save organizations to the database first
+    const savedOrganizations = await organizationRepository.save([organization1, organization2]);
 
-seedDatabase();
+    // Establish relationships after saving organizations
+    savedOrganizations[0].users = [superSuperAdmin, superAdmin]; // Org One users
+    savedOrganizations[1].users = [superSuperAdmin, subUser]; // Org Two users
+
+    // Save organizations again to update the relationships
+    await organizationRepository.save(savedOrganizations);
+
+    console.log('Seeding completed.');
+    await AppDataSource.destroy();
+}
+
+seed().catch((error) => {
+    console.error('Error seeding data:', error);
+    AppDataSource.destroy();
+});

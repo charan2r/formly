@@ -6,7 +6,7 @@ export class Organization {
     @PrimaryGeneratedColumn("uuid")
     orgId: string;
 
-    @Column()
+    @Column({type:'text',nullable:false})
     name: string;
 
     @Column({ type: "uuid" })

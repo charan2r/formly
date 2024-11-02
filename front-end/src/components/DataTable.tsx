@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   InputAdornment,
@@ -28,9 +28,14 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
+import axios from 'axios';
 
-// Import the sample data and Organization interface from the data file
-import sampleData, { Organization } from '../data/organizationData';
+interface Organization {
+  orgId: string;
+  name: string;
+  category?: string | null;
+  lastActive?: string | null;
+}
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
   '& .MuiPaginationItem-root': {
@@ -49,6 +54,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 }));
 
 const DataTable: React.FC = () => {
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrganizations, setSelectedOrganizations] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
@@ -56,9 +62,23 @@ const DataTable: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ name: '', type: '', lastActive: '' });
+  const [filters, setFilters] = useState({ name: '', type: '', category: '',lastActive: '' });
   const [orderBy, setOrderBy] = useState<keyof Organization>('name');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
+
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/organization'); 
+        console.log(response.data)
+        setOrganizations(response.data);
+      } catch (error) {
+        console.error('Error fetching organization data:', error);
+      }
+    };
+
+    fetchOrganizations();
+  }, []);
 
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
@@ -69,6 +89,16 @@ const DataTable: React.FC = () => {
   const handleMenuClose = () => {
     setMenuAnchor(null);
     setSelectedRowId(null);
+  };
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    const newSelectedOrganizations = organizations.reduce((acc, org) => {
+      acc[org.orgId] = checked;  // Apply the same checked state to all organizations
+      return acc;
+    }, {} as Record<number, boolean>);
+    
+    setSelectedOrganizations(newSelectedOrganizations);
   };
 
 
@@ -104,17 +134,25 @@ const DataTable: React.FC = () => {
     setOrderBy(property);
   };
 
-  const filteredData = sampleData
-    .filter((org) =>
-      org.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      org.name.toLowerCase().includes(filters.name.toLowerCase()) &&
-      org.type.toLowerCase().includes(filters.type.toLowerCase()) &&
-      org.lastActive.toLowerCase().includes(filters.lastActive.toLowerCase())
-    )
-    .sort((a, b) => {
-      const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
-      return a[orderBy] < b[orderBy] ? -orderMultiplier : orderMultiplier;
-    });
+  const filteredData = organizations
+  .filter((org) => {
+    const nameMatches = org.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                        org.name.toLowerCase().includes(filters.name.toLowerCase());
+    
+    const categoryMatches = org.category 
+      ? org.category.toLowerCase().includes(filters.category.toLowerCase())
+      : !filters.category; // If org.category is null, match only if filters.category is empty
+
+    const lastActiveMatches = org.lastActive
+      ? org.lastActive.toLowerCase().includes(filters.lastActive.toLowerCase())
+      : !filters.lastActive; // If org.lastActive is null, match only if filters.lastActive is empty
+
+    return nameMatches && categoryMatches && lastActiveMatches;
+  })
+  .sort((a, b) => {
+    const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
+    return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
+  });
 
   const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
 
@@ -212,17 +250,17 @@ const DataTable: React.FC = () => {
                   padding: '4px', // Adjust top and bottom padding here
                 }}
               >
-                <Checkbox
-                  onChange={(event) => {
-                    const checked = event.target.checked;
-                    setSelectedOrganizations(
-                      sampleData.reduce((acc, org) => {
-                        acc[org.id] = checked;
-                        return acc;
-                      }, {} as Record<number, boolean>)
-                    );
-                  }}
-                />
+               <Checkbox
+        onChange={handleSelectAll}
+        checked={
+          organizations.length > 0 && 
+          organizations.every((org) => selectedOrganizations[org.orgId])
+        }
+        indeterminate={
+          organizations.some((org) => selectedOrganizations[org.orgId]) &&
+          !organizations.every((org) => selectedOrganizations[org.orgId])
+        }
+      />
               </TableCell>
               <TableCell
                 padding="checkbox"
@@ -252,9 +290,9 @@ const DataTable: React.FC = () => {
                 }}
               >
                 <TableSortLabel
-                  active={orderBy === 'type'}
+                  active={orderBy === 'category'}
                   direction={orderDirection}
-                  onClick={() => handleRequestSort('type')}
+                  onClick={() => handleRequestSort('category')}
                 >
                   Type
                 </TableSortLabel>
@@ -325,16 +363,16 @@ const DataTable: React.FC = () => {
             {paginatedData.map((row) => (
               <TableRow key={row.id} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
-                  <Checkbox
-                    checked={!!selectedOrganizations[row.id]}
-                    onChange={() => handleSelectOrganization(row.id)}
-                  />
+                <Checkbox
+          checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
+          onChange={() => handleSelectOrganization(row.orgId)}
+        />
                 </TableCell>
                 <TableCell padding="checkbox">
                   <Avatar sx={{ width: '34px', height: '34px'  }}>O</Avatar>
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
-                <TableCell>{row.type}</TableCell>
+                <TableCell>{row.category}</TableCell>
                 <TableCell>{row.lastActive}</TableCell>
                 <TableCell padding="checkbox">
                   <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
