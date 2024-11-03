@@ -31,6 +31,7 @@ async function seed() {
     org1.superSuperAdminId = user1.id;
     org1.category = "IT Services";
     org1.lastActive = new Date();
+    org1.createdAt = new Date(Date.now() - 25 * 24 * 60 * 60 * 1000); // Set createdAt to one week ago
     org1.users = [user1, user2];
 
     await AppDataSource.manager.save(org1);

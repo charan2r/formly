@@ -1,18 +1,12 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router } from 'react-router-dom';
 import Background from './components/Background';
 import './App.css';
-
 
 const App: React.FC = () => {
   return (
     <Router>
       <Background />
-      <Routes>
-        <Route path="/overview" element={<div></div>} />
-        <Route path="/" element={<div></div>} />
-        <Route path="/audit-logs" element={<div></div>} />
-      </Routes>
     </Router>
   );
 };
