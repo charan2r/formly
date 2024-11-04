@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { Box, Typography, List, ListItemButton, ListItemText, Stack, Avatar } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
 import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
+import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 
 const Sidebar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const location = useLocation(); // Get the current location
 
   const handleProfileClick = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -26,16 +28,11 @@ const Sidebar: React.FC = () => {
         flexDirection: 'column',
         height: '100vh',
         boxSizing: 'border-box',
-        borderRight: '1px solid #E0E0E0',
       }}
     >
       {/* Logo and Title */}
       <Stack direction="row" alignItems="center" spacing={1} mb={6} mt={2} ml={2}>
-        <img
-          src="logo.png" 
-          alt="Logo"
-          style={{ maxWidth: '30px', maxHeight: '30px' }}
-        />
+        <HighlightOffIcon fontSize='large' />
         <Typography variant="h5" fontWeight="bold">
           Form.M
         </Typography>
@@ -43,56 +40,65 @@ const Sidebar: React.FC = () => {
 
       {/* Menu Items */}
       <Box ml={2}>
-        <Typography 
-          variant="caption" 
-          color="text.secondary" 
-          sx={{ mb: 1, mt: 2 }} 
-        >
-          GENERAL
-        </Typography>
-        <List disablePadding sx={{ marginLeft: '-14px' }}>
-          <ListItemButton component={Link} to="/overview">
-            <ListItemText 
-              primary="Overview" 
-              primaryTypographyProps={{ fontWeight: 'bold' }} 
-            />
-          </ListItemButton>
-          <ListItemButton component={Link} to="/organizations">
-            <ListItemText 
-              primary="Organizations" 
-              primaryTypographyProps={{ fontWeight: 'bold' }} 
-            />
-          </ListItemButton>
-          <ListItemButton component={Link} to="/audit-logs">
-            <ListItemText 
-              primary="Audit Logs" 
-              primaryTypographyProps={{ fontWeight: 'bold' }} 
-            />
-          </ListItemButton>
-        </List>
-      </Box>
+  <Typography 
+    variant="caption" 
+    color="text.secondary" 
+  >
+    GENERAL
+  </Typography>
+  <List disablePadding sx={{ marginLeft: '-14px', marginTop: '7px'}}>
+    {['/overview', '/organizations', '/audit-logs'].map((path) => (
+      <ListItemButton
+        key={path}
+        component={Link}
+        to={path}
+        sx={{
+          borderRadius: '150px',
+          padding: '1px',
+          margin: '5px',
+          backgroundColor: location.pathname === path ? 'black' : 'transparent', // Change background based on active path
+          color: location.pathname === path ? 'white' : 'inherit', // Change text color based on active path
+          '&:hover': {
+            backgroundColor: location.pathname === path ? 'black' : '#E0E0E0', // Hover effect
+          },
+        }}
+      >
+        <ListItemText 
+          primary={
+            path === '/overview' ? 'Overview' :
+            path === '/organizations' ? 'Organizations' : 
+            'Audit Logs'
+          } 
+          primaryTypographyProps={{ fontWeight: 'bold', marginLeft: '15px' }} 
+        />
+      </ListItemButton>
+    ))}
+  </List>
+</Box>
+
 
       {/* Profile Dropdown */}
       <Box mt="auto" mb={2} ml={2} sx={{ position: 'relative' }}>
-        <Box
-          onClick={handleProfileClick}
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            borderRadius: '8px',
-            padding: '4px 8px',
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-            backgroundColor: '#fff',
-            border: '1px solid #E0E0E0',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-            '&:hover': {
-              transform: 'scale(1.05)',
-              boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.2)',
-            },
-          }}
-        >
+      <Box
+  onClick={handleProfileClick}
+  sx={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    cursor: 'pointer',
+    borderRadius: '8px',
+    padding: '4px 16px', // Adjusted padding to reduce height and increase width
+    width: '100%', // Set a specific width to increase the button width
+    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+    backgroundColor: '#fff',
+    border: '1px solid #E0E0E0',
+    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+    '&:hover': {
+      transform: 'scale(1.05)',
+      boxShadow: '0px 6px 15px rgba(0, 0, 0, 0.2)',
+    },
+  }}
+>
           {/* Avatar */}
           <Avatar
             src="/path/to/avatar.jpg"
@@ -122,7 +128,7 @@ const Sidebar: React.FC = () => {
               bottom: '100%',
               left: 0,
               mb: 1,
-              width: '160px',  // Reduced width for a smaller card
+              width: '160px',
               backgroundColor: 'white',
               boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
               borderRadius: '8px',
@@ -133,20 +139,22 @@ const Sidebar: React.FC = () => {
             }}
           >
             {/* Profile Info (Avatar, Name, Email) */}
-            <Stack alignItems="center" spacing={0.5} p={1} sx={{ textAlign: 'center' }}>
+            <Stack direction="row" alignItems="center" spacing={1} p={1}>
               <Avatar src="/path/to/avatar.jpg" alt="Sardor" sx={{ width: 30, height: 30 }} />
-              <Typography fontSize="0.75rem" fontWeight="bold">
-                Sardor
-              </Typography>
-              <Typography fontSize="0.7rem" color="gray">
-                sardor@gmail.com
-              </Typography>
+              <Box textAlign="left">
+                <Typography fontSize="0.75rem" fontWeight="bold">
+                  Sardor
+                </Typography>
+                <Typography fontSize="0.7rem" color="gray">
+                  sardor@gmail.com
+                </Typography>
+              </Box>
             </Stack>
 
             {/* Divider Line */}
             <Box sx={{ borderBottom: '1px solid #E0E0E0', mb: 0.5 }} />
 
-            <List dense sx={{ py: 0 }}> {/* Compact items */}
+            <List dense sx={{ py: 0 }}>
               <ListItemButton sx={{ py: 0.5 }}>
                 <SettingsOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
                 <ListItemText primary="Profile Settings" primaryTypographyProps={{ fontSize: '0.75rem' }} />
