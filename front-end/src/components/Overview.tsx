@@ -144,8 +144,22 @@ const Overview: React.FC = () => {
               options={{
                 maintainAspectRatio: true,
                 responsive: true,
+                plugins: {
+                    legend: {
+                      display: true, // Hides the legend
+                      position: 'bottom',
+                    },
+                  },
+                  scales: {
+                    x: {
+                      display: false, // Hides the x-axis labels
+                    },
+                    y: {
+                      display: false, // Hides the y-axis labels
+                    },
+                  },
               }}
-              height={'60%'}
+              height={'70%'}
             />
             
             {/* Recent Activity Audit Section */}
