@@ -1,23 +1,48 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { User } from "./user";
+// organization.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { User } from './user';
 
 @Entity()
 export class Organization {
-    @PrimaryGeneratedColumn("uuid")
-    orgId: string;
+  @PrimaryGeneratedColumn("uuid")
+  orgId: string;
 
-    @Column({type:'text',nullable:false})
-    name: string;
+  @Column('text', { nullable: false })
+  name: string;
 
-    @Column({ type: "uuid" })
-    superSuperAdminId: string;
+  @Column({ type: "text", nullable: true })
+  logo: string;
 
-    @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    createdAt: Date;
+  @Column({ type: "text", nullable: true })
+  phone: string;
 
-    @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP" })
-    updatedAt: Date;
+  @Column({ type: "text", nullable: true })
+  street: string;
 
-    @ManyToOne(() => User, user => user.organizations)
-    user: User;
+  @Column({ type: "text", nullable: true })
+  city: string;
+
+  @Column({ type: "text", nullable: true })
+  state: string;
+
+  @Column({ type: "text", nullable: true })
+  zip: string;
+
+  @Column({ type: "text", nullable: true })
+  website: string;
+
+  @Column({ type: "uuid", nullable: true })
+  superAdminId: string; // Optional: Holds the ID of the designated SuperAdmin user
+
+  @Column({ type: "timestamp", nullable: true })
+  lastActive: Date;
+
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  createdAt: Date;
+
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", onUpdate: "CURRENT_TIMESTAMP" })
+  updatedAt: Date;
+
+  @OneToMany(() => User, (user) => user.organization)
+  users: User[]; // Relationship to multiple users
 }
