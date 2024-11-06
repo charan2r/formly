@@ -13,18 +13,18 @@ const RecentActivityAudit = () => {
   ];
 
   return (
-    <Box marginTop={4}>
+    <Box marginTop={5}>
       <Typography variant="h6" gutterBottom>
         Recent Activity Audit
       </Typography>
-      <Paper elevation={2} sx={{ padding: 2, maxHeight: '200px', overflow: 'auto', borderRadius: 2 }}>
+      {/* <Paper elevation={2} sx={{ padding: 2, maxHeight: '200px', overflow: 'auto', borderRadius: 2 }}> */}
         <List>
           {activities.map(activity => (
             <div key={activity.id}>
-              <ListItem sx={{ padding: 0.2 }}>
+              <ListItem sx={{ padding: 0.4 }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
                   <Box display="flex" alignItems="center" marginRight={5}>
-                    <IconButton size="small" color="primary" sx={{ marginRight: 1 }}>
+                    <IconButton size="small" color="black" sx={{ marginRight: 1 }}>
                       <AccessTime fontSize="small" />
                     </IconButton>
                     <Typography variant="body2" color="textSecondary">
@@ -33,7 +33,7 @@ const RecentActivityAudit = () => {
                   </Box>
                   <ListItemText 
                     primary={activity.text} 
-                    primaryTypographyProps={{ fontWeight: 'regular' }} // Bold for activity text
+                    primaryTypographyProps={{ fontWeight: 'regular', fontSize: 'small', }} // Bold for activity text
                   />
                 </Box>
               </ListItem>
@@ -41,7 +41,7 @@ const RecentActivityAudit = () => {
             </div>
           ))}
         </List>
-      </Paper>
+      {/* </Paper> */}
     </Box>
   );
 };
