@@ -402,7 +402,7 @@ const DataTable: React.FC = () => {
                     <MenuItem
   onClick={() => {
     handleMenuClose();
-    navigate('/view-organization');
+    navigate(`/view-organization/${row.orgId}`);
   }}
   sx={{
     backgroundColor: 'white',

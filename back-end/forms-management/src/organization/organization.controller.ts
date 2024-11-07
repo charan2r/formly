@@ -4,12 +4,8 @@ import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
 import { CreateOrganizationWithSuperAdminDto } from 'src/dto/create-organization.dto';
+import { User } from 'src/model/user.entity';
 
-interface MetaSchemaResponse<T> {
-    status: string;
-    message: string;
-    data?: T;
-}
 
 @Controller('organization')
 export class OrganizationController {
@@ -18,7 +14,7 @@ export class OrganizationController {
 
     // API endpoint to get all organizations
     @Get()
-    async getAll(): Promise<MetaSchemaResponse<Organization[]>> {
+    async getAll() {
         const organizations = await this.organizationService.getAll();
         return {
             status: 'success',
@@ -27,16 +23,20 @@ export class OrganizationController {
         };
     }
 
-    // API endpoint to get details of a specific organization
+    // API endpoint to get details of a specific organization along with super admin details
     @Get('details')
-    async getOrganizationDetails(@Query('id') orgId: string): Promise<{ message: string; data: Organization }> {
-        const organization = await this.organizationService.getOne(orgId);
-        if (!organization) {
+    async getOrganizationDetails(
+        @Query('id') orgId: string
+    ): Promise<{ message: string; data: { organization: Organization; superAdmin: User | null } }> {
+        const result = await this.organizationService.getOne(orgId);
+        
+        if (!result) {
             throw new NotFoundException(`Organization with ID "${orgId}" not found`);
         }
+
         return {
             message: 'Organization details retrieved successfully',
-            data: organization,
+            data: result,
         };
     }
 
@@ -70,7 +70,7 @@ export class OrganizationController {
 
     // API endpoint to bulk delete organizations
     @Delete('bulk-delete')
-    async bulkDeleteOrganizations(@Body('ids') orgIds: string[]): Promise<MetaSchemaResponse<null>> {
+    async bulkDeleteOrganizations(@Body('ids') orgIds: string[]) {
       if (!orgIds || orgIds.length === 0) {
         throw new BadRequestException('No organization IDs provided for bulk deletion');
       }

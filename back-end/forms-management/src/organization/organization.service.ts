@@ -1,16 +1,11 @@
-/* eslint-disable prettier/prettier */
 // organization.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../model/user.entity';
 import { Organization } from 'src/model/organization.entity';
 import { UserRepository } from 'src/user/user.repository';
 import { OrganizationRepository } from './organization.repository';
-import { UserRepository } from 'src/user/user.repository';
-import { Organization } from '../model/organization.entity';
-import { User } from '../model/user.entity';
 import { UpdateOrganizationDto } from './organization.dto';
 import { In } from 'typeorm';
-import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class OrganizationService {
@@ -63,27 +58,28 @@ export class OrganizationService {
   // Method to get all organizations
   async getAll() {
     // return this.organizationRepository.find();
-    const organizations = await this.organizationRepository.find();
-    try {
-      return {
-        status: 'success',
-        data: organizations,
-        message: 'Organizationsretriecved successfully ',
-        metadata: null,
-      };
-    } catch (error) {
-      return {
-        status: 'error',
-        data: null,
-        message: 'Failed to create organization',
-        metadata: error.message,
-      };
-    }
+    return await this.organizationRepository.find();
   }
 
-  // Method to get a single organization by ID
-  async getOne(id: string): Promise<Organization | null> {
-      return this.organizationRepository.findOne({ where: { orgId: id } });
+  // Method to get a single organization with its super admin details
+  async getOne(
+    id: string,
+  ): Promise<{ organization: Organization; superAdmin: User | null }> {
+    // Find the organization by its ID
+    const organization = await this.organizationRepository.findOne({
+      where: { orgId: id },
+    });
+
+    if (!organization) {
+      return null;
+    }
+
+    // Fetch the super admin details using the superAdminId
+    const superAdmin = await this.userRepository.findOne({
+      where: { id: organization.superAdminId, userType: 'SuperAdmin' },
+    });
+
+    return { organization, superAdmin };
   }
 
   // Method to update an organization
@@ -120,25 +116,5 @@ export class OrganizationService {
 
       organizations.forEach(org => org.status = 'deleted');
       return this.organizationRepository.save(organizations);
-  }
-
-  
-  // Method to delete an organization
-  async deleteOne(id: string) {
-    try {
-      return {
-        status: 'success',
-        data: await this.organizationRepository.delete(id),
-        message: 'Organization created successfully',
-        metadata: null,
-      };
-    } catch (error) {
-      return {
-        status: 'error',
-        data: null,
-        message: 'Failed to create organization',
-        metadata: error.message,
-      };
-    }
   }
 }

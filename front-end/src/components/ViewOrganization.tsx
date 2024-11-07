@@ -1,25 +1,66 @@
-import React, { useState } from 'react';
-import { Paper, TextField, Typography, Grid, Box, IconButton, InputAdornment, Button } from '@mui/material';
+import React, { useState,useEffect } from 'react';
+import { Paper, TextField, Typography, Grid, Box, IconButton, Button, CircularProgress } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+
 
 function ViewOrganization() {
   const navigate = useNavigate();
-  const [formData] = useState({
-    orgName: 'Tech Solutions',
-    category: 'IT Services', 
-    phone: '123-456-7890',
-    street: '123 Main St',
-    city: 'Metropolis',
-    state: 'CA',
-    zip: '90001',
-    website: 'www.techsolutions.com',
-    firstName: 'John',
-    lastName: 'Doe',
-    adminPhone: '987-654-3210',
-    email: 'john.doe@techsolutions.com',
+  const { orgId } = useParams();
+const [formData, setFormData] = useState({
+    orgName: '',
+    category: '', 
+    phone: '',
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
+    website: '',
+    firstName: '',
+    lastName: '',
+    adminPhone: '',
+    email: '',
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchOrganizationDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/organization/details`, {
+          params: { id: orgId }
+        });
+        const organization = response.data.data;
+        
+        setFormData({
+          orgName: organization.organization.name,
+          category: organization.organization.category,
+          phone: organization.organization.phone,
+          street: organization.organization.street,
+          city: organization.organization.city,
+          state: organization.organization.state,
+          zip: organization.organization.zip,
+          website: organization.organization.website,
+          firstName: organization.superAdmin?.firstName || '',
+          lastName: organization.superAdmin?.lastName || '',
+          adminPhone: organization.superAdmin?.phoneNumber || '',
+          email: organization.superAdmin?.email || '',
+        });
+      } catch (error) {
+        setError("Failed to load organization details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizationDetails();
+  }, [orgId]);
+
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
