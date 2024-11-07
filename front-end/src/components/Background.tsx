@@ -4,6 +4,7 @@ import Sidebar from './Sidebar';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Overview from './Overview';
 import DataTable from './DataTable';
+import CreateOrganization from './CreateOrganization';
 
 const Background: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const Background: React.FC = () => {
         <Route path="/" element={<Navigate to="/overview" replace />} />
         <Route path="/overview" element={<Overview />} />
         <Route path="/organizations" element={<DataTable />} />
+        <Route path="/create-organization" element={<CreateOrganization/>}/>
       </Routes>
     </Box>
   );

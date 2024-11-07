@@ -29,6 +29,7 @@ import { styled } from '@mui/material/styles';
 import { ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface Organization {
   orgId: string;
@@ -54,6 +55,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 }));
 
 const DataTable: React.FC = () => {
+  const navigate = useNavigate();
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOrganizations, setSelectedOrganizations] = useState<Record<number, boolean>>({});
@@ -62,14 +64,14 @@ const DataTable: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ name: '', type: '', category: '',lastActive: '' });
+  const [filters, setFilters] = useState({ name: '', type: '', category: '', lastActive: '' });
   const [orderBy, setOrderBy] = useState<keyof Organization>('name');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/organization'); 
+        const response = await axios.get('http://localhost:3001/organization');
         console.log(response.data)
         setOrganizations(response.data);
       } catch (error) {
@@ -97,7 +99,7 @@ const DataTable: React.FC = () => {
       acc[org.orgId] = checked;  // Apply the same checked state to all organizations
       return acc;
     }, {} as Record<number, boolean>);
-    
+
     setSelectedOrganizations(newSelectedOrganizations);
   };
 
@@ -145,24 +147,24 @@ const DataTable: React.FC = () => {
   };
 
   const filteredData = organizations
-  .filter((org) => {
-    const nameMatches = org.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                        org.name.toLowerCase().includes(filters.name.toLowerCase());
-    
-    const categoryMatches = org.category 
-      ? org.category.toLowerCase().includes(filters.category.toLowerCase())
-      : !filters.category; // If org.category is null, match only if filters.category is empty
+    .filter((org) => {
+      const nameMatches = org.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        org.name.toLowerCase().includes(filters.name.toLowerCase());
 
-    const lastActiveMatches = org.lastActive
-      ? org.lastActive.toLowerCase().includes(filters.lastActive.toLowerCase())
-      : !filters.lastActive; // If org.lastActive is null, match only if filters.lastActive is empty
+      const categoryMatches = org.category
+        ? org.category.toLowerCase().includes(filters.category.toLowerCase())
+        : !filters.category; // If org.category is null, match only if filters.category is empty
 
-    return nameMatches && categoryMatches && lastActiveMatches;
-  })
-  .sort((a, b) => {
-    const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
-    return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
-  });
+      const lastActiveMatches = org.lastActive
+        ? org.lastActive.toLowerCase().includes(filters.lastActive.toLowerCase())
+        : !filters.lastActive; // If org.lastActive is null, match only if filters.lastActive is empty
+
+      return nameMatches && categoryMatches && lastActiveMatches;
+    })
+    .sort((a, b) => {
+      const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
+      return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
+    });
 
   const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
 
@@ -173,9 +175,9 @@ const DataTable: React.FC = () => {
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
           <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <CircleIcon style={{ color: 'black' }}/>
+            <CircleIcon style={{ color: 'black' }} />
           </IconButton>
-            <ArrowForward style={{ color: 'black' }}/>
+          <ArrowForward style={{ color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             Overview
           </Typography>
@@ -239,6 +241,7 @@ const DataTable: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                onClick={() => navigate('/create-organization')}
               >
                 <AddIcon sx={{ marginRight: 1 }} />
                 Add Organization
@@ -248,123 +251,126 @@ const DataTable: React.FC = () => {
         </Box>
       </Box>
       <TableContainer sx={{ maxHeight: '400px', overflow: 'auto' }}>
-      <Table stickyHeader sx={{ marginTop: '25px' }}>
-      <TableHead>
-  <TableRow>
-    <TableCell
-      padding="checkbox"
-      sx={{
-        backgroundColor: '#f9f9f9',
-        borderStartStartRadius: '20px',
-        borderEndStartRadius: '20px',
-        padding: '4px',
-        position: 'relative', // Make this cell relative for absolute positioning of filter input
-      }}
-    >
-      <Checkbox
-        onChange={handleSelectAll}
-        checked={
-          organizations.length > 0 &&
-          organizations.every((org) => selectedOrganizations[org.orgId])
-        }
-        indeterminate={
-          organizations.some((org) => selectedOrganizations[org.orgId]) &&
-          !organizations.every((org) => selectedOrganizations[org.orgId])
-        }
-      />
-    </TableCell>
-    <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
-    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
-      <TableSortLabel
-        active={orderBy === 'name'}
-        direction={orderDirection}
-        onClick={() => handleRequestSort('name')}
-      >
-        Organization
-      </TableSortLabel>
-      {showFilters && (
-        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            inputProps={{
-      style: {
-        height: "10px",
-      },}}
-            placeholder="Filter"
-            value={filters.name}
-            onChange={(e) => handleFilterChange(e, 'name')}
-            sx={{ width: '100%', marginTop: '4px' }}
-          />
-        </div>
-      )}
-    </TableCell>
-    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
-      <TableSortLabel
-        active={orderBy === 'category'}
-        direction={orderDirection}
-        onClick={() => handleRequestSort('category')}
-      >
-        Type
-      </TableSortLabel>
-      {showFilters && (
-        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Filter"
-                        inputProps={{
-      style: {
-        height: "10px",
-      },}}
-            value={filters.category}
-            onChange={(e) => handleFilterChange(e, 'category')}
-            sx={{ width: '100%', marginTop: '4px' }}
-          />
-        </div>
-      )}
-    </TableCell>
-    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
-      <TableSortLabel
-        active={orderBy === 'lastActive'}
-        direction={orderDirection}
-        onClick={() => handleRequestSort('lastActive')}
-      >
-        Last Active
-      </TableSortLabel>
-      {showFilters && (
-        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Filter"
-                        inputProps={{
-      style: {
-        height: "10px",
-      },}}
-            value={filters.lastActive}
-            onChange={(e) => handleFilterChange(e, 'lastActive')}
-            sx={{ width: '100%', marginTop: '4px' }}
-          />
-        </div>
-      )}
-    </TableCell>
-    <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', borderStartEndRadius: '20px', borderEndEndRadius: '20px', padding: '1px' }} />
-  </TableRow>
-</TableHead>
+        <Table stickyHeader sx={{ marginTop: '25px' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  borderStartStartRadius: '20px',
+                  borderEndStartRadius: '20px',
+                  padding: '4px',
+                  position: 'relative', // Make this cell relative for absolute positioning of filter input
+                }}
+              >
+                <Checkbox
+                  onChange={handleSelectAll}
+                  checked={
+                    organizations.length > 0 &&
+                    organizations.every((org) => selectedOrganizations[org.orgId])
+                  }
+                  indeterminate={
+                    organizations.some((org) => selectedOrganizations[org.orgId]) &&
+                    !organizations.every((org) => selectedOrganizations[org.orgId])
+                  }
+                />
+              </TableCell>
+              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'name'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('name')}
+                >
+                  Organization
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      placeholder="Filter"
+                      value={filters.name}
+                      onChange={(e) => handleFilterChange(e, 'name')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'category'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('category')}
+                >
+                  Type
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Filter"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      value={filters.category}
+                      onChange={(e) => handleFilterChange(e, 'category')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'lastActive'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('lastActive')}
+                >
+                  Last Active
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Filter"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      value={filters.lastActive}
+                      onChange={(e) => handleFilterChange(e, 'lastActive')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', borderStartEndRadius: '20px', borderEndEndRadius: '20px', padding: '1px' }} />
+            </TableRow>
+          </TableHead>
 
 
           <TableBody>
             {paginatedData.map((row) => (
               <TableRow key={row.id} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
-                <Checkbox
-          checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
-          onChange={() => handleSelectOrganization(row.orgId)}
-        />
+                  <Checkbox
+                    checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
+                    onChange={() => handleSelectOrganization(row.orgId)}
+                  />
                 </TableCell>
                 <TableCell padding="checkbox">
-                  <Avatar sx={{ width: '34px', height: '34px'  }}>O</Avatar>
+                  <Avatar sx={{ width: '34px', height: '34px' }}>O</Avatar>
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.category}</TableCell>

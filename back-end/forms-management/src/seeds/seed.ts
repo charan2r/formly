@@ -1,4 +1,3 @@
-// seed.ts
 import { User } from "src/model/user.entity";
 import { Organization } from "src/model/organization.entity";
 import AppDataSource from "ormconfig";
@@ -47,3 +46,4 @@ async function seed() {
 }
 
 seed().catch((error) => console.log(error));
+
