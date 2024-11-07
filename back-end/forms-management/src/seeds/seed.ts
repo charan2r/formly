@@ -28,6 +28,15 @@ async function seed() {
 
     await AppDataSource.manager.save(org1);
 
+    const org2 = new Organization();
+    org2.name = "Healthcare Innovations";
+    org2.superAdminId = user1.id;
+    org2.category = "Healthcare";
+    org2.lastActive = new Date();
+    org2.createdAt = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000); // Set createdAt to two weeks ago
+
+    await AppDataSource.manager.save(org2);
+
     // Step 3: Create a Super Admin User associated with the organization
     const user2 = new User();
     user2.firstName = "Jane";

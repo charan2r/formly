@@ -5,15 +5,23 @@ import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
 import { CreateOrganizationWithSuperAdminDto } from 'src/dto/create-organization.dto';
 
+interface MetaSchemaResponse<T> {
+    status: string;
+    message: string;
+    data?: T;
+}
+
 @Controller('organization')
 export class OrganizationController {
+
     constructor(private readonly organizationService: OrganizationService) {}
 
     // API endpoint to get all organizations
     @Get()
-    async getAll() {
+    async getAll(): Promise<MetaSchemaResponse<Organization[]>> {
         const organizations = await this.organizationService.getAll();
         return {
+            status: 'success',
             message: 'Organizations retrieved successfully',
             data: organizations,
         };
@@ -62,19 +70,20 @@ export class OrganizationController {
 
     // API endpoint to bulk delete organizations
     @Delete('bulk-delete')
-    async bulkDeleteOrganizations(@Body('ids') orgIds: string[]): Promise<{ message: string; data: Organization[] }> {
-        if (!orgIds || orgIds.length === 0) {
-            throw new BadRequestException('No organization IDs provided for bulk deletion');
-        }
+    async bulkDeleteOrganizations(@Body('ids') orgIds: string[]): Promise<MetaSchemaResponse<null>> {
+      if (!orgIds || orgIds.length === 0) {
+        throw new BadRequestException('No organization IDs provided for bulk deletion');
+      }
 
-        const updatedOrganizations = await this.organizationService.bulkDelete(orgIds);
-        if (updatedOrganizations.length === 0) {
-            throw new NotFoundException(`No organizations found for the provided IDs`);
-        }
-        return {
-            message: 'Status of Organizations have been updated successfully',
-            data: updatedOrganizations,
-        };
+      const updatedOrganizations = await this.organizationService.bulkDelete(orgIds);
+      if (updatedOrganizations.length === 0) {
+        throw new NotFoundException(`No organizations found for the provided IDs`);
+      }
+      return {
+        status: 'success',
+        message: 'Status of Organizations have been updated successfully',
+        
+      };
     }
 
 
