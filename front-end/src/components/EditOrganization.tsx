@@ -97,7 +97,7 @@ function EditOrganization() {
               required
               placeholder="Enter Organization's Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px' ,width: '70%',  paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }} 
             />
@@ -114,7 +114,7 @@ function EditOrganization() {
               required
               placeholder="Enter Category"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -130,7 +130,7 @@ function EditOrganization() {
               required
               placeholder="Enter Organization Phone No"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -144,7 +144,7 @@ function EditOrganization() {
               fullWidth
               placeholder="Enter Street"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -158,7 +158,7 @@ function EditOrganization() {
               fullWidth
               placeholder="City"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -172,7 +172,7 @@ function EditOrganization() {
               fullWidth
               placeholder="Enter State"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -186,7 +186,7 @@ function EditOrganization() {
               fullWidth
               placeholder="ZipCode"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', width: '70%', width: '70%', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -201,7 +201,7 @@ function EditOrganization() {
               required
               placeholder="Website"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -219,10 +219,11 @@ function EditOrganization() {
               value={formData.firstName}
               onChange={handleChange}
               fullWidth
+              disabled
               required
               placeholder="Enter First Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -234,10 +235,11 @@ function EditOrganization() {
               value={formData.lastName}
               onChange={handleChange}
               fullWidth
+              disabled
               required
               placeholder="Enter Last Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -249,10 +251,11 @@ function EditOrganization() {
               value={formData.adminPhone}
               onChange={handleChange}
               fullWidth
+              disabled
               required
               placeholder="Enter Phone No"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -265,9 +268,10 @@ function EditOrganization() {
               onChange={handleChange}
               fullWidth
               required
+              disabled
               placeholder="Enter Email"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />

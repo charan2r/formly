@@ -130,7 +130,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Organization's Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }} 
             />
@@ -147,7 +147,7 @@ function CreateOrganization() {
               required
               placeholder="Choose file"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }, // Adjusted height and padding
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }, // Adjusted height and padding
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton component="label">
@@ -175,7 +175,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Organization Phone No"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -189,7 +189,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="Enter Street"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -203,7 +203,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="City"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px',width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -217,7 +217,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="Enter State"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -231,7 +231,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="ZipCode"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -246,7 +246,7 @@ function CreateOrganization() {
               required
               placeholder="Website"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -267,7 +267,7 @@ function CreateOrganization() {
               required
               placeholder="Enter First Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '26px'}
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '26px'}
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -282,7 +282,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Last Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -297,7 +297,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Phone No"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -312,7 +312,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Email"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />

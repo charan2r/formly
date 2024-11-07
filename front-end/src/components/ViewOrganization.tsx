@@ -64,7 +64,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px',width: '70%', paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -78,7 +78,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -91,7 +91,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -104,7 +104,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -117,7 +117,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -130,7 +130,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -143,7 +143,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -156,7 +156,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -174,7 +174,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px'}
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px',width: '70%', paddingY: '2px', height: '30px'}
               }}
             />
           </Grid>
@@ -187,7 +187,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -200,7 +200,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>
@@ -213,7 +213,7 @@ function ViewOrganization() {
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px',width: '70%', paddingY: '2px', height: '30px' }
               }}
             />
           </Grid>

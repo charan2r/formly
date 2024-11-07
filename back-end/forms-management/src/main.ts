@@ -19,10 +19,10 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-  .setTitle('Cats example')
-  .setDescription('The cats API description')
+  .setTitle('Forms .O')
+  .setDescription('Forms management application')
   .setVersion('1.0')
-  .addTag('cats')
+  .addTag('forms')
   .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
