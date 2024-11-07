@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Paper, TextField, Button, Typography, Grid, Box, IconButton, InputAdornment } from '@mui/material';
+import axios from 'axios';
+import { Paper, TextField, Button, Typography, Grid, Box, IconButton, InputAdornment, Snackbar, Alert } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
 import UploadIcon from '@mui/icons-material/Upload';
 
 function CreateOrganization() {
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     orgName: '',
     logo: '',
     phone: '',
@@ -18,7 +19,11 @@ function CreateOrganization() {
     lastName: '',
     adminPhone: '',
     email: '',
-  });
+  };
+  const [formData, setFormData] = useState(initialFormData);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [errorToastOpen, setErrorToastOpen] = useState(false);
+
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -28,11 +33,57 @@ function CreateOrganization() {
     });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Add form submission logic here
-    console.log('Form submitted', formData);
+
+    const requiredFields = [
+      'orgName', 'category', 'phone', 'website', 
+      'firstName', 'lastName', 'adminPhone', 'email'
+    ];
+
+    const missingFields = requiredFields.filter(field => !formData[field]);
+
+    if (missingFields.length > 0) {
+      setErrorToastOpen(true);
+      return;
+    }
+
+    // Organize data according to the API requirements
+    const payload = {
+      organizationData: {
+        name: formData.orgName,
+        category: formData.category, // Assuming logo is a URL or string
+        phone: formData.phone,
+        street: formData.street,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip,
+        website: formData.website,
+      },
+      superAdminData: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.adminPhone,
+        passwordHash: "hash_password", // You would hash the password on the backend ideally
+      },
+    };
+
+    try {
+      const response = await axios.post('http://localhost:3001/organization/create', payload);
+      console.log('Form submitted successfully:', response.data);
+      setToastOpen(true);
+      setFormData(initialFormData);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+    }
   };
+
+  const handleToastClose = () => {
+    setToastOpen(false);
+    setErrorToastOpen(false);
+  };
+
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -47,10 +98,10 @@ function CreateOrganization() {
           </Typography>
         </Box>
 
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="20px">
           <Box>
             <Typography variant="h5" fontWeight="bold">Create Organization</Typography>
-            <Typography variant="body2" color="textSecondary" marginBottom="20px">
+            <Typography variant="body2" color="textSecondary" >
               Create and Manage your organizations.
             </Typography>
           </Box>
@@ -65,7 +116,7 @@ function CreateOrganization() {
       </Box>
 
       <form onSubmit={handleSubmit}>
-        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px' }}>
+        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px', marginTop:'20px' }}>
           Organizational Details
         </Typography>
         <Grid container spacing={2}>
@@ -79,24 +130,24 @@ function CreateOrganization() {
               required
               placeholder="Enter Organization's Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }} 
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Logo *</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Category *</Typography>
             <TextField
-              name="logo"
+              name="category"
               type="text"
-              value={formData.logo ? formData.logo.name : ''}
+              value={formData.category}
               onChange={handleChange}
               fullWidth
               required
               placeholder="Choose file"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }, // Adjusted height and padding
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }, // Adjusted height and padding
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton component="label">
@@ -124,7 +175,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Organization Phone No"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -138,7 +189,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="Enter Street"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -152,7 +203,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="City"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -166,7 +217,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="Enter State"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -180,7 +231,7 @@ function CreateOrganization() {
               fullWidth
               placeholder="ZipCode"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -195,7 +246,7 @@ function CreateOrganization() {
               required
               placeholder="Website"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -216,7 +267,7 @@ function CreateOrganization() {
               required
               placeholder="Enter First Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px'}
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '26px'}
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -231,7 +282,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Last Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -246,7 +297,7 @@ function CreateOrganization() {
               required
               placeholder="Enter Phone No"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -261,13 +312,35 @@ function CreateOrganization() {
               required
               placeholder="Enter Email"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
           </Grid>
         </Grid>
       </form>
+
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={6000}
+        onClose={handleToastClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleToastClose} severity="success" sx={{ backgroundColor: 'black', color: 'white' }}>
+          Organization created successfully!
+        </Alert>
+      </Snackbar>
+
+       <Snackbar
+        open={errorToastOpen}
+        autoHideDuration={6000}
+        onClose={handleToastClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleToastClose} severity="warning" sx={{ backgroundColor: 'black', color: 'white' }}>
+          Please fill in all required fields to submit.
+        </Alert>
+      </Snackbar>
     </Paper>
   );
 }

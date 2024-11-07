@@ -1,9 +1,9 @@
 // organization.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { OrganizationRepository } from './organization.repository';
-import { UserRepository } from 'src/user/user.repository';
-import { Organization } from '../model/organization.entity';
+import { Injectable } from '@nestjs/common';
 import { User } from '../model/user.entity';
+import { Organization } from 'src/model/organization.entity';
+import { UserRepository } from 'src/user/user.repository';
+import { OrganizationRepository } from './organization.repository';
 import { DeleteResult } from 'typeorm';
 
 @Injectable()
