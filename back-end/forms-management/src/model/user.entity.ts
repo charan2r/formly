@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // user.entity.ts
 import {
   Entity,
