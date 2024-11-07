@@ -9,6 +9,8 @@ import { OrganizationModule } from './organization/organization.module';
 import { OrganizationRepository } from './organization/organization.repository';
 import { Organization } from './model/organization.entity';
 import { User } from './model/user.entity';
+import { UserRepository } from './user/user.repository';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -24,9 +26,10 @@ import { User } from './model/user.entity';
       synchronize: true,
     }),
     TypeOrmModule.forFeature([Organization, User]),
-    OrganizationModule
+    OrganizationModule,
+    UserModule
   ],
   controllers: [AppController, OrganizationController],
-  providers: [AppService, OrganizationService, OrganizationRepository],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository],
 })
 export class AppModule { }
