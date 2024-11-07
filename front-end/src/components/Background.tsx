@@ -5,6 +5,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Overview from './Overview';
 import DataTable from './DataTable';
 import CreateOrganization from './CreateOrganization';
+import ViewOrganization from './ViewOrganization';
+import EditOrganization from './EditOrganization';
 
 const Background: React.FC = () => {
   return (
@@ -15,6 +17,8 @@ const Background: React.FC = () => {
         <Route path="/overview" element={<Overview />} />
         <Route path="/organizations" element={<DataTable />} />
         <Route path="/create-organization" element={<CreateOrganization/>}/>
+        <Route path="/View-organization" element={<ViewOrganization/>}/>
+        <Route path="/Edit-organization" element={<EditOrganization/>}/>
       </Routes>
     </Box>
   );

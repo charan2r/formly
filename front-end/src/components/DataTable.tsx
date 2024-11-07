@@ -400,51 +400,58 @@ const DataTable: React.FC = () => {
                     }}
                   >
                     <MenuItem
-                      onClick={handleMenuClose}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '40px',
-                        margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      View
-                    </MenuItem>
-                    <MenuItem
-                      onClick={handleMenuClose}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '40px',
-                        margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Edit
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleDeleteOrganization(row.orgId)}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '40px',
-                        margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        color: 'red', // Red text color for "Delete"
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
+  onClick={() => {
+    handleMenuClose();
+    navigate('/view-organization');
+  }}
+  sx={{
+    backgroundColor: 'white',
+    borderRadius: '40px',
+    margin: '5px',
+    justifyContent: 'center', // Center align text
+    fontSize: '0.875rem', // Smaller font size
+    minHeight: '30px', // Reduced height
+    minWidth: '100px', // Increased width
+    '&:hover': { backgroundColor: '#f0f0f0' },
+  }}
+>
+  View
+</MenuItem>
+<MenuItem
+  onClick={() => {
+    handleMenuClose();
+    navigate('/edit-organization');
+  }}
+  sx={{
+    backgroundColor: 'white',
+    borderRadius: '40px',
+    margin: '5px',
+    justifyContent: 'center', // Center align text
+    fontSize: '0.875rem', // Smaller font size
+    minHeight: '30px', // Reduced height
+    minWidth: '100px', // Increased width
+    '&:hover': { backgroundColor: '#f0f0f0' },
+  }}
+>
+  Edit
+</MenuItem>
+<MenuItem
+  onClick={() => handleDeleteOrganization(row.orgId)}
+  sx={{
+    backgroundColor: 'white',
+    borderRadius: '40px',
+    margin: '5px',
+    justifyContent: 'center', // Center align text
+    color: 'red', // Red text color for "Delete"
+    fontSize: '0.875rem', // Smaller font size
+    minHeight: '30px', // Reduced height
+    minWidth: '100px', // Increased width
+    '&:hover': { backgroundColor: '#f0f0f0' },
+  }}
+>
+  Delete
+</MenuItem>
+              
                   </Popover>
                 </TableCell>
 
