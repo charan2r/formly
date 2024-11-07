@@ -18,7 +18,7 @@ export class OrganizationController {
     @Delete(':id')
     async deleteOne(@Param('id') id: string): Promise<void> {
         const result = await this.organizationService.deleteOne(id);
-        if (result.affected === 0) {
+        if (result.data.affected === 0) {
             throw new NotFoundException(`Organization with ID "${id}" not found`);
         }
     }
@@ -26,7 +26,7 @@ export class OrganizationController {
     @Post('create')
     async createOrganizationWithSuperAdmin(
         @Body() createOrganizationDto: CreateOrganizationWithSuperAdminDto,
-    ): Promise<Organization> {
+    ) {
         const { organizationData, superAdminData } = createOrganizationDto;
         return this.organizationService.createOrganizationWithSuperAdmin(organizationData, superAdminData);
     }

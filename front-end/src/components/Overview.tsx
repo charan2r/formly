@@ -32,7 +32,7 @@ const Overview: React.FC = () => {
     const fetchOrganizations = async () => {
       try {
         const response = await axios.get('http://localhost:3001/organization');
-        const organizations = response.data;
+        const organizations = response.data.data;
   
         // Process data to count organizations created on each date
         const dateCount = {};
@@ -69,7 +69,7 @@ const Overview: React.FC = () => {
     const fetchCategories = async () => {
       try {
         const response = await axios.get('http://localhost:3001/organization'); // Adjust your API endpoint here
-        const categories = response.data; // Assuming categories are returned as an array
+        const categories = response.data.data; // Assuming categories are returned as an array
 
         // Process categories for the Pie chart
         const categoryCount = {};
