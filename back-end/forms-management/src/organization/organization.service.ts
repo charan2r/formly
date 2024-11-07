@@ -1,10 +1,12 @@
+/* eslint-disable prettier/prettier */
 // organization.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { OrganizationRepository } from './organization.repository';
 import { UserRepository } from 'src/user/user.repository';
 import { Organization } from '../model/organization.entity';
 import { User } from '../model/user.entity';
-import { DeleteResult } from 'typeorm';
+import { UpdateOrganizationDto } from './organization.dto';
+import { In } from 'typeorm';
 
 @Injectable()
 export class OrganizationService {
@@ -39,13 +41,52 @@ export class OrganizationService {
     return organization;
   }
 
+  
   // Method to get all organizations
   async getAll(): Promise<Organization[]> {
     return this.organizationRepository.find();
   }
 
-  // Method to delete an organization
-  async deleteOne(id: string): Promise<DeleteResult> {
-    return this.organizationRepository.delete(id);
+  // Method to get a single organization by ID
+  async getOne(id: string): Promise<Organization | null> {
+      return this.organizationRepository.findOne({ where: { orgId: id } });
   }
+
+  // Method to update an organization
+  async updateOrganization(id: string, updateOrganizationDto: UpdateOrganizationDto): Promise<Organization | null> {
+      const organization = await this.organizationRepository.findOne({ where: { orgId: id } });
+      if (!organization) {
+          throw new NotFoundException(`Organization with ID "${id}" not found`);
+      }
+
+      Object.assign(organization, updateOrganizationDto);
+      return this.organizationRepository.save(organization);
+  }
+
+  // Method to soft-delete an organization by setting status to 'deleted'
+  async deleteOne(id: string): Promise<boolean> {
+      const organization = await this.organizationRepository.findOne({ where: { orgId: id } });
+      if (!organization) {
+          return false;
+      }
+
+      organization.status = 'deleted';
+      await this.organizationRepository.save(organization);
+      return true;
+  }
+
+  // Method to bulk soft-delete organizations by setting their status to 'deleted'
+  async bulkDelete(orgIds: string[]): Promise<Organization[]> {
+      const organizations = await this.organizationRepository.find({
+        where: { orgId: In(orgIds) },
+      });
+      if (organizations.length === 0) {
+          throw new NotFoundException(`No organizations found for the provided IDs`);
+      }
+
+      organizations.forEach(org => org.status = 'deleted');
+      return this.organizationRepository.save(organizations);
+  }
+
+  
 }

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // seed.ts
 import { User } from "src/model/user.entity";
 import { Organization } from "src/model/organization.entity";

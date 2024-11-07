@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // organization.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { User } from './user.entity';
@@ -42,6 +43,9 @@ export class Organization {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @Column({ type: 'text', default: 'active', nullable: true })
+  status: string;
 
   @Column({
     type: 'timestamp',
