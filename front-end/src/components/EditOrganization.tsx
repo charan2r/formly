@@ -1,25 +1,24 @@
 import React, { useState } from 'react';
-import { Paper, TextField, Button, Typography, Grid, Box, IconButton, InputAdornment } from '@mui/material';
+import { Paper, TextField, Button, Typography, Grid, Box, IconButton, InputAdornment, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
-import UploadIcon from '@mui/icons-material/Upload';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
 
 function EditOrganization() {
   const [formData, setFormData] = useState({
-    orgName: 'Tech Solutions', 
-    logo: '',
-    phone: '123-456-7890', 
-    street: '123 Main St', 
-    city: 'Metropolis', 
-    state: 'CA', 
-    zip: '90001', 
-    website: 'www.techsolutions.com', 
-    firstName: 'John', 
-    lastName: 'Doe', 
-    adminPhone: '987-654-3210', 
-    email: 'john.doe@techsolutions.com', 
+    orgName: 'Tech Solutions',
+    category: 'IT Services', 
+    phone: '123-456-7890',
+    street: '123 Main St',
+    city: 'Metropolis',
+    state: 'CA',
+    zip: '90001',
+    website: 'www.techsolutions.com',
+    firstName: 'John',
+    lastName: 'Doe',
+    adminPhone: '987-654-3210',
+    email: 'john.doe@techsolutions.com',
   });
 
   const handleChange = (event) => {
@@ -104,30 +103,18 @@ function EditOrganization() {
             />
           </Grid>
 
+          {/* Text input for Category instead of dropdown */}
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Logo *</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Category *</Typography>
             <TextField
-              name="logo"
-              type="text"
-              value={formData.logo ? formData.logo.name : ''}
+              name="category"
+              value={formData.category}
               onChange={handleChange}
               fullWidth
               required
-              placeholder="Choose file"
+              placeholder="Enter Category"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' },
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton component="label">
-                      <UploadIcon />
-                      <input
-                        type="file"
-                        hidden
-                        name="logo"
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
@@ -235,7 +222,7 @@ function EditOrganization() {
               required
               placeholder="Enter First Name"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px'}
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />

@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { Paper, TextField, Typography, Grid, Box, IconButton, InputAdornment, Button } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
-import UploadIcon from '@mui/icons-material/Upload';
 import { useNavigate } from 'react-router-dom';
 
 function ViewOrganization() {
   const navigate = useNavigate();
   const [formData] = useState({
     orgName: 'Tech Solutions',
-    logo: '',
+    category: 'IT Services', 
     phone: '123-456-7890',
     street: '123 Main St',
     city: 'Metropolis',
@@ -70,22 +69,16 @@ function ViewOrganization() {
             />
           </Grid>
 
+          {/* Category Field instead of dropdown */}
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom>Logo</Typography>
+            <Typography variant="caption" gutterBottom>Category</Typography>
             <TextField
-              name="logo"
-              value={formData.logo ? formData.logo.name : ''}
+              name="category"
+              value={formData.category}
               fullWidth
               disabled
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' },
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton disabled>
-                      <UploadIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
+                sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', paddingY: '2px', height: '36px' }
               }}
             />
           </Grid>
