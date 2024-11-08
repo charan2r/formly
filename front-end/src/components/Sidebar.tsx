@@ -32,7 +32,10 @@ const Sidebar: React.FC = () => {
         { path: '/audit-logs', label: 'Audit Logs' },
       ];
 
- 
+  const authorizationMenuItems = [
+    { path: '/users', label: 'Users' },
+    { path: '/roles', label: 'Roles' }
+  ];
 
   return (
     <Box
