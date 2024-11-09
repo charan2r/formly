@@ -1,56 +1,116 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Paper, TextField, Button, Typography, Grid, Box, IconButton, InputAdornment, MenuItem, FormControl, InputLabel } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 
 function EditOrganization() {
+  const navigate = useNavigate();
+  const { orgId } = useParams();
   const [formData, setFormData] = useState({
-    orgName: 'Tech Solutions',
-    category: 'IT Services', 
-    phone: '123-456-7890',
-    street: '123 Main St',
-    city: 'Metropolis',
-    state: 'CA',
-    zip: '90001',
-    website: 'www.techsolutions.com',
-    firstName: 'John',
-    lastName: 'Doe',
-    adminPhone: '987-654-3210',
-    email: 'john.doe@techsolutions.com',
+    name: '',
+    category: '', 
+    phone: '',
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
+    website: '',
+    firstName: '',
+    lastName: '',
+    adminPhone: '',
+    email: '',
   });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchOrganizationDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/organization/details`, {
+          params: { id: orgId }
+        });
+        const organization = response.data.data;
+
+        setFormData({
+          name: organization.organization.name,
+          category: organization.organization.category,
+          phone: organization.organization.phone,
+          street: organization.organization.street,
+          city: organization.organization.city,
+          state: organization.organization.state,
+          zip: organization.organization.zip,
+          website: organization.organization.website,
+          firstName: organization.superAdmin?.firstName || '',
+          lastName: organization.superAdmin?.lastName || '',
+          adminPhone: organization.superAdmin?.phoneNumber || '',
+          email: organization.superAdmin?.email || '',
+        });
+      } catch (error) {
+        setError("Failed to load organization details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrganizationDetails();
+  }, [orgId]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+    console.log(name, value); // This should show the updated name and value
     setFormData({
       ...formData,
       [name]: value,
     });
   };
+  
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Log the updated form data to the console
-    console.log('Form submitted', formData);
-
-    // Display toast message on successful update with custom styling
-    toast.success("Your changes have been saved successfully!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      style: {
-        backgroundColor: 'black',
-        color: 'white',
-        borderRadius: '10px',
-        fontWeight: 'bold',
-      },
-    });
+  
+    // Create a new object excluding specified fields
+    const { firstName, lastName, adminPhone, email, ...filteredData } = formData;
+    console.log(JSON.stringify(filteredData));
+    console.log(orgId)
+  
+    try {
+      const response = await fetch(`http://localhost:3001/organization/edit/?id=${orgId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(filteredData),
+      });
+  
+      if (!response.ok) throw new Error('Failed to update organization');
+  
+      const updatedData = await response.json();
+      toast.success("Your changes have been saved successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+  
+      // Optionally reset or update the form data
+      setFormData(updatedData);
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      toast.error("Failed to save changes. Please try again.");
+    }
   };
+  
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -90,8 +150,8 @@ function EditOrganization() {
           <Grid item xs={12} sm={6}>
             <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Organization Name *</Typography>
             <TextField
-              name="orgName"
-              value={formData.orgName}
+              name="name"
+              value={formData.name}
               onChange={handleChange}
               fullWidth
               required

@@ -10,7 +10,7 @@ import axios from 'axios';
 function ViewOrganization() {
   const navigate = useNavigate();
   const { orgId } = useParams();
-const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     orgName: '',
     category: '', 
     phone: '',

@@ -18,7 +18,7 @@ const Background: React.FC = () => {
         <Route path="/organizations" element={<DataTable />} />
         <Route path="/create-organization" element={<CreateOrganization/>}/>
         <Route path="/view-organization/:orgId" element={<ViewOrganization></ViewOrganization>} />
-        <Route path="/Edit-organization" element={<EditOrganization/>}/>
+        <Route path="/Edit-organization/:orgId" element={<EditOrganization/>}/>
       </Routes>
     </Box>
   );

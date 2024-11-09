@@ -43,17 +43,17 @@ export class OrganizationController {
     // API endpoint to update details of a specific organization
     @Patch('edit')
     async updateOrganization(
-        @Query('id') orgId: string,
-        @Body() updateOrganizationDto: UpdateOrganizationDto,
+      @Query('id') orgId: string,
+      @Body() updateOrganizationDto: UpdateOrganizationDto,
     ): Promise<{ message: string; data: Organization }> {
-        const updatedOrganization = await this.organizationService.updateOrganization(orgId, updateOrganizationDto);
-        if (!updatedOrganization) {
-            throw new NotFoundException(`Organization with ID "${orgId}" not found`);
-        }
-        return {
-            message: 'Organization updated successfully',
-            data: updatedOrganization,
-        };
+      const updatedOrganization = await this.organizationService.updateOrganization(orgId, updateOrganizationDto);
+      if (!updatedOrganization) {
+        throw new NotFoundException(`Organization with ID "${orgId}" not found`);
+      }
+      return {
+        message: 'Organization updated successfully',
+        data: updatedOrganization,
+      };
     }
 
     // API endpoint to delete a specific organization
