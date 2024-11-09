@@ -130,7 +130,7 @@ const Overview: React.FC = () => {
         </Typography>
 
         {/* Chart Section */}
-        <Box display="flex" justifyContent="space-between" mt={4} height="300px" flexWrap="wrap">
+        <Box display="flex" justifyContent="space-between" mt={2} height="300px" flexWrap="wrap">
           <Box 
             width={{ xs: '100%', sm: '60%' }} 
             height="100%"

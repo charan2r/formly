@@ -13,7 +13,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: 'http://localhost:5173',  // Allow only specific domain
-    methods: 'GET,POST,PUT,DELETE',  // Allow only specific HTTP methods
+    methods: 'GET,POST,PUT,DELETE,PATCH',  // Allow only specific HTTP methods
     allowedHeaders: 'Content-Type, Authorization',  // Allow specific headers
     credentials: true,  // Allow credentials
   });

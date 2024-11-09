@@ -7,6 +7,7 @@ import DataTable from './DataTable';
 import CreateOrganization from './CreateOrganization';
 import ViewOrganization from './ViewOrganization';
 import EditOrganization from './EditOrganization';
+import UserOverview from './UserOverview';
 
 const Background: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ const Background: React.FC = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/overview" replace />} />
         <Route path="/overview" element={<Overview />} />
+        <Route path="/useroverview" element={<UserOverview />} />
         <Route path="/organizations" element={<DataTable />} />
         <Route path="/create-organization" element={<CreateOrganization/>}/>
         <Route path="/view-organization/:orgId" element={<ViewOrganization></ViewOrganization>} />
