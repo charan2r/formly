@@ -20,6 +20,10 @@ import {
   Pagination,
   TableSortLabel,
   Popover,
+  DialogActions,
+  DialogContent,
+  Dialog,
+  DialogTitle,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
@@ -67,20 +71,26 @@ const DataTable: React.FC = () => {
   const [filters, setFilters] = useState({ name: '', type: '', category: '', lastActive: '' });
   const [orderBy, setOrderBy] = useState<keyof Organization>('name');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [organizationToDelete, setOrganizationToDelete] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
         const response = await axios.get('http://localhost:3001/organization');
-        console.log(response.data.data);
-        setOrganizations(response.data.data);
+        // Filter organizations where the status is 'active'
+        const activeOrganizations = response.data.data.filter(org => org.status === 'active');
+        console.log(activeOrganizations);
+        setOrganizations(activeOrganizations);
       } catch (error) {
         console.error('Error fetching organization data:', error);
       }
     };
-
+  
     fetchOrganizations();
   }, []);
+  
 
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
@@ -136,15 +146,21 @@ const DataTable: React.FC = () => {
     setOrderBy(property);
   };
 
-  const handleDeleteOrganization = async (orgId: string) => {
-    try {
-      await axios.delete(`http://localhost:3001/organization/${orgId}`);
-      setOrganizations((prev) => prev.filter((org) => org.orgId !== orgId));
-      handleMenuClose();
-    } catch (error) {
-      console.error(`Error deleting organization with ID ${orgId}:`, error);
-    }
+  const handleDeleteConfirmation = (orgId: string) => {
+    setOrganizationToDelete(orgId);
+    setConfirmationOpen(true);
   };
+
+// Method to handle deletion of an organization
+const handleDeleteOrganization = async () => {
+  try {
+    await axios.delete(`http://localhost:3001/organization/delete?id=${organizationToDelete}`);
+    setOrganizations((prev) => prev.filter((org) => org.orgId !== organizationToDelete));
+    setConfirmationOpen(false); // Close confirmation dialog
+  } catch (error) {
+    console.error(`Error deleting organization: ${error}`);
+  }
+};
 
   const filteredData = organizations
     .filter((org) => {
@@ -406,7 +422,7 @@ const DataTable: React.FC = () => {
   }}
   sx={{
     backgroundColor: 'white',
-    borderRadius: '40px',
+    borderRadius: '10px',
     margin: '5px',
     justifyContent: 'center', // Center align text
     fontSize: '0.875rem', // Smaller font size
@@ -424,7 +440,7 @@ const DataTable: React.FC = () => {
   }}
   sx={{
     backgroundColor: 'white',
-    borderRadius: '40px',
+    borderRadius: '10px',
     margin: '5px',
     justifyContent: 'center', // Center align text
     fontSize: '0.875rem', // Smaller font size
@@ -436,10 +452,10 @@ const DataTable: React.FC = () => {
   Edit
 </MenuItem>
 <MenuItem
-  onClick={() => handleDeleteOrganization(row.orgId)}
+   onClick={() => handleDeleteConfirmation(row.orgId)}
   sx={{
     backgroundColor: 'white',
-    borderRadius: '40px',
+    borderRadius: '10px',
     margin: '5px',
     justifyContent: 'center', // Center align text
     color: 'red', // Red text color for "Delete"
@@ -471,6 +487,22 @@ const DataTable: React.FC = () => {
           color="primary"
         />
       </Box>
+
+            {/* Confirmation Dialog */}
+            <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete this organization?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmationOpen(false)} color="black">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteOrganization} sx={{color:'white', backgroundColor: 'black', borderRadius:'10px'}}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
