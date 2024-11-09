@@ -74,8 +74,6 @@ function EditOrganization() {
   
     // Create a new object excluding specified fields
     const { firstName, lastName, adminPhone, email, ...filteredData } = formData;
-    console.log(JSON.stringify(filteredData));
-    console.log(orgId)
   
     try {
       const response = await fetch(`http://localhost:3001/organization/edit/?id=${orgId}`, {

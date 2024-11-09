@@ -34,6 +34,8 @@ import { ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
 
 interface Organization {
   orgId: string;
@@ -72,6 +74,7 @@ const DataTable: React.FC = () => {
   const [orderBy, setOrderBy] = useState<keyof Organization>('name');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
   const [organizationToDelete, setOrganizationToDelete] = useState<string | null>(null);
 
 
@@ -151,14 +154,98 @@ const DataTable: React.FC = () => {
     setConfirmationOpen(true);
   };
 
+  const handleBulkDeleteConfirmation = () => {
+    setConfirmationBulkOpen(true);
+  };
+
+
+
+  const handleDeleteOrganizations = async () => {
+    
+    try {
+      const response = await axios.delete('http://localhost:3001/organization/bulk-delete', {
+        data: { ids: Object.keys(selectedOrganizations) },
+      });
+
+      // Filter out the organizations that were deleted
+      setOrganizations((prevOrganizations) =>
+        prevOrganizations.filter(org => !Object.keys(selectedOrganizations).includes(org.orgId))
+      );
+
+      toast.success("Organization has been deleted successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+
+      setSelectedOrganizations([]);
+      setConfirmationBulkOpen(false);
+    } catch (error) {
+      toast.error("Failed to delete the organization. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+  };
+}
+
 // Method to handle deletion of an organization
 const handleDeleteOrganization = async () => {
   try {
     await axios.delete(`http://localhost:3001/organization/delete?id=${organizationToDelete}`);
     setOrganizations((prev) => prev.filter((org) => org.orgId !== organizationToDelete));
     setConfirmationOpen(false); // Close confirmation dialog
+    toast.success("Organization has been deleted successfully!", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      style: {
+        backgroundColor: 'black',
+        color: 'white',
+        borderRadius: '10px',
+        fontWeight: 'bold',
+      },
+    });
   } catch (error) {
-    console.error(`Error deleting organization: ${error}`);
+    toast.error("Failed to delete the organization. Please try again.", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      style: {
+        backgroundColor: 'black',
+        color: 'white',
+        borderRadius: '10px',
+        fontWeight: 'bold',
+      },
+    });
   }
 };
 
@@ -185,6 +272,8 @@ const handleDeleteOrganization = async () => {
   const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -248,6 +337,7 @@ const handleDeleteOrganization = async () => {
             {selectedCount > 0 ? (
               <Button
                 variant="contained"
+                onClick={() => handleBulkDeleteConfirmation()}
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
               >
                 <Delete sx={{ marginRight: 1 }} />
@@ -503,6 +593,23 @@ const handleDeleteOrganization = async () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+        {/* Confirmation Dialog */}
+        <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to delete these organizations?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmationBulkOpen(false)} color="black">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteOrganizations} sx={{color:'white', backgroundColor: 'black', borderRadius:'10px'}}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <ToastContainer></ToastContainer>
     </Paper>
   );
 };
