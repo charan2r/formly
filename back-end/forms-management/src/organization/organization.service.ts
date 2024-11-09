@@ -113,4 +113,9 @@ export class OrganizationService {
     organizations.forEach((org) => (org.status = 'deleted'));
     return this.organizationRepository.save(organizations);
   }
+
+  // Method to find all users by organization, with optional filter if organizationId is provided
+  async findUserByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email } });
+  }
 }

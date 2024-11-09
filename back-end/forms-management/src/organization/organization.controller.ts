@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Delete, Post, NotFoundException, Query, Patch, Body, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Delete, Post, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException } from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
@@ -87,14 +87,38 @@ export class OrganizationController {
     }
 
 
-    // API endpoint to create an organization with a super admin
-    @Post('create')
-    async createOrganizationWithSuperAdmin(
-        @Body() createOrganizationDto: CreateOrganizationWithSuperAdminDto,
-    ) {
-        const { organizationData, superAdminData } = createOrganizationDto;
-        return this.organizationService.createOrganizationWithSuperAdmin(organizationData, superAdminData);
+
+// API endpoint to create a new organization with super admin
+@Post('create')
+async createOrganizationWithSuperAdmin(
+  @Body() createOrganizationDto: CreateOrganizationWithSuperAdminDto,
+) {
+  const { organizationData, superAdminData } = createOrganizationDto;
+  
+  try {
+    // Check if the super admin email already exists
+    const existingUser = await this.organizationService.findUserByEmail(superAdminData.email);
+    
+    if (existingUser) {
+      // If the email already exists, throw a ConflictException
+      throw new ConflictException('Email already exists');
     }
+
+    // Proceed with creating the organization and super admin
+    return await this.organizationService.createOrganizationWithSuperAdmin(organizationData, superAdminData);
+    
+  } catch (error) {
+    // Log the error (you can enhance this by using a logger service)
+    console.error('Error occurred while creating organization with super admin:', error);
+  
+    // Return the error details to the client
+    throw new HttpException({
+      status: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: error.message,
+    }, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
+    
 }
 
 

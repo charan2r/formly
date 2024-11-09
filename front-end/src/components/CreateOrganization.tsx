@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
 import { Paper, TextField, Button, Typography, Grid, Box, IconButton, InputAdornment, Snackbar, Alert } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
@@ -10,6 +11,7 @@ function CreateOrganization() {
     orgName: '',
     logo: '',
     phone: '',
+    category: '',
     street: '',
     city: '',
     state: '',
@@ -44,7 +46,21 @@ function CreateOrganization() {
     const missingFields = requiredFields.filter(field => !formData[field]);
 
     if (missingFields.length > 0) {
-      setErrorToastOpen(true);
+      toast.error('The required columns are empty..',{
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
       return;
     }
 
@@ -72,17 +88,47 @@ function CreateOrganization() {
     try {
       const response = await axios.post('http://localhost:3001/organization/create', payload);
       console.log('Form submitted successfully:', response.data);
-      setToastOpen(true);
+      toast.success('Organization created successfully!',{
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
       setFormData(initialFormData);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      if (error.response.data.message === "Email already exists") {
+        // Email conflict error
+        toast.error('The email is already in use. Please choose another one.',{
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+      } else {
+        // Other errors
+        toast.error('An error occurred while creating the organization.');
+      }
     }
   };
 
-  const handleToastClose = () => {
-    setToastOpen(false);
-    setErrorToastOpen(false);
-  };
 
 
   return (
@@ -320,27 +366,7 @@ function CreateOrganization() {
         </Grid>
       </form>
 
-      <Snackbar
-        open={toastOpen}
-        autoHideDuration={6000}
-        onClose={handleToastClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={handleToastClose} severity="success" sx={{ backgroundColor: 'black', color: 'white' }}>
-          Organization created successfully!
-        </Alert>
-      </Snackbar>
-
-       <Snackbar
-        open={errorToastOpen}
-        autoHideDuration={6000}
-        onClose={handleToastClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert onClose={handleToastClose} severity="warning" sx={{ backgroundColor: 'black', color: 'white' }}>
-          Please fill in all required fields to submit.
-        </Alert>
-      </Snackbar>
+      <ToastContainer />
     </Paper>
   );
 }

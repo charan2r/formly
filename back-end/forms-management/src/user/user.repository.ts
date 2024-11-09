@@ -18,6 +18,7 @@ export class UserRepository extends Repository<User> {
         return this.find();
     }
 
+
     // Method to create a user with optional organization association
     async createUser(userData: Partial<User>): Promise<User> {
         const user = this.create(userData);

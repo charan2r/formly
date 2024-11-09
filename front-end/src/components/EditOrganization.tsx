@@ -103,11 +103,25 @@ function EditOrganization() {
         },
       });
   
-      // Optionally reset or update the form data
+      // Reset or update the form data
       setFormData(updatedData);
     } catch (error) {
       console.error('Error updating organization:', error);
-      toast.error("Failed to save changes. Please try again.");
+      toast.error("Failed to save changes. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     }
   };
   
