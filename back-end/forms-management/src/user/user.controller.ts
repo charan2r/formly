@@ -7,19 +7,15 @@ import { User } from 'src/model/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // API Endpoint to get all users 
+  // API Endpoint to get all users without pagination
   @Get()
   async getUsers(
     @Query('organizationId') organizationId?: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ): Promise<{ data: User[]; total: number; page: number; limit: number }> {
-    const [users, total] = await this.userService.getUsers(organizationId, page, limit);
+  ): Promise<{ data: User[]; total: number }> {
+    const [users, total] = await this.userService.getUsers(organizationId);
     return {
       data: users,
       total,
-      page,
-      limit,
     };
   }
 

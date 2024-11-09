@@ -7,15 +7,13 @@ import { User } from 'src/model/user.entity';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  // Method to get users for grid view with pagination and organization filter
-  async getUsers(organizationId?: string, page: number = 1, limit: number = 10): Promise<[User[], number]> {
-    const [users, total] = await this.userRepository.findAndCount({
-      where: organizationId ? { organizationId } : {},
-      take: limit,
-      skip: (page - 1) * limit,
-    });
-    return [users, total];
-  }
+// Method to get users for grid view without pagination
+async getUsers(organizationId?: string): Promise<[User[], number]> {
+  const [users, total] = await this.userRepository.findAndCount({
+    where: organizationId ? { organizationId } : {},
+  });
+  return [users, total];
+}
 
   // Method to get a user by ID
   async getUserById(id: string): Promise<User> {
