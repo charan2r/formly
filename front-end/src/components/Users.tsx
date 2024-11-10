@@ -20,9 +20,14 @@ import {
   Pagination,
   TableSortLabel,
   Popover,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircleIcon from '@mui/icons-material/Circle';
 import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
@@ -31,10 +36,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
 
 interface Users {
-  orgId: string;
-  name: string;
-  category?: string | null;
-  lastActive?: string | null;
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType?: string;
+  lastLogin?: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -62,16 +69,19 @@ const Users: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ name: '', type: '', category: '',lastActive: '' });
-  const [orderBy, setOrderBy] = useState<keyof Users>('name');
+  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '',email: '' });
+  const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
+  const [userDetails, setUserDetails] = useState<Users | null>(null); // For storing user details
+  const [isDialogOpen, setDialogOpen] = useState(false); // For opening the user details dialog
+
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/organization'); 
+        const response = await axios.get('http://localhost:3001/users?organizationId=72a53cab-e8a8-4072-bf91-d2643b22851b'); 
         console.log(response.data)
-        setOrganizations(response.data);
+        setOrganizations(response.data.data);
       } catch (error) {
         console.error('Error fetching organization data:', error);
       }
@@ -94,7 +104,7 @@ const Users: React.FC = () => {
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     const newSelectedOrganizations = organizations.reduce((acc, org) => {
-      acc[org.orgId] = checked;  // Apply the same checked state to all organizations
+      acc[org.id] = checked;  // Apply the same checked state to all organizations
       return acc;
     }, {} as Record<number, boolean>);
     
@@ -144,29 +154,46 @@ const Users: React.FC = () => {
     }
   };
 
+  const handleViewUser = async (userId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
+      setUserDetails(response.data); // Store user details
+      setDialogOpen(true); // Open dialog
+      handleMenuClose(); // Close the options menu
+    } catch (error) {
+      console.error(`Error fetching user details for ID ${userId}:`, error);
+    }
+  };
+
   const filteredData = organizations
-  .filter((org) => {
-    const nameMatches = org.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                        org.name.toLowerCase().includes(filters.name.toLowerCase());
-    
-    const categoryMatches = org.category 
-      ? org.category.toLowerCase().includes(filters.category.toLowerCase())
-      : !filters.category; // If org.category is null, match only if filters.category is empty
+    .filter((org) => {
+      const nameMatches = org.firstName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        org.firstName.toLowerCase().includes(filters.firstName.toLowerCase());
 
-    const lastActiveMatches = org.lastActive
-      ? org.lastActive.toLowerCase().includes(filters.lastActive.toLowerCase())
-      : !filters.lastActive; // If org.lastActive is null, match only if filters.lastActive is empty
+      const categoryMatches = org.lastName
+        ? org.lastName.toLowerCase().includes(filters.lastName.toLowerCase())
+        : !filters.lastName; // If org.category is null, match only if filters.category is empty
 
-    return nameMatches && categoryMatches && lastActiveMatches;
-  })
-  .sort((a, b) => {
-    const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
-    return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
-  });
+      const lastActiveMatches = org.email
+        ? org.email.toLowerCase().includes(filters.email.toLowerCase())
+        : !filters.email; // If org.lastActive is null, match only if filters.lastActive is empty
+
+      return nameMatches && categoryMatches && lastActiveMatches;
+    })
+    .sort((a, b) => {
+      const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
+      return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
+    });
+
 
   const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setUserDetails(null);
+  };
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -269,20 +296,20 @@ const Users: React.FC = () => {
         onChange={handleSelectAll}
         checked={
           organizations.length > 0 &&
-          organizations.every((org) => selectedOrganizations[org.orgId])
+          organizations.every((org) => selectedOrganizations[org.id])
         }
         indeterminate={
-          organizations.some((org) => selectedOrganizations[org.orgId]) &&
-          !organizations.every((org) => selectedOrganizations[org.orgId])
+          organizations.some((org) => selectedOrganizations[org.id]) &&
+          !organizations.every((org) => selectedOrganizations[org.id])
         }
       />
     </TableCell>
     <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
     <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
       <TableSortLabel
-        active={orderBy === 'name'}
+        active={orderBy === 'email'}
         direction={orderDirection}
-        onClick={() => handleRequestSort('name')}
+        onClick={() => handleRequestSort('email')}
       >
         Username
       </TableSortLabel>
@@ -296,8 +323,8 @@ const Users: React.FC = () => {
         height: "10px",
       },}}
             placeholder="Filter"
-            value={filters.name}
-            onChange={(e) => handleFilterChange(e, 'name')}
+            value={filters.email}
+            onChange={(e) => handleFilterChange(e, 'email')}
             sx={{ width: '100%', marginTop: '4px' }}
           />
         </div>
@@ -305,9 +332,9 @@ const Users: React.FC = () => {
     </TableCell>
     <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
       <TableSortLabel
-        active={orderBy === 'category'}
+        active={orderBy === 'userType'}
         direction={orderDirection}
-        onClick={() => handleRequestSort('category')}
+        onClick={() => handleRequestSort('userType')}
       >
         Role
       </TableSortLabel>
@@ -321,8 +348,8 @@ const Users: React.FC = () => {
       style: {
         height: "10px",
       },}}
-            value={filters.category}
-            onChange={(e) => handleFilterChange(e, 'category')}
+            value={filters.userType}
+            onChange={(e) => handleFilterChange(e, 'userType')}
             sx={{ width: '100%', marginTop: '4px' }}
           />
         </div>
@@ -370,9 +397,16 @@ const Users: React.FC = () => {
                 <TableCell padding="checkbox">
                   <Avatar sx={{ width: '34px', height: '34px'  }}>O</Avatar>
                 </TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.category}</TableCell>
-                <TableCell>{row.lastActive ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
+                <TableCell>
+        <Typography variant="subtitle2">
+          {row.firstName} {row.lastName}
+        </Typography>
+        <Typography variant="body2" color="textSecondary">
+          {row.email}
+        </Typography>
+      </TableCell>
+                <TableCell>{row.userType}</TableCell>
+                <TableCell>{row.lastLogin ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
                   <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
                     <MoreVertIcon />
@@ -398,7 +432,7 @@ const Users: React.FC = () => {
                     }}
                   >
                     <MenuItem
-                      onClick={handleMenuClose}
+                      onClick={() => handleViewUser(row.id)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
@@ -428,7 +462,7 @@ const Users: React.FC = () => {
                       Edit
                     </MenuItem>
                     <MenuItem
-                      onClick={() => handleDeleteOrganization(row.orgId)}
+                      onClick={() => handleDeleteOrganization(row.id)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
@@ -462,6 +496,72 @@ const Users: React.FC = () => {
           color="primary"
         />
       </Box>
+
+      {/* Dialog to display user details */}
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth sx={{borderRadius: '60px'}}>
+      <IconButton onClick={handleCloseDialog} sx={{ position: 'absolute', top: '10px', left: '10px' }}>
+          <ArrowBackIcon style={{ color: 'black' }} />
+        </IconButton>
+      <Box sx={{ position: 'relative', padding: '16px', alignContent: 'ceter',borderRadius: '60px' }}>
+        {/* Header with Avatar, Title, and Subtitle */}
+        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" mb={2} borderRadius='60px' >
+        <Avatar
+            sx={{ width: 80, height: 80, mr: 2 }}
+            src={userDetails?.avatarUrl || '/default-avatar.png'}
+          >
+            {/* Optional initial if avatar URL is not provided */}
+            {userDetails?.firstName ? userDetails.firstName[0] : 'U'}
+          </Avatar>
+          
+          <Box>
+            <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'left', m: 0 }}>User Details</DialogTitle>
+            <Typography variant="body2" sx={{ textAlign: 'left', color: 'gray' }}>
+              Look through your user's information easily.
+            </Typography>
+          </Box>
+        </Box>
+        <DialogContent>
+          {userDetails ? (
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center"  gap={2} mb={2}>
+              <TextField
+                label="Name"
+                value={`${userDetails.firstName}`}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+                            <TextField
+                label="Name"
+                value={`${userDetails.lastName}`}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+              </Box>
+              <TextField
+                label="Email"
+                value={userDetails.email}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+              <TextField
+                label="Phone Number"
+                value={userDetails.phoneNumber}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+              <TextField
+                label="Role"
+                value={userDetails.userType}
+                InputProps={{ readOnly: true }}
+                fullWidth
+              />
+            </Box>
+          ) : (
+            <Typography>Loading user details...</Typography>
+          )}
+        </DialogContent>
+      </Box>
+      </Dialog>
     </Paper>
   );
 };

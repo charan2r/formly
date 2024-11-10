@@ -39,15 +39,15 @@ const UserOverview: React.FC = () => {
 
   // Sample data for Pie Chart (Categories)
   const sampleCategoryData = [
-    { category: 'Super Admin' },
-    { category: 'SubUser' },
-    { category: 'SubUser' },
-    { category: 'Super Admin' },
-    { category: 'SubUser' },
-    { category: 'SbUser' },
-    { category: 'SubUser' },
-    { category: 'SubUser' },
-    { category: 'SubUser' },
+    { category: 'HR' },
+    { category: 'R & D' },
+    { category: 'R & D' },
+    { category: 'HR' },
+    { category: 'R & D' },
+    { category: 'R & D' },
+    { category: 'R & D' },
+    { category: 'R & D' },
+    { category: 'R & D' },
   ];
 
   useEffect(() => {
@@ -119,11 +119,11 @@ const UserOverview: React.FC = () => {
     });
 
     // Calculate percentages for Admin and User
-    const totalUsers = categoryCount['Super Admin'] + categoryCount['SubUser'];
-    const superAdminPercentage = ((categoryCount['Super Admin'] / totalUsers) * 110).toFixed(2);
-    const subUserPercentage = ((categoryCount['SubUser'] / totalUsers) * 100).toFixed(2);
+    const totalUsers = categoryCount['HR'] + categoryCount['R & D'];
+    const superAdminPercentage = ((categoryCount['HR'] / totalUsers) * 110).toFixed(2);
+    const subUserPercentage = ((categoryCount['R & D'] / totalUsers) * 100).toFixed(2);
 
-    const labels = ['Super Admin', 'SubUser'];
+    const labels = ['HR', 'R & D'];
     const data = [superAdminPercentage, subUserPercentage];
 
     setCategoryData({
@@ -220,7 +220,7 @@ const UserOverview: React.FC = () => {
           </Box>
          {/* Second Column with Charts */}
          <Box 
-            width={{ xs: '100%', sm: '35%' }} 
+            width={{ xs: '100%', sm: '55%' }} 
             height="100%"
             display="flex" 
             flexDirection="column" 
@@ -228,7 +228,7 @@ const UserOverview: React.FC = () => {
             order={{ xs: 1, sm: 2 }}
           >
             {/* Pie Chart for Categories */}
-            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="50%">
+            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="60%">
                 <Typography variant="h6" gutterBottom>Forms Categories</Typography>
                 <Pie
     data={categoryData} // Use categoryData state
@@ -240,7 +240,7 @@ const UserOverview: React.FC = () => {
   />
             </Box>
             {/* Doughnut Chart */}
-            <Box display="flex" flexDirection="column" alignItems="center" height="50%" marginTop={7}>
+            <Box display="flex" flexDirection="column" alignItems="center" height="60%" marginTop={7}>
               <Typography variant="h6" gutterBottom>Users</Typography>
               <Doughnut
                 data={doughnutData}

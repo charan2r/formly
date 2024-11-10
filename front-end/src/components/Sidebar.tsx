@@ -17,11 +17,12 @@ const Sidebar: React.FC = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  const isUsersPage = location.pathname.startsWith('/users');
+  const isUsersPage = true;
   
   // Define separate menu items for GENERAL and AUTHORIZATION sections
   const generalMenuItems = isUsersPage
     ? [
+        { path: '/userOverview', label: 'Overview' },
         { path: '/forms', label: 'Forms' },
         { path: '/template', label: 'Template' },
         { path: '/categories', label: 'Categories' },
@@ -32,10 +33,10 @@ const Sidebar: React.FC = () => {
         { path: '/audit-logs', label: 'Audit Logs' },
       ];
 
-  const authorizationMenuItems = [
+  const authorizationMenuItems = isUsersPage ? [
     { path: '/users', label: 'Users' },
     { path: '/roles', label: 'Roles' }
-  ];
+  ] : [];
 
   return (
     <Box
@@ -89,7 +90,7 @@ const Sidebar: React.FC = () => {
       {/* AUTHORIZATION Menu Items */}
       <Box ml={2} mt={3}>
         <Typography variant="caption" color="text.secondary">
-          Authorization
+          AUTHORIZATION
         </Typography>
         <List disablePadding sx={{ marginLeft: '-14px', marginTop: '7px'}}>
           {authorizationMenuItems.map(({ path, label }) => (
@@ -138,7 +139,7 @@ const Sidebar: React.FC = () => {
         >
           <Avatar src="/path/to/avatar.jpg" alt="Sardor" sx={{ width: 24, height: 24, borderRadius: '50%', border: '1px solid white' }} />
           <Typography fontWeight="bold" sx={{ ml: 1, fontSize: '0.75rem', color: '#333' }}>
-            Asfik
+            Jhon Doe
           </Typography>
           {isDropdownOpen ? <KeyboardArrowUpOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} /> : <KeyboardArrowDownOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} />}
         </Box>
@@ -162,10 +163,10 @@ const Sidebar: React.FC = () => {
             }}
           >
             <Stack direction="row" alignItems="center" spacing={1} p={1}>
-              <Avatar src="/path/to/avatar.jpg" alt="Sardor" sx={{ width: 30, height: 30 }} />
+              <Avatar src="/path/to/avatar.jpg" alt="Jhon" sx={{ width: 30, height: 30 }} />
               <Box textAlign="left">
-                <Typography fontSize="0.75rem" fontWeight="bold">Sardor</Typography>
-                <Typography fontSize="0.7rem" color="gray">sardor@gmail.com</Typography>
+                <Typography fontSize="0.75rem" fontWeight="bold">Jhon</Typography>
+                <Typography fontSize="0.7rem" color="gray">jdoe@gmail.com</Typography>
               </Box>
             </Stack>
             <Box sx={{ borderBottom: '1px solid #E0E0E0', mb: 0.5 }} />

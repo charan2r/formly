@@ -8,6 +8,7 @@ import CreateOrganization from './CreateOrganization';
 import ViewOrganization from './ViewOrganization';
 import EditOrganization from './EditOrganization';
 import UserOverview from './UserOverview';
+import Users from './Users';
 
 const Background: React.FC = () => {
   return (
@@ -18,6 +19,7 @@ const Background: React.FC = () => {
         <Route path="/overview" element={<Overview />} />
         <Route path="/useroverview" element={<UserOverview />} />
         <Route path="/organizations" element={<DataTable />} />
+        <Route path="/users" element={<Users />} />
         <Route path="/create-organization" element={<CreateOrganization/>}/>
         <Route path="/view-organization/:orgId" element={<ViewOrganization></ViewOrganization>} />
         <Route path="/Edit-organization/:orgId" element={<EditOrganization/>}/>
