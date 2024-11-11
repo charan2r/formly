@@ -1,5 +1,3 @@
-<p align="center"><img src="https://www.canva.com/design/DAGWK6iE6ig/hJso2MzEj95QlMzse2i97Q/edit?utm_content=DAGWK6iE6ig&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton" alt="Outlook" style="max-width: 60% !important"></p>
-
 # Forms Management System
 
 ## Overview
