@@ -1,5 +1,4 @@
-![Logo (2)](https://github.com/user-attachments/assets/460d64e4-1eee-4a80-a70b-d37c7c9cf986)
-
+<img src="https://github.com/user-attachments/assets/460d64e4-1eee-4a80-a70b-d37c7c9cf986" alt="Logo" width="150"/>
 
 # Forms Management System
 
