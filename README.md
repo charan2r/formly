@@ -1,15 +1,15 @@
-<div style="text-align: center;">
-  <img src="https://github.com/user-attachments/assets/460d64e4-1eee-4a80-a70b-d37c7c9cf986" alt="Logo" width="250"/>
-</div>
+# <p align="center">✅Forms Management System </p>
 
-# Forms Management System
+<p align="center"><<img src="https://github.com/user-attachments/assets/460d64e4-1eee-4a80-a70b-d37c7c9cf986" alt="Logo" width="250"/>></p>
+<p align="center">✨🚀<em>The Forms Management System is designed to digitize and streamline the process of creating, managing, and distributing forms within organizations. Built by ATeamSoftware, this system allows organizations to overcome geographical limitations and vendor dependencies associated with cloud-based solutions. This project is divided into multiple phases, with this initial phase focused on delivering a Minimum Viable Product (MVP).</em>✨🚀</p>
 
-## Overview
-The Forms Management System is designed to digitize and streamline the process of creating, managing, and distributing forms within organizations. Built by ATeamSoftware, this system allows organizations to overcome geographical limitations and vendor dependencies associated with cloud-based solutions. This project is divided into multiple phases, with this initial phase focused on delivering a Minimum Viable Product (MVP).
+---
 
-## Features
 
-### Core Features
+## <p align="center">☄ Features ☄</p>
+
+### <p align="center">☄ Core Features ☄</p>
+
 1. **Template Creation**: 
    - Drag-and-drop interface for creating form templates.
    - Predefined layouts and elements for quick setup.
@@ -41,32 +41,32 @@ The Forms Management System is designed to digitize and streamline the process o
 8. **User and Security Management**:
    - User account and role management.
    - Data encryption and compliance with GDPR, HIPAA.
-
-### Additional Features
+  
+### <p align="center">☄ Additional Features ☄</p>
 - **Audit Trails** for tracking changes and user actions.
 - **Reporting and Analytics** on document usage and template performance.
 - **Mobile Compatibility** for document management on mobile browsers and apps.
 
-## Proposed Technology Stack
+## <p align="center">📌 Proposed Technology Stack 📌</p>
 - **Frontend**: React.js (Vite), Quill.js
 - **UI/UX**: Material UI
 - **Backend**: Nest.js, TypeORM
 
-## Stakeholders
+## <p align="center">📌 Stakeholders 📌</p>
 - **Project Sponsor**: Oversees project direction.
 - **End Users**: Use the system for form management.
 - **IT Department**: Integrates and maintains the system.
 - **Compliance Officers**: Ensure regulatory compliance.
 - **Management**: Ensures project alignment with business goals.
 
-## Requirements
+## <p align="center">🔩 Requirements 🔩</p>
 - The MVP will include essential features for template creation, management, licensing, and basic analytics.
 - Compliance with data protection regulations (e.g., GDPR, HIPAA).
 
-## Future Enhancements
+## <p align="center">📌 Future Enhancements 📌</p>
 This project proposal identifies further improvements and additional features such as expanded mobile applications and more advanced analytics tools. Prioritization and roadmap are to be determined.
 
-## Installation and Setup
+## <p align="center">❓ Installation and Setup ❓</p>
 Detailed installation steps will be provided in future versions.
 
 ---
