@@ -8,8 +8,8 @@
 
 ## <p align="center">☄ Features ☄</p>
 
-### <p align="center">☄ Core Features ☄</p>
 
+### <p align="center">☄ Core Features ☄</p>
 1. **Template Creation**: 
    - Drag-and-drop interface for creating form templates.
    - Predefined layouts and elements for quick setup.
@@ -47,10 +47,12 @@
 - **Reporting and Analytics** on document usage and template performance.
 - **Mobile Compatibility** for document management on mobile browsers and apps.
 
+
 ## <p align="center">📌 Proposed Technology Stack 📌</p>
 - **Frontend**: React.js (Vite), Quill.js
 - **UI/UX**: Material UI
 - **Backend**: Nest.js, TypeORM
+
 
 ## <p align="center">📌 Stakeholders 📌</p>
 - **Project Sponsor**: Oversees project direction.
@@ -59,12 +61,15 @@
 - **Compliance Officers**: Ensure regulatory compliance.
 - **Management**: Ensures project alignment with business goals.
 
+
 ## <p align="center">🔩 Requirements 🔩</p>
 - The MVP will include essential features for template creation, management, licensing, and basic analytics.
 - Compliance with data protection regulations (e.g., GDPR, HIPAA).
 
+
 ## <p align="center">📌 Future Enhancements 📌</p>
 This project proposal identifies further improvements and additional features such as expanded mobile applications and more advanced analytics tools. Prioritization and roadmap are to be determined.
+
 
 ## <p align="center">❓ Installation and Setup ❓</p>
 Detailed installation steps will be provided in future versions.
