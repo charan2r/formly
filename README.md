@@ -1,6 +1,6 @@
 # <p align="center">✅Forms Management System </p>
 
-<p align="center"><<img src="https://github.com/user-attachments/assets/460d64e4-1eee-4a80-a70b-d37c7c9cf986" alt="Logo" width="250"/>></p>
+<p align="center"><img src="https://github.com/user-attachments/assets/460d64e4-1eee-4a80-a70b-d37c7c9cf986" alt="Logo" width="250"/></p>
 <p align="center">✨🚀<em>The Forms Management System is designed to digitize and streamline the process of creating, managing, and distributing forms within organizations. Built by ATeamSoftware, this system allows organizations to overcome geographical limitations and vendor dependencies associated with cloud-based solutions. This project is divided into multiple phases, with this initial phase focused on delivering a Minimum Viable Product (MVP).</em>✨🚀</p>
 
 ---
