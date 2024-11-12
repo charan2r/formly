@@ -285,7 +285,7 @@ const Template: React.FC = () => {
                     </IconButton>
                     <ArrowForward style={{ color: 'black' }} />
                     <Typography variant="body2" color="textSecondary">
-                        Atlas corp
+                        Atlas corp.
                     </Typography>
                     <ArrowForward style={{ color: 'black' }} />
                     <Typography variant="body2" color="textSecondary">
@@ -365,8 +365,16 @@ const Template: React.FC = () => {
                 <Table stickyHeader sx={{ marginTop: '25px' }}>
                     <TableHead>
                         <TableRow>
-                            <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }}>
-                                <Checkbox
+                            <TableCell
+                                padding="checkbox"
+                                sx={{
+                                    backgroundColor: '#f9f9f9',
+                                    borderStartStartRadius: '20px',
+                                    borderEndStartRadius: '20px',
+                                    padding: '4px',
+                                    position: 'relative',
+                                }}
+                            >                                <Checkbox
                                     onChange={handleSelectAll}
                                     checked={
                                         templates.length > 0 &&

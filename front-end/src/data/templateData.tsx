@@ -1,5 +1,5 @@
 export interface Template {
-    id: number;
+    templateId: number;
     name: string;
     category: string;
     createdDate: string;
@@ -11,7 +11,7 @@ export interface Template {
   // Sample data array that matches the Template interface
   const sampleTemplateData: Template[] = [
     {
-      id: 1,
+      templateId: 1,
       name: 'TempName 1',
       category: 'Sales',
       createdDate: 'Oct 6, 2024',
@@ -20,7 +20,7 @@ export interface Template {
       lastModifiedBy: 'Minhaj Naseer',
     },
     {
-      id: 2,
+      templateId: 2,
       name: 'TempName 2',
       category: 'Sales',
       createdDate: 'Oct 6, 2024',
@@ -29,7 +29,7 @@ export interface Template {
       lastModifiedBy: 'Minhaj Naseer',
     },
     {
-      id: 3,
+      templateId: 3,
       name: 'TempName 3',
       category: 'Sales',
       createdDate: 'Oct 6, 2024',
@@ -38,7 +38,7 @@ export interface Template {
       lastModifiedBy: 'Minhaj Naseer',
     },
     {
-      id: 4,
+      templateId: 4,
       name: 'TempName 4',
       category: 'Sales',
       createdDate: 'Oct 6, 2024',
