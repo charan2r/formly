@@ -17,7 +17,7 @@ const Sidebar: React.FC = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  const isUsersPage = true;
+  const isUsersPage = false;
   
   // Define separate menu items for GENERAL and AUTHORIZATION sections
   const generalMenuItems = isUsersPage

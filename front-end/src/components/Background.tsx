@@ -7,6 +7,7 @@ import DataTable from './DataTable';
 import CreateOrganization from './CreateOrganization';
 import ViewOrganization from './ViewOrganization';
 import EditOrganization from './EditOrganization';
+import ChangeOrganization from './ChangeOrganization';
 import UserOverview from './UserOverview';
 import Users from './Users';
 
@@ -23,6 +24,7 @@ const Background: React.FC = () => {
         <Route path="/create-organization" element={<CreateOrganization/>}/>
         <Route path="/view-organization/:orgId" element={<ViewOrganization></ViewOrganization>} />
         <Route path="/Edit-organization/:orgId" element={<EditOrganization/>}/>
+        <Route path="/Change-organization/:orgId" element={<ChangeOrganization/>}/>
       </Routes>
     </Box>
   );

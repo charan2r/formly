@@ -542,7 +542,25 @@ const handleDeleteOrganization = async () => {
   Edit
 </MenuItem>
 <MenuItem
-   onClick={() => handleDeleteConfirmation(row.orgId)}
+  onClick={() => {
+    handleMenuClose();
+    navigate(`/change-organization/${row.orgId}`);
+  }}
+  sx={{
+    backgroundColor: 'white',
+    borderRadius: '10px',
+    margin: '5px',
+    justifyContent: 'center', // Center align text
+    fontSize: '0.875rem', // Smaller font size
+    minHeight: '30px', // Reduced height
+    minWidth: '100px', // Increased width
+    '&:hover': { backgroundColor: '#f0f0f0' },
+  }}
+>
+  Change Admin
+</MenuItem>
+<MenuItem
+  onClick={() => handleDeleteConfirmation(row.orgId)}
   sx={{
     backgroundColor: 'white',
     borderRadius: '10px',
@@ -557,6 +575,7 @@ const handleDeleteOrganization = async () => {
 >
   Delete
 </MenuItem>
+
               
                   </Popover>
                 </TableCell>
