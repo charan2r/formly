@@ -24,6 +24,7 @@ import {
     DialogContent,
     Dialog,
     DialogTitle,
+    Grid,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
@@ -36,6 +37,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface Template {
     templateId: string;
@@ -78,7 +80,16 @@ const Template: React.FC = () => {
     const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
     const [confirmationOpen, setConfirmationOpen] = useState(false);
     const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
+    const [templateDetails, setTemplateDetails] = useState<Templates | null>(null);
+    const [isDialogOpen, setDialogOpen] = useState(false);
     const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+    const [createTemplateOpen, setCreateTemplateOpen] = useState(false);
+    const [newTemplate, setNewTemplate] = useState({
+        name: '',
+        type: 'Employees',
+        pageSize: 'A4',
+        description: ''
+    });
 
 
     useEffect(() => {
@@ -162,9 +173,18 @@ const Template: React.FC = () => {
     };
 
 
+    const handleCreateTemplate = async () => {
+        try {
+            const response = await axios.post('http://localhost:3001/template', newTemplate);
+            setTemplates([...templates, response.data]);
+            setCreateTemplateOpen(false);
+            toast.success("Template created successfully!");
+        } catch (error) {
+            toast.error("Failed to create template");
+        }
+    };
 
     const handleDeleteTemplates = async () => {
-
         try {
             const response = await axios.delete('http://localhost:3001/template/bulk-delete', {
                 data: { ids: Object.keys(selectedTemplates) },
@@ -212,7 +232,7 @@ const Template: React.FC = () => {
         };
     }
 
-    // Method to handle deletion of an templates
+    // Method to handle deletion of an template
     const handleDeleteTemplate = async () => {
         try {
             await axios.delete(`http://localhost:3001/template/delete?id=${templateToDelete}`);
@@ -250,6 +270,11 @@ const Template: React.FC = () => {
                 },
             });
         }
+    };
+
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+        setTemplateDetails(null);
     };
 
     const filteredData = templates
@@ -352,7 +377,7 @@ const Template: React.FC = () => {
                             <Button
                                 variant="contained"
                                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                                onClick={() => navigate('/create-template')}
+                                onClick={() => setCreateTemplateOpen(true)}
                             >
                                 <AddIcon sx={{ marginRight: 1 }} />
                                 Add Templates
@@ -374,7 +399,8 @@ const Template: React.FC = () => {
                                     padding: '4px',
                                     position: 'relative',
                                 }}
-                            >                                <Checkbox
+                            >
+                                <Checkbox
                                     onChange={handleSelectAll}
                                     checked={
                                         templates.length > 0 &&
@@ -694,6 +720,148 @@ const Template: React.FC = () => {
                         Delete
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            {/* Dialog to add template details */}
+            <Dialog
+                open={createTemplateOpen}
+                onClose={() => setCreateTemplateOpen(false)}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                    sx: {
+                        borderRadius: '20px',
+                        padding: '16px 28px 40px',
+                        maxWidth: '650px',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+                    }
+                }}
+            >
+                <Box sx={{ position: 'relative' }}>
+                    {/* Back button */}
+                    <IconButton
+                        onClick={handleCloseDialog}
+                        sx={{
+                            position: 'absolute',
+                            left: 8,
+                            top: 8,
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+
+                    {/* Header section */}
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                        <Box sx={{ textAlign: 'left' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                Create Template
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Create custom template for your enterprise needs
+                            </Typography>
+                        </Box>
+
+
+                    </Box>
+
+                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                        <Box display="flex" flexDirection="column" gap={2.5}>
+                            <Grid item xs={12} sm={6} mt={-3.5}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Template Name</Typography>
+                                <TextField
+                                    value={newTemplate.name}
+                                    InputProps={{ readOnly: true }}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    inputProps={{
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                                    }}
+                                />
+                            </Grid>
+
+                            <Box display="flex" gap={2} width="100%" mt={-2}>
+                                {/* Template Type Field */}
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
+                                        Template Type
+                                    </Typography>
+                                    <TextField
+                                        select
+                                        value={newTemplate.type}
+                                        size="small"
+                                        onChange={(e) => setNewTemplate({ ...newTemplate, type: e.target.value })}
+                                        fullWidth
+                                        InputProps={{
+                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                        }}
+                                    >
+                                        <MenuItem value="Employees">Employees</MenuItem>
+                                        {/* Add more options as needed */}
+                                    </TextField>
+                                </Box>
+
+                                {/* Page Size Field */}
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
+                                        Page Size
+                                    </Typography>
+                                    <TextField
+                                        select
+                                        value={newTemplate.pageSize}
+                                        size="small"
+                                        onChange={(e) => setNewTemplate({ ...newTemplate, pageSize: e.target.value })}
+                                        fullWidth
+                                        InputProps={{
+                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                        }}
+                                    >
+                                        <MenuItem value="A4">A4</MenuItem>
+                                        <MenuItem value="A3">A3</MenuItem>
+                                        {/* Add more options as needed */}
+                                    </TextField>
+                                </Box>
+                            </Box>
+
+
+                            <Grid item xs={12} sm={6} mt={-2}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
+
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={newTemplate.description}
+                                    onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
+                                    InputProps={{
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                    }}
+                                />
+                            </Grid>
+                        </Box>
+                    </DialogContent>
+
+                    <DialogActions sx={{ p: 3, justifyContent: 'center' }}>
+                        <Button
+                            variant="contained"
+                            onClick={handleCreateTemplate}
+                            sx={{
+                                backgroundColor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                width: '30%',
+                                marginTop: '-20px',
+                                marginBottom: '-25px',
+                                '&:hover': {
+                                    backgroundColor: '#333'
+                                }
+                            }}
+                        >
+                            Create
+                        </Button>
+                    </DialogActions>
+                </Box>
             </Dialog>
             <ToastContainer></ToastContainer>
         </Paper >
