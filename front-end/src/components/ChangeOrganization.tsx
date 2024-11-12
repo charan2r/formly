@@ -9,12 +9,8 @@ function ChangeOrganization() {
   const [formData, setFormData] = useState({
     name: '',
     category: '',
-    firstName: 'John',
-    lastName: 'Doe',
     newphone: '',
     newEmail: '',
-    phone: '0702433548',
-    email: 'admin@email.com'
   });
 
   const handleChange = (event) => {
@@ -26,15 +22,6 @@ function ChangeOrganization() {
   };
 
   const handleUpdate = () => {
-    // Update Super Admin Details based on new Organizational Details
-    setFormData({
-      ...formData,
-      firstName: formData.name || formData.firstName, // Update firstName if name is provided
-      lastName: formData.category || formData.lastName, // Update lastName if category is provided
-      phone: formData.newphone || formData.phone, // Update phone if newphone is provided
-      email: formData.newEmail || formData.email, // Update email if newEmail is provided
-    });
-
     toast.success("Changed successfully!", {
       position: "top-right",
       autoClose: 5000,
@@ -143,70 +130,6 @@ function ChangeOrganization() {
               placeholder="Enter New Email"
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
-              }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
-            />
-          </Grid>
-        </Grid>
-
-        <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', marginBottom: '-4px', fontWeight: 'bold'}}>
-          Current Super Admin Details
-        </Typography>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name *</Typography>
-            <TextField
-              name="firstName"
-              value={formData.firstName}
-              fullWidth
-              placeholder="Enter First Name"
-              disabled
-              InputProps={{
-                sx: { backgroundColor: '#f1f1f1', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
-              }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Last Name *</Typography>
-            <TextField
-              name="lastName"
-              value={formData.lastName}
-              fullWidth
-              placeholder="Enter Last Name"
-              disabled
-              InputProps={{
-                sx: { backgroundColor: '#f1f1f1', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
-              }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
-            <TextField
-              name="phone"
-              value={formData.phone}
-              fullWidth
-              placeholder="0702433548"
-              disabled
-              InputProps={{
-                sx: { backgroundColor: '#f1f1f1', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
-              }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
-            />
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email</Typography>
-            <TextField
-              name="email"
-              value={formData.email}
-              fullWidth
-              placeholder="admin@email.com"
-              disabled
-              InputProps={{
-                sx: { backgroundColor: '#f1f1f1', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
