@@ -90,10 +90,10 @@ const DataTable: React.FC = () => {
         console.error('Error fetching organization data:', error);
       }
     };
-  
+
     fetchOrganizations();
   }, []);
-  
+
 
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
@@ -161,7 +161,7 @@ const DataTable: React.FC = () => {
 
 
   const handleDeleteOrganizations = async () => {
-    
+
     try {
       const response = await axios.delete('http://localhost:3001/organization/bulk-delete', {
         data: { ids: Object.keys(selectedOrganizations) },
@@ -206,48 +206,48 @@ const DataTable: React.FC = () => {
           fontWeight: 'bold',
         },
       });
-  };
-}
-
-// Method to handle deletion of an organization
-const handleDeleteOrganization = async () => {
-  try {
-    await axios.delete(`http://localhost:3001/organization/delete?id=${organizationToDelete}`);
-    setOrganizations((prev) => prev.filter((org) => org.orgId !== organizationToDelete));
-    setConfirmationOpen(false); // Close confirmation dialog
-    toast.success("Organization has been deleted successfully!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      style: {
-        backgroundColor: 'black',
-        color: 'white',
-        borderRadius: '10px',
-        fontWeight: 'bold',
-      },
-    });
-  } catch (error) {
-    toast.error("Failed to delete the organization. Please try again.", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      style: {
-        backgroundColor: 'black',
-        color: 'white',
-        borderRadius: '10px',
-        fontWeight: 'bold',
-      },
-    });
+    };
   }
-};
+
+  // Method to handle deletion of an organization
+  const handleDeleteOrganization = async () => {
+    try {
+      await axios.delete(`http://localhost:3001/organization/delete?id=${organizationToDelete}`);
+      setOrganizations((prev) => prev.filter((org) => org.orgId !== organizationToDelete));
+      setConfirmationOpen(false); // Close confirmation dialog
+      toast.success("Organization has been deleted successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to delete the organization. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+    }
+  };
 
   const filteredData = organizations
     .filter((org) => {
@@ -506,58 +506,58 @@ const handleDeleteOrganization = async () => {
                     }}
                   >
                     <MenuItem
-  onClick={() => {
-    handleMenuClose();
-    navigate(`/view-organization/${row.orgId}`);
-  }}
-  sx={{
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    margin: '5px',
-    justifyContent: 'center', // Center align text
-    fontSize: '0.875rem', // Smaller font size
-    minHeight: '30px', // Reduced height
-    minWidth: '100px', // Increased width
-    '&:hover': { backgroundColor: '#f0f0f0' },
-  }}
->
-  View
-</MenuItem>
-<MenuItem
-  onClick={() => {
-    handleMenuClose();
-    navigate(`/edit-organization/${row.orgId}`);
-  }}
-  sx={{
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    margin: '5px',
-    justifyContent: 'center', // Center align text
-    fontSize: '0.875rem', // Smaller font size
-    minHeight: '30px', // Reduced height
-    minWidth: '100px', // Increased width
-    '&:hover': { backgroundColor: '#f0f0f0' },
-  }}
->
-  Edit
-</MenuItem>
-<MenuItem
-   onClick={() => handleDeleteConfirmation(row.orgId)}
-  sx={{
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    margin: '5px',
-    justifyContent: 'center', // Center align text
-    color: 'red', // Red text color for "Delete"
-    fontSize: '0.875rem', // Smaller font size
-    minHeight: '30px', // Reduced height
-    minWidth: '100px', // Increased width
-    '&:hover': { backgroundColor: '#f0f0f0' },
-  }}
->
-  Delete
-</MenuItem>
-              
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/view-organization/${row.orgId}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      View
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/edit-organization/${row.orgId}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Edit
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleDeleteConfirmation(row.orgId)}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        color: 'red', // Red text color for "Delete"
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+
                   </Popover>
                 </TableCell>
 
@@ -578,8 +578,8 @@ const handleDeleteOrganization = async () => {
         />
       </Box>
 
-            {/* Confirmation Dialog */}
-            <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to delete this organization?</Typography>
@@ -588,14 +588,14 @@ const handleDeleteOrganization = async () => {
           <Button onClick={() => setConfirmationOpen(false)} color="black">
             Cancel
           </Button>
-          <Button onClick={handleDeleteOrganization} sx={{color:'white', backgroundColor: 'black', borderRadius:'10px'}}>
+          <Button onClick={handleDeleteOrganization} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
             Delete
           </Button>
         </DialogActions>
       </Dialog>
 
-        {/* Confirmation Dialog */}
-        <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to delete these organizations?</Typography>
@@ -604,7 +604,7 @@ const handleDeleteOrganization = async () => {
           <Button onClick={() => setConfirmationBulkOpen(false)} color="black">
             Cancel
           </Button>
-          <Button onClick={handleDeleteOrganizations} sx={{color:'white', backgroundColor: 'black', borderRadius:'10px'}}>
+          <Button onClick={handleDeleteOrganizations} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
             Delete
           </Button>
         </DialogActions>
