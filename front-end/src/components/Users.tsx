@@ -69,7 +69,7 @@ const Users: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '',email: '' });
+  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [userDetails, setUserDetails] = useState<Users | null>(null); // For storing user details
@@ -79,7 +79,7 @@ const Users: React.FC = () => {
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users?organizationId=72a53cab-e8a8-4072-bf91-d2643b22851b'); 
+        const response = await axios.get('http://localhost:3001/users?organizationId=72a53cab-e8a8-4072-bf91-d2643b22851b');
         console.log(response.data)
         setOrganizations(response.data.data);
       } catch (error) {
@@ -107,7 +107,7 @@ const Users: React.FC = () => {
       acc[org.id] = checked;  // Apply the same checked state to all organizations
       return acc;
     }, {} as Record<number, boolean>);
-    
+
     setSelectedOrganizations(newSelectedOrganizations);
   };
 
@@ -200,13 +200,13 @@ const Users: React.FC = () => {
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
           <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <CircleIcon style={{ color: 'black' }}/>
+            <CircleIcon style={{ color: 'black' }} />
           </IconButton>
-            <ArrowForward style={{ color: 'black' }}/>
+          <ArrowForward style={{ color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             Atlas corp
           </Typography>
-          <ArrowForward style={{ color: 'black' }}/>
+          <ArrowForward style={{ color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             User Management
           </Typography>
@@ -279,132 +279,135 @@ const Users: React.FC = () => {
         </Box>
       </Box>
       <TableContainer sx={{ maxHeight: '400px', overflow: 'auto' }}>
-      <Table stickyHeader sx={{ marginTop: '25px' }}>
-      <TableHead>
-  <TableRow>
-    <TableCell
-      padding="checkbox"
-      sx={{
-        backgroundColor: '#f9f9f9',
-        borderStartStartRadius: '20px',
-        borderEndStartRadius: '20px',
-        padding: '4px',
-        position: 'relative', // Make this cell relative for absolute positioning of filter input
-      }}
-    >
-      <Checkbox
-        onChange={handleSelectAll}
-        checked={
-          organizations.length > 0 &&
-          organizations.every((org) => selectedOrganizations[org.id])
-        }
-        indeterminate={
-          organizations.some((org) => selectedOrganizations[org.id]) &&
-          !organizations.every((org) => selectedOrganizations[org.id])
-        }
-      />
-    </TableCell>
-    <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
-    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
-      <TableSortLabel
-        active={orderBy === 'email'}
-        direction={orderDirection}
-        onClick={() => handleRequestSort('email')}
-      >
-        Username
-      </TableSortLabel>
-      {showFilters && (
-        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            inputProps={{
-      style: {
-        height: "10px",
-      },}}
-            placeholder="Filter"
-            value={filters.email}
-            onChange={(e) => handleFilterChange(e, 'email')}
-            sx={{ width: '100%', marginTop: '4px' }}
-          />
-        </div>
-      )}
-    </TableCell>
-    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
-      <TableSortLabel
-        active={orderBy === 'userType'}
-        direction={orderDirection}
-        onClick={() => handleRequestSort('userType')}
-      >
-        Role
-      </TableSortLabel>
-      {showFilters && (
-        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Filter"
-                        inputProps={{
-      style: {
-        height: "10px",
-      },}}
-            value={filters.userType}
-            onChange={(e) => handleFilterChange(e, 'userType')}
-            sx={{ width: '100%', marginTop: '4px' }}
-          />
-        </div>
-      )}
-    </TableCell>
-    <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
-      <TableSortLabel
-        active={orderBy === 'lastActive'}
-        direction={orderDirection}
-        onClick={() => handleRequestSort('lastActive')}
-      >
-        Last Active
-      </TableSortLabel>
-      {showFilters && (
-        <div style={{ position: 'absolute', top: '70%',width: '45%', left: 0, right: 0 }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Filter"
-                        inputProps={{
-      style: {
-        height: "10px",
-      },}}
-            value={filters.lastActive}
-            onChange={(e) => handleFilterChange(e, 'lastActive')}
-            sx={{ width: '100%', marginTop: '4px' }}
-          />
-        </div>
-      )}
-    </TableCell>
-    <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', borderStartEndRadius: '20px', borderEndEndRadius: '20px', padding: '1px' }} />
-  </TableRow>
-</TableHead>
+        <Table stickyHeader sx={{ marginTop: '25px' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  borderStartStartRadius: '20px',
+                  borderEndStartRadius: '20px',
+                  padding: '4px',
+                  position: 'relative', 
+                }}
+              >
+                <Checkbox
+                  onChange={handleSelectAll}
+                  checked={
+                    organizations.length > 0 &&
+                    organizations.every((org) => selectedOrganizations[org.id])
+                  }
+                  indeterminate={
+                    organizations.some((org) => selectedOrganizations[org.id]) &&
+                    !organizations.every((org) => selectedOrganizations[org.id])
+                  }
+                />
+              </TableCell>
+              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'email'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('email')}
+                >
+                  Username
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      placeholder="Filter"
+                      value={filters.email}
+                      onChange={(e) => handleFilterChange(e, 'email')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'userType'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('userType')}
+                >
+                  Role
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Filter"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      value={filters.userType}
+                      onChange={(e) => handleFilterChange(e, 'userType')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'lastActive'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('lastActive')}
+                >
+                  Last Active
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Filter"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      value={filters.lastActive}
+                      onChange={(e) => handleFilterChange(e, 'lastActive')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', borderStartEndRadius: '20px', borderEndEndRadius: '20px', padding: '1px' }} />
+            </TableRow>
+          </TableHead>
 
 
           <TableBody>
             {paginatedData.map((row) => (
               <TableRow key={row.id} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
-                <Checkbox
-          checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
-          onChange={() => handleSelectOrganization(row.orgId)}
-        />
+                  <Checkbox
+                    checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
+                    onChange={() => handleSelectOrganization(row.orgId)}
+                  />
                 </TableCell>
                 <TableCell padding="checkbox">
-                  <Avatar sx={{ width: '34px', height: '34px'  }}>O</Avatar>
+                  <Avatar sx={{ width: '34px', height: '34px' }}>O</Avatar>
                 </TableCell>
                 <TableCell>
-        <Typography variant="subtitle2">
-          {row.firstName} {row.lastName}
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          {row.email}
-        </Typography>
-      </TableCell>
+                  <Typography variant="subtitle2">
+                    {row.firstName} {row.lastName}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {row.email}
+                  </Typography>
+                </TableCell>
                 <TableCell>{row.userType}</TableCell>
                 <TableCell>{row.lastLogin ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
@@ -498,69 +501,69 @@ const Users: React.FC = () => {
       </Box>
 
       {/* Dialog to display user details */}
-      <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth sx={{borderRadius: '60px'}}>
-      <IconButton onClick={handleCloseDialog} sx={{ position: 'absolute', top: '10px', left: '10px' }}>
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth sx={{ borderRadius: '60px' }}>
+        <IconButton onClick={handleCloseDialog} sx={{ position: 'absolute', top: '10px', left: '10px' }}>
           <ArrowBackIcon style={{ color: 'black' }} />
         </IconButton>
-      <Box sx={{ position: 'relative', padding: '16px', alignContent: 'ceter',borderRadius: '60px' }}>
-        {/* Header with Avatar, Title, and Subtitle */}
-        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" mb={2} borderRadius='60px' >
-        <Avatar
-            sx={{ width: 80, height: 80, mr: 2 }}
-            src={userDetails?.avatarUrl || '/default-avatar.png'}
-          >
-            {/* Optional initial if avatar URL is not provided */}
-            {userDetails?.firstName ? userDetails.firstName[0] : 'U'}
-          </Avatar>
-          
-          <Box>
-            <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'left', m: 0 }}>User Details</DialogTitle>
-            <Typography variant="body2" sx={{ textAlign: 'left', color: 'gray' }}>
-              Look through your user's information easily.
-            </Typography>
-          </Box>
-        </Box>
-        <DialogContent>
-          {userDetails ? (
-            <Box display="flex" flexDirection="column" gap={2}>
-              <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center"  gap={2} mb={2}>
-              <TextField
-                label="Name"
-                value={`${userDetails.firstName}`}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-                            <TextField
-                label="Name"
-                value={`${userDetails.lastName}`}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-              </Box>
-              <TextField
-                label="Email"
-                value={userDetails.email}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-              <TextField
-                label="Phone Number"
-                value={userDetails.phoneNumber}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
-              <TextField
-                label="Role"
-                value={userDetails.userType}
-                InputProps={{ readOnly: true }}
-                fullWidth
-              />
+        <Box sx={{ position: 'relative', padding: '16px', alignContent: 'ceter', borderRadius: '60px' }}>
+          {/* Header with Avatar, Title, and Subtitle */}
+          <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" mb={2} borderRadius='60px' >
+            <Avatar
+              sx={{ width: 80, height: 80, mr: 2 }}
+              src={userDetails?.avatarUrl || '/default-avatar.png'}
+            >
+              {/* Optional initial if avatar URL is not provided */}
+              {userDetails?.firstName ? userDetails.firstName[0] : 'U'}
+            </Avatar>
+
+            <Box>
+              <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'left', m: 0 }}>User Details</DialogTitle>
+              <Typography variant="body2" sx={{ textAlign: 'left', color: 'gray' }}>
+                Look through your user's information easily.
+              </Typography>
             </Box>
-          ) : (
-            <Typography>Loading user details...</Typography>
-          )}
-        </DialogContent>
-      </Box>
+          </Box>
+          <DialogContent>
+            {userDetails ? (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2} mb={2}>
+                  <TextField
+                    label="Name"
+                    value={`${userDetails.firstName}`}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Name"
+                    value={`${userDetails.lastName}`}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                  />
+                </Box>
+                <TextField
+                  label="Email"
+                  value={userDetails.email}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="Phone Number"
+                  value={userDetails.phoneNumber}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="Role"
+                  value={userDetails.userType}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Box>
+            ) : (
+              <Typography>Loading user details...</Typography>
+            )}
+          </DialogContent>
+        </Box>
       </Dialog>
     </Paper>
   );

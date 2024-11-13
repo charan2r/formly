@@ -24,7 +24,7 @@ const Sidebar: React.FC = () => {
     ? [
         { path: '/userOverview', label: 'Overview' },
         { path: '/forms', label: 'Forms' },
-        { path: '/template', label: 'Template' },
+        { path: '/templates', label: 'Templates' },
         { path: '/categories', label: 'Categories' },
       ]
     : [
