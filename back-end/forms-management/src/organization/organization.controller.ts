@@ -3,7 +3,7 @@ import { Controller, Get, Delete, Post, NotFoundException, Query, Patch, Body, B
 import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
-import { CreateOrganizationWithSuperAdminDto } from 'src/dto/create-organization.dto';
+import { CreateOrganizationWithSuperAdminDto } from 'src/user/create-organization.dto';
 
 interface MetaSchemaResponse<T> {
     status: string;
