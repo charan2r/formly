@@ -1,55 +1,68 @@
 /* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Section } from './section.entity';
-import { Form } from './form.entity';
-
-@Entity('form_template')
-export class FormTemplate {
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    ManyToOne,
+    OneToMany,
+    CreateDateColumn,
+    UpdateDateColumn,
+  } from 'typeorm';
+  import { Category } from './category.entity';
+  import { Section } from './section.entity';
+  import { Form } from './form.entity';
+  
+  @Entity('form_template')
+  export class FormTemplate {
     @PrimaryGeneratedColumn('uuid')
-    form_template_id: string;
-
-    @Column({ type: 'varchar', length: 255 })
+    formTemplateId: string;
+  
+    @Column('varchar', { length: 255 })
     name: string;
-
-    @Column({ type: 'text', nullable: true })
+  
+    @Column('text')
     description: string;
-
-    @Column({ type: 'integer', default: 1 })
+  
+    @Column('int')
     version: number;
-
-    @Column({ type: 'varchar', length: 50, default: 'draft' })
+  
+    @Column('varchar', { length: 50 })
     status: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    header_text: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    header_image_url: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    question_font_style: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    question_text_color: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    background_color: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    header_image: string;
-
-    @Column({ type: 'varchar', nullable: true })
-    logo_image: string;
-
+  
+    @Column('varchar', { length: 255, nullable: true })
+    headerText: string;
+  
+    @Column('varchar', { length: 255, nullable: true })
+    headerImageUrl: string;
+  
+    @Column('varchar', { length: 100, nullable: true })
+    questionFontStyle: string;
+  
+    @Column('varchar', { length: 7, nullable: true })
+    questionTextColor: string;
+  
+    @Column('varchar', { length: 7, nullable: true })
+    backgroundColor: string;
+  
+    @Column('varchar', { length: 255, nullable: true })
+    headerImage: string;
+  
+    @Column('varchar', { length: 255, nullable: true })
+    logoImage: string;
+  
     @CreateDateColumn()
-    created_at: Date;
-
+    createdAt: Date;
+  
     @UpdateDateColumn()
-    updated_at: Date;
-
-    @OneToMany(() => Section, (section) => section.form_template)
+    updatedAt: Date;
+  
+    @ManyToOne(() => Category, (category) => category.formTemplates)
+    category: Category;
+  
+    @OneToMany(() => Section, (section) => section.formTemplate)
     sections: Section[];
-
-    @OneToMany(() => Form, (form) => form.form_template)
+  
+    @OneToMany(() => Form, (form) => form.formTemplate)
     forms: Form[];
-}
+  }
+  
