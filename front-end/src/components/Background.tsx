@@ -10,6 +10,8 @@ import EditOrganization from './EditOrganization';
 import UserOverview from './UserOverview';
 import Users from './Users';
 import Template from './Template';
+import Category from './category';
+
 
 const Background: React.FC = () => {
   return (
@@ -22,6 +24,7 @@ const Background: React.FC = () => {
         <Route path="/organizations" element={<DataTable />} />
         <Route path="/users" element={<Users />} />
         <Route path='/templates' element={<Template/>}/>
+        <Route path='/categories' element={<Category/>}/>
         <Route path="/create-organization" element={<CreateOrganization/>}/>
         <Route path="/view-organization/:orgId" element={<ViewOrganization></ViewOrganization>} />
         <Route path="/Edit-organization/:orgId" element={<EditOrganization/>}/>

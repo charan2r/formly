@@ -258,7 +258,7 @@ function EditOrganization() {
               fullWidth
               placeholder="ZipCode"
               InputProps={{
-                sx: { backgroundColor: '#f9f9f9', width: '70%', width: '70%', borderRadius: '5px', paddingY: '2px', height: '30px' }
+                sx: { backgroundColor: '#f9f9f9', width: '70%', borderRadius: '5px', paddingY: '2px', height: '30px' }
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
