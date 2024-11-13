@@ -1,16 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { FormTemplate } from './form-template.entity';
 
 @Entity('form')
 export class Form {
-  @PrimaryGeneratedColumn('uuid')
-  formId: string;
+    @PrimaryGeneratedColumn('uuid')
+    form_id: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  name: string;
+    @Column({ type: 'varchar', length: 255 })
+    name: string;
 
-  @ManyToOne(() => FormTemplate, (formTemplate) => formTemplate.forms, { nullable: false })
-  @JoinColumn({ name: 'form_template_id' })
-  formTemplate: FormTemplate;
+    @ManyToOne(() => FormTemplate, (formTemplate) => formTemplate.forms, { onDelete: 'CASCADE' })
+    form_template: FormTemplate;
 }

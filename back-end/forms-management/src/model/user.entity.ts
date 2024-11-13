@@ -5,11 +5,9 @@ import {
   PrimaryGeneratedColumn,
   Column,
   ManyToOne,
-  OneToMany,
   JoinColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
-import { Category } from './category.entity';
 
 @Entity()
 export class User {
@@ -56,6 +54,4 @@ export class User {
   @Column({ type: 'uuid', nullable: true })
   organizationId: string; // Foreign key column to store organization ID
 
-  @OneToMany(() => Category, (category) => category.user)
-  categories: Category[]; // One-to-many relationship with Category
 }
