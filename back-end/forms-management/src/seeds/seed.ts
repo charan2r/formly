@@ -1,5 +1,6 @@
 import { User } from "src/model/user.entity";
 import { Organization } from "src/model/organization.entity";
+import { Category } from '../model/category.entity'; 
 import AppDataSource from "ormconfig";
 
 async function seed() {
@@ -49,6 +50,15 @@ async function seed() {
     // Step 4: Update org1's user relationship with both users
     org1.users = [user1, user2];
     await AppDataSource.manager.save(org1);
+
+    //seed the category
+    const category1 = new Category();
+    category1.name = "sales department";
+    category1.description = "lorem ipsam lorem ipsam ";
+    category1.createdById = user1.id;
+    category1.user = user1; 
+
+    await AppDataSource.manager.save(category1);
 
     console.log("Seeding completed.");
     await AppDataSource.destroy();

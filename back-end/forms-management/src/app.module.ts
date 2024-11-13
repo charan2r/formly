@@ -11,6 +11,7 @@ import { Organization } from './model/organization.entity';
 import { User } from './model/user.entity';
 import { UserRepository } from './user/user.repository';
 import { UserModule } from './user/user.module';
+import { Category } from './model/category.entity'; 
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { UserModule } from './user/user.module';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User]),
+    TypeOrmModule.forFeature([Organization, User,Category]),
     OrganizationModule,
     UserModule
   ],

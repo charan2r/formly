@@ -4,10 +4,12 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
+  OneToMany,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
+import { Category } from './category.entity'; 
 
 @Entity()
 export class User {
@@ -53,4 +55,7 @@ export class User {
 
   @Column({ type: 'uuid', nullable: true })
   organizationId: string; // Foreign key column to store organization ID
+
+  @OneToMany(() => Category, (category) => category.user)  // One user can have many categories
+  categories: Category[];
 }
