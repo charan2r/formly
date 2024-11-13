@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
-import { FormTemplate } from './form-template.entity';
 
 @Entity()
 export class Category {
@@ -24,6 +23,4 @@ export class Category {
   @JoinColumn({ name: 'userId' })  
   user: User;
 
-  @OneToMany(() => FormTemplate, (formTemplate) => formTemplate.category)
-  formTemplates: FormTemplate[];
 }
