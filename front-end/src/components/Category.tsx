@@ -22,6 +22,7 @@ import {
     DialogContent,
     Dialog,
     DialogTitle,
+    Grid,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
@@ -34,6 +35,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface Category {
     categoryId: number;
@@ -74,6 +76,14 @@ const Category: React.FC = () => {
     const [confirmationOpen, setConfirmationOpen] = useState(false);
     const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+    const [categoryDetails, setCategoryDetails] = useState<Categories | null>(null);
+    const [isDialogOpen, setDialogOpen] = useState(false);
+    const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
+    const [newCategory, setNewCategory] = useState({
+        name: '',
+        createdBy: '',
+        createdAt: ''
+    });
 
 
     useEffect(() => {
@@ -156,10 +166,18 @@ const Category: React.FC = () => {
         setConfirmationBulkOpen(true);
     };
 
-
+    const handleCreateCategory = async () => {
+        try {
+            const response = await axios.post('http://localhost:3001/category', newCategory);
+            setCategories([...categories, response.data]);
+            setCreateCategoryOpen(false);
+            toast.success("Category created successfully!");
+        } catch (error) {
+            toast.error("Failed to create category");
+        }
+    };
 
     const handleDeleteCategories = async () => {
-
         try {
             const response = await axios.delete('http://localhost:3001/category/bulk-delete', {
                 data: { ids: Object.keys(selectedCategories) },
@@ -271,6 +289,11 @@ const Category: React.FC = () => {
 
     const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
+    const handleCloseDialog = () => {
+        setDialogOpen(false);
+        setCategoryDetails(null);
+    };
+
     return (
         <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
             <Box display="flex" flexDirection="column" gap={2}>
@@ -347,7 +370,7 @@ const Category: React.FC = () => {
                             <Button
                                 variant="contained"
                                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                                onClick={() => navigate('/create-category')}
+                                onClick={() => setCreateCategoryOpen(true)}
                             >
                                 <AddIcon sx={{ marginRight: 1 }} />
                                 Add Categories
@@ -591,7 +614,7 @@ const Category: React.FC = () => {
                 </DialogActions>
             </Dialog>
 
-            {/* Confirmation Dialog */}
+            {/* Bulk Confirmation Dialog */}
             <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
                 <DialogTitle>Confirm Deletion</DialogTitle>
                 <DialogContent>
@@ -605,6 +628,104 @@ const Category: React.FC = () => {
                         Delete
                     </Button>
                 </DialogActions>
+            </Dialog>
+
+            {/* Create category Dialog */}
+            <Dialog
+                open={createCategoryOpen}
+                onClose={() => setCreateCategoryOpen(false)}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                    sx: {
+                        borderRadius: '20px',
+                        padding: '16px 28px 40px',
+                        maxWidth: '650px',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+                    }
+                }}
+            >
+                <Box sx={{ position: 'relative' }}>
+                    {/* Back button */}
+                    <IconButton
+                        onClick={handleCloseDialog}
+                        sx={{
+                            position: 'absolute',
+                            left: 8,
+                            top: 8,
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+
+                    {/* Header section */}
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                Create a Category
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Boost your employee's productivity with digital forms.
+                            </Typography>
+                        </Box>
+
+
+                    </Box>
+
+                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                        <Box display="flex" flexDirection="column" gap={2.5}>
+                            <Grid item xs={12} sm={6} mt={-3.5}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Name</Typography>
+                                <TextField
+                                    value={newCategory.name}
+                                    InputProps={{ readOnly: true }}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    inputProps={{
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                                    }}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} mt={-2}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={newCategory.description}
+                                    onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                                    InputProps={{
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                    }}
+                                />
+                            </Grid>
+                        </Box>
+                    </DialogContent>
+
+                    <DialogActions sx={{ p: 3, justifyContent: 'right' }}>
+                        <Button
+                            variant="contained"
+                            onClick={handleCreateCategory}
+                            sx={{
+                                backgroundColor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                width: '30%',
+                                marginTop: '-20px',
+                                marginBottom: '-25px',
+                                marginRight:'80px',
+                                '&:hover': {
+                                    backgroundColor: '#333'
+                                }
+                            }}
+                        >
+                            Create
+                        </Button>
+                    </DialogActions>
+                </Box>
             </Dialog>
             <ToastContainer></ToastContainer>
         </Paper >
