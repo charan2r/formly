@@ -13,7 +13,6 @@ import {
   IconButton,
   Button,
   Typography,
-  Menu,
   MenuItem,
   Avatar,
   Box,
@@ -21,9 +20,7 @@ import {
   TableSortLabel,
   Popover,
   Dialog,
-  DialogTitle,
   DialogContent,
-  DialogActions,
   Grid,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -37,12 +34,20 @@ import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
 
 interface Users {
-  id: string;
+  userId: string;
   firstName: string;
   lastName: string;
   email: string;
   userType?: string;
   lastLogin?: string;
+}
+
+interface EditUserForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber?: string;
+  userType?: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -62,33 +67,35 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 }));
 
 const Users: React.FC = () => {
-  const [organizations, setOrganizations] = useState<Users[]>([]);
+  const [users, setUsers] = useState<Users[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedOrganizations, setSelectedOrganizations] = useState<Record<number, boolean>>({});
+  const [selectedUsers, setSelectedUsers] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '' });
+  const [filters, setFilters] = useState({ userId: '', firstName: '', lastName: '', email: '', phoneNumber: '', userType: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
-  const [userDetails, setUserDetails] = useState<Users | null>(null); 
-  const [isDialogOpen, setDialogOpen] = useState(false); 
+  const [userDetails, setUserDetails] = useState<Users | null>(null);
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState<EditUserForm | null>(null);
 
 
   useEffect(() => {
-    const fetchOrganizations = async () => {
+    const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users?organizationId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
+        const response = await axios.get('http://localhost:3001/users?userId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
         console.log(response.data)
-        setOrganizations(response.data.data);
+        setUsers(response.data.data);
       } catch (error) {
-        console.error('Error fetching organization data:', error);
+        console.error('Error fetching user data:', error);
       }
     };
 
-    fetchOrganizations();
+    fetchUsers();
   }, []);
 
 
@@ -104,17 +111,16 @@ const Users: React.FC = () => {
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
-    const newSelectedOrganizations = organizations.reduce((acc, org) => {
-      acc[org.id] = checked;  // Apply the same checked state to all organizations
+    const newSelectedUsers = users.reduce((acc, org) => {
+      acc[org.userId] = checked;
       return acc;
     }, {} as Record<number, boolean>);
 
-    setSelectedOrganizations(newSelectedOrganizations);
+    setSelectedUsers(newSelectedUsers);
   };
 
-
-  const handleSelectOrganization = (id: number) => {
-    setSelectedOrganizations((prev) => ({
+  const handleSelectUser = (id: number) => {
+    setSelectedUser((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
@@ -145,39 +151,72 @@ const Users: React.FC = () => {
     setOrderBy(property);
   };
 
-  const handleDeleteOrganization = async (orgId: string) => {
-    try {
-      await axios.delete(`http://localhost:3001/organization/${orgId}`);
-      setOrganizations((prev) => prev.filter((org) => org.orgId !== orgId));
-      handleMenuClose();
-    } catch (error) {
-      console.error(`Error deleting organization with ID ${orgId}:`, error);
-    }
-  };
-
   const handleViewUser = async (userId: string) => {
     try {
       const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
-      setUserDetails(response.data); // Store user details
-      setDialogOpen(true); // Open dialog
-      handleMenuClose(); // Close the options menu
+      setUserDetails(response.data);
+      setDialogOpen(true);
+      handleMenuClose();
     } catch (error) {
       console.error(`Error fetching user details for ID ${userId}:`, error);
     }
   };
 
-  const filteredData = organizations
+  // New handler for edit button click
+  const handleEditUser = async (userId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
+      setEditFormData({
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
+        email: response.data.email,
+        phoneNumber: response.data.phoneNumber || '',
+        userType: response.data.userType || ''
+      });
+      setEditDialogOpen(true);
+      handleMenuClose();
+    } catch (error) {
+      console.error(`Error fetching user details for ID ${userId}:`, error);
+    }
+  };
+
+  // Handler for form input changes
+  const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setEditFormData(prev => prev ? {
+      ...prev,
+      [name]: value
+    } : null);
+  };
+
+  // Handler for form submission
+  const handleUpdateUser = async () => {
+    if (!editFormData) return;
+
+    try {
+      await axios.put(`http://localhost:3001/users/${editFormData.id}`, editFormData);
+      // Refresh the users list
+      const response = await axios.get('http://localhost:3001/users?organizationId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
+      setOrganizations(response.data.data);
+      setEditDialogOpen(false);
+      setEditFormData(null);
+    } catch (error) {
+      console.error('Error updating user:', error);
+    }
+  };
+
+  const filteredData = users
     .filter((org) => {
       const nameMatches = org.firstName.toLowerCase().includes(searchTerm.toLowerCase()) &&
         org.firstName.toLowerCase().includes(filters.firstName.toLowerCase());
 
       const categoryMatches = org.lastName
         ? org.lastName.toLowerCase().includes(filters.lastName.toLowerCase())
-        : !filters.lastName; // If org.category is null, match only if filters.category is empty
+        : !filters.lastName;
 
       const lastActiveMatches = org.email
         ? org.email.toLowerCase().includes(filters.email.toLowerCase())
-        : !filters.email; // If org.lastActive is null, match only if filters.lastActive is empty
+        : !filters.email;
 
       return nameMatches && categoryMatches && lastActiveMatches;
     })
@@ -187,7 +226,7 @@ const Users: React.FC = () => {
     });
 
 
-  const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
+  const selectedCount = Object.values(selectedUsers).filter(Boolean).length;
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
@@ -231,7 +270,7 @@ const Users: React.FC = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     <IconButton>
-                      <MenuIcon sx={{ color: 'grey.600' }} /> {/* Hamburger menu icon */}
+                      <MenuIcon sx={{ color: 'grey.600' }} />
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -290,18 +329,18 @@ const Users: React.FC = () => {
                   borderStartStartRadius: '20px',
                   borderEndStartRadius: '20px',
                   padding: '4px',
-                  position: 'relative', 
+                  position: 'relative',
                 }}
               >
                 <Checkbox
                   onChange={handleSelectAll}
                   checked={
-                    organizations.length > 0 &&
-                    organizations.every((org) => selectedOrganizations[org.id])
+                    users.length > 0 &&
+                    users.every((org) => selectedUsers[org.id])
                   }
                   indeterminate={
-                    organizations.some((org) => selectedOrganizations[org.id]) &&
-                    !organizations.every((org) => selectedOrganizations[org.id])
+                    users.some((org) => selectedUsers[org.id]) &&
+                    !users.every((org) => selectedUsers[org.id])
                   }
                 />
               </TableCell>
@@ -394,8 +433,8 @@ const Users: React.FC = () => {
               <TableRow key={row.id} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
-                    onChange={() => handleSelectOrganization(row.orgId)}
+                    checked={!!selectedUsers[row.userId]}
+                    onChange={() => handleSelectUser(row.userId)}
                   />
                 </TableCell>
                 <TableCell padding="checkbox">
@@ -429,7 +468,7 @@ const Users: React.FC = () => {
                     }}
                     PaperProps={{
                       sx: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.25)', // Slightly transparent light gray
+                        backgroundColor: 'rgba(0, 0, 0, 0.25)',
                         color: 'black',
                         padding: '5px',
                       },
@@ -441,41 +480,40 @@ const Users: React.FC = () => {
                         backgroundColor: 'white',
                         borderRadius: '40px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
                       View
                     </MenuItem>
                     <MenuItem
-                      onClick={handleMenuClose}
+                      onClick={() => handleEditUser(row.id)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
                       Edit
                     </MenuItem>
                     <MenuItem
-                      onClick={() => handleDeleteOrganization(row.id)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        color: 'red', // Red text color for "Delete"
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        color: 'red',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
@@ -483,9 +521,6 @@ const Users: React.FC = () => {
                     </MenuItem>
                   </Popover>
                 </TableCell>
-
-
-
               </TableRow>
             ))}
           </TableBody>
@@ -510,7 +545,7 @@ const Users: React.FC = () => {
         PaperProps={{
           sx: {
             borderRadius: '20px',
-            padding: '16px 28px 40px', 
+            padding: '16px 28px 40px',
             maxWidth: '650px',
             backgroundColor: '#f9f9f9',
             boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
@@ -551,89 +586,255 @@ const Users: React.FC = () => {
                 Look through your user's information easily.
               </Typography>
             </Box>
-
-
           </Box>
 
-          {/* Form fields */}
-          <DialogContent sx={{ px: 3, ml:10, mr:10}}>
+          {/* View Form fields */}
+          <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
             {userDetails ? (
               <Box display="flex" flexDirection="column" gap={2.5}>
-                <Box display="flex" gap={2} >
-                <Grid item xs={12} sm={6}>
-                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name</Typography>
-                  <TextField
-                    value={userDetails.firstName}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      readOnly: true,
-                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                    }}
-                  />
+                <Box display="flex" gap={2} mt={-3} >
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name</Typography>
+                    <TextField
+                      value={userDetails.firstName}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        readOnly: true,
+                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                      }}
+                    />
                   </Grid>
                   <Grid item xs={12} sm={6}>
-                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>last Name</Typography>
-                  <TextField
-                    value={userDetails.lastName}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      readOnly: true,
-                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                    }}
-                  />
+                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>last Name</Typography>
+                    <TextField
+                      value={userDetails.lastName}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        readOnly: true,
+                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                      }}
+                    />
                   </Grid>
                 </Box>
                 <Grid item xs={12} sm={6}>
-                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email</Typography>
-                <TextField
-                  value={userDetails.email}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  InputProps={{
-                    readOnly: true,
-                    sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                  }}
-                />
+                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email</Typography>
+                  <TextField
+                    value={userDetails.email}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      readOnly: true,
+                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
-                <TextField
-                  value={userDetails.phoneNumber || ''}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  InputProps={{
-                    readOnly: true,
-                    sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                  }}
-                />
+                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
+                  <TextField
+                    value={userDetails.phoneNumber || ''}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      readOnly: true,
+                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                    }}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Role</Typography>
-                <TextField
-                  value={userDetails.userType || ''}
-                  fullWidth
-                  variant="outlined"
-                  size="small"
-                  inputProps={{
-                    readOnly: true,
-                    sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                  }}
-                />
+                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Role</Typography>
+                  <TextField
+                    value={userDetails.userType || ''}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    inputProps={{
+                      readOnly: true,
+                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                    }}
+                  />
                 </Grid>
               </Box>
-              
+
             ) : (
               <Typography>Loading user details...</Typography>
             )}
           </DialogContent>
         </Box>
       </Dialog>
+
+      {/* Add Edit User Dialog */}
+      <Dialog
+        open={isEditDialogOpen}
+        onClose={() => setEditDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '16px 28px 40px',
+            maxWidth: '650px',
+            backgroundColor: '#f9f9f9',
+            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          {/* Back button */}
+          <IconButton
+            onClick={() => setEditDialogOpen(false)}
+            sx={{
+              position: 'absolute',
+              left: 8,
+              top: 8,
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+
+          {/* Header section */}
+          <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+            <Avatar
+              sx={{
+                width: 64,
+                height: 64,
+                backgroundColor: '#f5f5f5',
+                color: '#666',
+                marginRight: '30px'
+              }}
+            >
+              {editFormData?.firstName?.[0] || 'U'}
+            </Avatar>
+            <Box sx={{ textAlign: 'left' }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                Edit user
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Modify users and keep the database updated
+              </Typography>
+            </Box>
+          </Box>
+
+          <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+            {editFormData ? (
+              <Box display="flex" flexDirection="column" gap={2.5}>
+                {/* First Name and Last Name row */}
+                <Box display="flex" gap={2} mt={-3} >
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name</Typography>
+                    <TextField
+                      name="firstName"
+                      value={editFormData.firstName}
+                      onChange={handleEditFormChange}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Last Name</Typography>
+                    <TextField
+                      name="lastName"
+                      value={editFormData.lastName}
+                      onChange={handleEditFormChange}
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                      }}
+                    />
+                  </Grid>
+                </Box>
+
+                {/* Email field */}
+                <Grid item xs={12}>
+                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email</Typography>
+                  <TextField
+                    name="email"
+                    value={editFormData.email}
+                    onChange={handleEditFormChange}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                    }}
+                  />
+                </Grid>
+
+                {/* Phone field */}
+                <Grid item xs={12}>
+                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
+                  <TextField
+                    name="phoneNumber"
+                    value={editFormData.phoneNumber || ''}
+                    onChange={handleEditFormChange}
+                    fullWidth
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                    }}
+                  />
+                </Grid>
+
+                {/* Role dropdown and Update button row */}
+                <Box display="flex" gap={2} alignItems="flex-end" sx={{ width: '100%' }}>
+                  <Grid item xs={10} sm={9.5} sx={{ width: '65%' }}>  
+                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Role</Typography>
+                    <TextField
+                      name="userType"
+                      value={editFormData.userType || ''}
+                      onChange={handleEditFormChange}
+                      select
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                      }}
+                    >
+                      <MenuItem value="Form Creator">Form Creator</MenuItem>
+                      <MenuItem value="Form Manager">Form Manager</MenuItem>
+                      <MenuItem value="Form Viewer">Form Viewer</MenuItem>
+                      <MenuItem value="Admin">Admin</MenuItem>
+                    </TextField>
+                  </Grid>
+
+                  <Grid item xs={12} sm={2.5} sx={{ width: '35%' }}>  
+                    <Button
+                      variant="contained"
+                      onClick={handleUpdateUser}
+                      fullWidth
+                      sx={{
+                        backgroundColor: 'black',
+                        color: 'white',
+                        borderRadius: '20px',
+                        height: '40px',
+                        '&:hover': { backgroundColor: '#333' }
+                      }}
+                    >
+                      Update
+                    </Button>
+                  </Grid>
+                </Box>
+              </Box>
+            ) : (
+              <Typography>Loading user details...</Typography>
+            )}
+          </DialogContent>
+        </Box>
+      </Dialog>
+
     </Paper>
   );
 };
