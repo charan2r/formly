@@ -156,7 +156,7 @@ const Users: React.FC = () => {
     }));
   };
 
-  const handleRequestSort = (property: keyof U) => {
+  const handleRequestSort = (property: keyof Users) => {
     const isAsc = orderBy === property && orderDirection === 'asc';
     setOrderDirection(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
