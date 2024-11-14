@@ -73,4 +73,14 @@ export class CategoryController {
     };
   }
 
+  // Bulk delete categories
+  @Delete('bulk-delete')
+  async deleteCategories(@Body() categoryIds: string[]): Promise<{ status: string; message: string }> {
+    await this.categoryService.deleteCategories(categoryIds);
+    return {
+      status: 'success',
+      message: 'Categories deleted successfully',
+    };
+  }
+
 }

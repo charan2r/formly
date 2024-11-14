@@ -3,7 +3,7 @@ import { Category } from '../model/category.entity';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { CategoryRepository } from './category.repository';
 import { UserRepository } from '../user/user.repository';
-
+import { In } from 'typeorm';
 
 @Injectable()
 export class CategoryService {
@@ -112,6 +112,19 @@ export class CategoryService {
     }
 
     await this.categoryRepository.remove(category);
+  }
+
+   // Bulk delete categories
+   async deleteCategories(categoryIds: string[]): Promise<void> {
+    const categories = await this.categoryRepository.findBy({
+      categoryId: In(categoryIds),
+    });
+
+    if (categories.length !== categoryIds.length) {
+      throw new NotFoundException('One or more categories not found');
+    }
+
+    await this.categoryRepository.remove(categories);
   }
 
 }
