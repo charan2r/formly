@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { FormTemplateService } from './form-template.service';
 import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
@@ -32,6 +32,23 @@ export class FormTemplateController {
       data: templates,
     };
   }
+
+
+  // API endpoint to get a form template by ID
+  @Get('details')
+  async findOne(@Query('id') formTemplateId: string): Promise<MetaSchemaResponse<FormTemplate | undefined>> {
+    const template = await this.formTemplateService.findOne(formTemplateId);
+    if (!template) {
+      return {
+        status: 'error',
+        message: 'Form template not found',
+      };
+    }
+    return {
+      status: 'success',
+      message: 'Form template retrieved successfully',
+      data: template,
+    };
+  }
+
 }
-
-
