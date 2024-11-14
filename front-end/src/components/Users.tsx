@@ -24,6 +24,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Grid,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
@@ -72,14 +73,14 @@ const Users: React.FC = () => {
   const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
-  const [userDetails, setUserDetails] = useState<Users | null>(null); // For storing user details
-  const [isDialogOpen, setDialogOpen] = useState(false); // For opening the user details dialog
+  const [userDetails, setUserDetails] = useState<Users | null>(null); 
+  const [isDialogOpen, setDialogOpen] = useState(false); 
 
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users?organizationId=72a53cab-e8a8-4072-bf91-d2643b22851b');
+        const response = await axios.get('http://localhost:3001/users?organizationId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
         console.log(response.data)
         setOrganizations(response.data.data);
       } catch (error) {
@@ -501,64 +502,132 @@ const Users: React.FC = () => {
       </Box>
 
       {/* Dialog to display user details */}
-      <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth sx={{ borderRadius: '60px' }}>
-        <IconButton onClick={handleCloseDialog} sx={{ position: 'absolute', top: '10px', left: '10px' }}>
-          <ArrowBackIcon style={{ color: 'black' }} />
-        </IconButton>
-        <Box sx={{ position: 'relative', padding: '16px', alignContent: 'ceter', borderRadius: '60px' }}>
-          {/* Header with Avatar, Title, and Subtitle */}
-          <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" mb={2} borderRadius='60px' >
-            <Avatar
-              sx={{ width: 80, height: 80, mr: 2 }}
-              src={userDetails?.avatarUrl || '/default-avatar.png'}
-            >
-              {/* Optional initial if avatar URL is not provided */}
-              {userDetails?.firstName ? userDetails.firstName[0] : 'U'}
-            </Avatar>
+      <Dialog
+        open={isDialogOpen}
+        onClose={handleCloseDialog}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '16px 28px 40px', 
+            maxWidth: '650px',
+            backgroundColor: '#f9f9f9',
+            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          {/* Back button */}
+          <IconButton
+            onClick={handleCloseDialog}
+            sx={{
+              position: 'absolute',
+              left: 8,
+              top: 8,
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
 
-            <Box>
-              <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'left', m: 0 }}>User Details</DialogTitle>
-              <Typography variant="body2" sx={{ textAlign: 'left', color: 'gray' }}>
+          {/* Header section */}
+          <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+            <Avatar
+              sx={{
+                width: 64,
+                height: 64,
+                backgroundColor: '#f5f5f5',
+                color: '#666',
+                marginRight: '30px'
+              }}
+            >
+              {userDetails?.firstName?.[0] || 'U'}
+            </Avatar>
+            <Box sx={{ textAlign: 'left' }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                View user
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 Look through your user's information easily.
               </Typography>
             </Box>
+
+
           </Box>
-          <DialogContent>
+
+          {/* Form fields */}
+          <DialogContent sx={{ px: 3, ml:10, mr:10}}>
             {userDetails ? (
-              <Box display="flex" flexDirection="column" gap={2}>
-                <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2} mb={2}>
+              <Box display="flex" flexDirection="column" gap={2.5}>
+                <Box display="flex" gap={2} >
+                <Grid item xs={12} sm={6}>
+                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name</Typography>
                   <TextField
-                    label="Name"
-                    value={`${userDetails.firstName}`}
-                    InputProps={{ readOnly: true }}
+                    value={userDetails.firstName}
                     fullWidth
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      readOnly: true,
+                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                    }}
                   />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>last Name</Typography>
                   <TextField
-                    label="Name"
-                    value={`${userDetails.lastName}`}
-                    InputProps={{ readOnly: true }}
+                    value={userDetails.lastName}
                     fullWidth
+                    variant="outlined"
+                    size="small"
+                    InputProps={{
+                      readOnly: true,
+                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                    }}
                   />
+                  </Grid>
                 </Box>
+                <Grid item xs={12} sm={6}>
+                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email</Typography>
                 <TextField
-                  label="Email"
                   value={userDetails.email}
-                  InputProps={{ readOnly: true }}
                   fullWidth
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    readOnly: true,
+                    sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                  }}
                 />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
                 <TextField
-                  label="Phone Number"
-                  value={userDetails.phoneNumber}
-                  InputProps={{ readOnly: true }}
+                  value={userDetails.phoneNumber || ''}
                   fullWidth
+                  variant="outlined"
+                  size="small"
+                  InputProps={{
+                    readOnly: true,
+                    sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                  }}
                 />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Role</Typography>
                 <TextField
-                  label="Role"
-                  value={userDetails.userType}
-                  InputProps={{ readOnly: true }}
+                  value={userDetails.userType || ''}
                   fullWidth
+                  variant="outlined"
+                  size="small"
+                  inputProps={{
+                    readOnly: true,
+                    sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                  }}
                 />
+                </Grid>
               </Box>
+              
             ) : (
               <Typography>Loading user details...</Typography>
             )}
@@ -570,3 +639,4 @@ const Users: React.FC = () => {
 };
 
 export default Users;
+
