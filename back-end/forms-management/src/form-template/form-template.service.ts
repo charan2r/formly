@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { FormTemplateRepository } from './form-template.repository';
 import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
+import { UpdateTemplateDto } from './update-template.dto';
 
 @Injectable()
 export class FormTemplateService {
@@ -21,5 +22,15 @@ export class FormTemplateService {
   // Method to get a form template by ID
   async findOne(id: string): Promise<FormTemplate | undefined> {
     return this.formTemplateRepository.findOne({ where: { formTemplateId: id } });
+  }
+
+  // Method to update a form template
+  async update(id: string, updateTemplateDto: UpdateTemplateDto): Promise<FormTemplate | null> {
+    const template = await this.formTemplateRepository.findOne({ where: { formTemplateId: id } });
+    if (!template) {
+      throw new NotFoundException(`Template not found`);
+    }
+    Object.assign(template, updateTemplateDto); 
+    return this.formTemplateRepository.save(template);
   }
 }

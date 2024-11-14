@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Patch, NotFoundException } from '@nestjs/common';
 import { FormTemplateService } from './form-template.service';
 import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
+import { UpdateTemplateDto } from './update-template.dto';
 
 interface MetaSchemaResponse<T> {
   status: string;
@@ -51,4 +52,23 @@ export class FormTemplateController {
     };
   }
 
+
+
+  // API endpoint to update a form template
+  @Patch('edit')
+  async updateTemplate(
+    @Query('id') id: string,
+    @Body() updateTemplateDto: UpdateTemplateDto,
+  ) : Promise<MetaSchemaResponse<FormTemplate>>{
+    const updatedTemplate = await this.formTemplateService.update(id, updateTemplateDto);
+    if (!updatedTemplate) {
+      throw new NotFoundException(`Template not found`);
+    }
+    return {
+      status: 'success',
+      message: 'Form template updated successfully',
+      data: updatedTemplate,
+  }
+
+}
 }
