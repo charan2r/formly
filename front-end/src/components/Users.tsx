@@ -29,9 +29,10 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CircleIcon from '@mui/icons-material/Circle';
 import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
-import { ArrowForward, Delete } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 interface Users {
   userId: string;
@@ -82,6 +83,8 @@ const Users: React.FC = () => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState<EditUserForm | null>(null);
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -98,6 +101,14 @@ const Users: React.FC = () => {
     fetchUsers();
   }, []);
 
+  const StyledDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialog-paper': {
+      borderRadius: '16px',
+      padding: '32px',
+      maxWidth: '500px',
+      width: '100%'
+    }
+  }));
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchor(event.currentTarget);
@@ -120,7 +131,7 @@ const Users: React.FC = () => {
   };
 
   const handleSelectUser = (id: number) => {
-    setSelectedUser((prev) => ({
+    setSelectedUsers((prev) => ({
       ...prev,
       [id]: !prev[id],
     }));
@@ -196,12 +207,57 @@ const Users: React.FC = () => {
     try {
       await axios.put(`http://localhost:3001/users/${editFormData.id}`, editFormData);
       // Refresh the users list
-      const response = await axios.get('http://localhost:3001/users?organizationId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
-      setOrganizations(response.data.data);
+      const response = await axios.get('http://localhost:3001/users?userId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
+      setUsers(response.data.data);
       setEditDialogOpen(false);
       setEditFormData(null);
     } catch (error) {
       console.error('Error updating user:', error);
+    }
+  };
+
+  const handleDeleteConfirmation = (userId: string) => {
+    setUserToDelete(userId);
+    setConfirmationOpen(true);
+  };
+
+  // Method to handle deletion of an user
+  const handleDeleteUser = async () => {
+    try {
+      await axios.delete(`http://localhost:3001/user/delete?id=${userToDelete}`);
+      setUsers((prev) => prev.filter((org) => org.userId !== userToDelete));
+      setConfirmationOpen(false);
+      toast.success("User has been deleted successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to delete the user. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     }
   };
 
@@ -505,6 +561,7 @@ const Users: React.FC = () => {
                       Edit
                     </MenuItem>
                     <MenuItem
+                      onClick={() => handleDeleteConfirmation(row.userId)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
@@ -789,7 +846,7 @@ const Users: React.FC = () => {
 
                 {/* Role dropdown and Update button row */}
                 <Box display="flex" gap={2} alignItems="flex-end" sx={{ width: '100%' }}>
-                  <Grid item xs={10} sm={9.5} sx={{ width: '65%' }}>  
+                  <Grid item xs={10} sm={9.5} sx={{ width: '65%' }}>
                     <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Role</Typography>
                     <TextField
                       name="userType"
@@ -810,7 +867,7 @@ const Users: React.FC = () => {
                     </TextField>
                   </Grid>
 
-                  <Grid item xs={12} sm={2.5} sx={{ width: '35%' }}>  
+                  <Grid item xs={12} sm={2.5} sx={{ width: '35%' }}>
                     <Button
                       variant="contained"
                       onClick={handleUpdateUser}
@@ -835,6 +892,51 @@ const Users: React.FC = () => {
         </Box>
       </Dialog>
 
+      {/* Confirmation Dialog for Delete User */}
+      <StyledDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)}>
+        <Box sx={{ textAlign: 'center', pb: 2 }}>
+          <IconButton
+            sx={{ position: 'absolute', left: 16, top: 16 }}
+            onClick={() => setConfirmationOpen(false)}
+          >
+            <ArrowBack />
+          </IconButton>
+          <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+            Delete User
+          </Typography>
+          <Typography sx={{ mt: 2, mb: 3 }}>
+            Are you sure you want to delete?
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+            <Button
+              variant="contained"
+              onClick={() => setConfirmationOpen(false)}
+              sx={{
+                bgcolor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 4,
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+              }}
+            >
+              No, Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleDeleteUser}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                px: 4,
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+              }}
+            >
+              Yes, Delete
+            </Button>
+          </Box>
+        </Box>
+      </StyledDialog>
     </Paper>
   );
 };

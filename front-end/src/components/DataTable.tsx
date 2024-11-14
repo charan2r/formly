@@ -13,7 +13,6 @@ import {
   IconButton,
   Button,
   Typography,
-  Menu,
   MenuItem,
   Avatar,
   Box,
@@ -109,7 +108,7 @@ const DataTable: React.FC = () => {
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     const newSelectedOrganizations = organizations.reduce((acc, org) => {
-      acc[org.orgId] = checked;  // Apply the same checked state to all organizations
+      acc[org.orgId] = checked;  
       return acc;
     }, {} as Record<number, boolean>);
 
@@ -158,10 +157,8 @@ const DataTable: React.FC = () => {
     setConfirmationBulkOpen(true);
   };
 
-
-
+  {/*handler for bulk organization delete*/}
   const handleDeleteOrganizations = async () => {
-
     try {
       const response = await axios.delete('http://localhost:3001/organization/bulk-delete', {
         data: { ids: Object.keys(selectedOrganizations) },
@@ -214,7 +211,7 @@ const DataTable: React.FC = () => {
     try {
       await axios.delete(`http://localhost:3001/organization/delete?id=${organizationToDelete}`);
       setOrganizations((prev) => prev.filter((org) => org.orgId !== organizationToDelete));
-      setConfirmationOpen(false); // Close confirmation dialog
+      setConfirmationOpen(false); 
       toast.success("Organization has been deleted successfully!", {
         position: "top-right",
         autoClose: 5000,
@@ -557,12 +554,8 @@ const DataTable: React.FC = () => {
                     >
                       Delete
                     </MenuItem>
-
                   </Popover>
                 </TableCell>
-
-
-
               </TableRow>
             ))}
           </TableBody>
