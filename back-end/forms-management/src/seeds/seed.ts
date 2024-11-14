@@ -56,7 +56,7 @@ async function seed() {
     category1.name = "sales department";
     category1.description = "lorem ipsam lorem ipsam ";
     category1.createdById = user1.id;
-    category1.user = user1; 
+    category1.createdBy = user1; 
 
     await AppDataSource.manager.save(category1);
 

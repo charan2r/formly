@@ -6,7 +6,6 @@ import { UpdateOrganizationDto } from './organization.dto';
 import { CreateOrganizationWithSuperAdminDto } from 'src/dto/create-organization.dto';
 import { User } from 'src/model/user.entity';
 
-
 @Controller('organization')
 export class OrganizationController {
 

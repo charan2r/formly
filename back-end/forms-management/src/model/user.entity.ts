@@ -56,6 +56,7 @@ export class User {
   @Column({ type: 'uuid', nullable: true })
   organizationId: string; // Foreign key column to store organization ID
 
-  @OneToMany(() => Category, (category) => category.user)  // One user can have many categories
+  @OneToMany(() => Category, (category) => category.createdById)
   categories: Category[];
 }
+

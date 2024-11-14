@@ -12,6 +12,7 @@ import { User } from './model/user.entity';
 import { UserRepository } from './user/user.repository';
 import { UserModule } from './user/user.module';
 import { Category } from './model/category.entity'; 
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -22,13 +23,14 @@ import { Category } from './model/category.entity';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [User, Organization],
+      entities: [User, Organization,Category],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
     TypeOrmModule.forFeature([Organization, User,Category]),
     OrganizationModule,
-    UserModule
+    UserModule,
+    CategoryModule,
   ],
   controllers: [AppController, OrganizationController],
   providers: [AppService, OrganizationService, OrganizationRepository,UserRepository],
