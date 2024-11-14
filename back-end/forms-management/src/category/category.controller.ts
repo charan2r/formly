@@ -25,4 +25,26 @@ export class CategoryController {
     };
   }
 
+  // Get a single category by ID
+  @Get('details/:id')
+  async getCategoryById(@Param('id') id: string): Promise<{ status: string; message: string; data: CategoryResponse }> {
+    const category = await this.categoryService.getCategoryById(id);
+    return {
+      status: 'success',
+      message: 'Category retrieved successfully',
+      data: category,
+    };
+  }
+
+  // Get all categories
+  @Get('all')
+  async getAllCategories(): Promise<{ status: string; message: string; data: CategoryResponse[] }> {
+    const categories = await this.categoryService.getAllCategories();
+    return {
+      status: 'success',
+      message: 'Categories retrieved successfully',
+      data: categories,
+    };
+  } 
+
 }

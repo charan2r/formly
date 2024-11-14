@@ -1,5 +1,5 @@
 // src/category/category.service.ts
-import { Injectable} from '@nestjs/common';
+import { Injectable, NotFoundException} from '@nestjs/common';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { CategoryRepository } from './category.repository';
 import { UserRepository } from '../user/user.repository';
@@ -43,6 +43,47 @@ export class CategoryService {
         lastName: user.lastName,
       },
     };
+  }
+
+  // Get a single category by ID
+  async getCategoryById(categoryId: string): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdById: string, createdAt: Date }> {
+    const category = await this.categoryRepository.findOne({
+      where: { categoryId },
+      relations: ['createdBy'],
+    });
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+     return {
+      categoryId: category.categoryId,
+      name: category.name,
+      description: category.description,
+      createdById: category.createdById,
+      createdBy: {
+        firstName: category.createdBy?.firstName,
+        lastName: category.createdBy?.lastName,
+      },
+      createdAt: category.createdAt,
+    };
+  }
+
+  // Get all categories
+  async getAllCategories(): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdAt: Date }[]> {
+    const categories = await this.categoryRepository.find({
+      relations: ['createdBy'],
+    });
+
+    return categories.map(({ categoryId, name, description, createdBy, createdAt }) => ({
+      name,
+      description,
+      categoryId,
+      createdBy: {
+        firstName: createdBy?.firstName,
+        lastName: createdBy?.lastName,
+      },
+      createdAt,
+    }));
   }
 }
 
