@@ -63,4 +63,14 @@ export class CategoryController {
      };
   }
 
+  // Delete a single category
+  @Delete('delete/:id')
+  async deleteCategory(@Param('id') id: string): Promise<{ status: string; message: string }> {
+    await this.categoryService.deleteCategory(id);
+    return {
+      status: 'success',
+      message: 'Category deleted successfully',
+    };
+  }
+
 }

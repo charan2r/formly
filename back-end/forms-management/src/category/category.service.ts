@@ -101,5 +101,18 @@ export class CategoryService {
     return this.categoryRepository.save(updatedCategory);
   }
 
+  // Delete a single category
+  async deleteCategory(categoryId: string): Promise<void> {
+    const category = await this.categoryRepository.findOne({
+      where: { categoryId },
+    });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    await this.categoryRepository.remove(category);
+  }
+
 }
 
