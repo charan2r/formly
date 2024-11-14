@@ -1,9 +1,8 @@
-// src/category/category.service.ts
 import { Injectable, NotFoundException} from '@nestjs/common';
+import { Category } from '../model/category.entity';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { CategoryRepository } from './category.repository';
 import { UserRepository } from '../user/user.repository';
-
 
 
 @Injectable()
@@ -85,5 +84,22 @@ export class CategoryService {
       createdAt,
     }));
   }
+
+  // update category
+  async updateCategory(categoryId: string, updateCategoryDto: CreateCategoryDto): Promise<Category> {
+
+    const category = await this.categoryRepository.findOne({ where: { categoryId } });
+
+    if (!category) {
+      throw new NotFoundException('Category not found');
+    }
+
+    const updatedCategory = { ...category, ...updateCategoryDto };
+
+    updatedCategory.createdById = category.createdById;
+    
+    return this.categoryRepository.save(updatedCategory);
+  }
+
 }
 
