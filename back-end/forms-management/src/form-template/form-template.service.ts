@@ -12,4 +12,9 @@ export class FormTemplateService {
   async createTemplate(createFormTemplateDto: CreateFormTemplateDto): Promise<FormTemplate> {
     return this.formTemplateRepository.createTemplate(createFormTemplateDto);
   }
+ 
+  // Method to get all form templates
+  async getAll(): Promise<FormTemplate[]> {
+    return this.formTemplateRepository.find();
+  }
 }
