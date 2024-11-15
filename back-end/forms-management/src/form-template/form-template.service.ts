@@ -4,6 +4,7 @@ import { FormTemplateRepository } from './form-template.repository';
 import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
 import { UpdateTemplateDto } from './update-template.dto';
+import { In } from 'typeorm';
 
 @Injectable()
 export class FormTemplateService {
@@ -43,4 +44,19 @@ export class FormTemplateService {
     template.status = 'deleted';  
     return this.formTemplateRepository.save(template);
   }
+
+  // Method to bulk delete form templates
+  async bulkDelete(ids: string[]): Promise<FormTemplate[]> {
+    const templates = await this.formTemplateRepository.find({ where: { formTemplateId: In(ids) } });
+    if (!templates.length) {
+      throw new NotFoundException(`Templates not found`);
+    }
+    templates.forEach((template) => {
+      template.status = 'deleted';
+    });
+    return this.formTemplateRepository.save(templates);
+    
+  }
+
+
 }

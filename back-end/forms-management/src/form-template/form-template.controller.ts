@@ -85,6 +85,19 @@ export class FormTemplateController {
     };
   }
 
+  // API endpoint to bulk delete form templates
+  @Delete('bulk-delete')
+  async bulkDelete(@Body('ids') ids: string[]): Promise<MetaSchemaResponse<null>> {
+    const deletedTemplates = await this.formTemplateService.bulkDelete(ids);
+    if (!deletedTemplates.length) {
+      throw new NotFoundException(`Templates not found`);
+    }
+    return {
+      status: 'success',
+      message: 'Status of Form templates changed successfully',
+    };
+  }
+
 
 
 }
