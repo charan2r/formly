@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, Query, Patch, NotFoundException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Patch, NotFoundException, Delete } from '@nestjs/common';
 import { FormTemplateService } from './form-template.service';
 import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
@@ -68,7 +68,23 @@ export class FormTemplateController {
       status: 'success',
       message: 'Form template updated successfully',
       data: updatedTemplate,
+    }
   }
 
-}
+  // API endpoint to delete a form template
+  @Delete('delete')
+  async softDelete(@Query('id') id: string): Promise<MetaSchemaResponse<FormTemplate>> {
+    const deletedTemplate = await this.formTemplateService.softDelete(id);
+    if (!deletedTemplate) {
+      throw new NotFoundException(`Template not found`);
+    }
+    return {
+      status: 'success',
+      message: 'Status of Form template changed successfully',
+      data: deletedTemplate,
+    };
+  }
+
+
+
 }

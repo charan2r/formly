@@ -33,4 +33,14 @@ export class FormTemplateService {
     Object.assign(template, updateTemplateDto); 
     return this.formTemplateRepository.save(template);
   }
+
+  // Method to delete a form template
+  async softDelete(id: string): Promise<FormTemplate | null> {
+    const template = await this.formTemplateRepository.findOne({ where: { formTemplateId: id } });
+    if (!template) {
+      throw new NotFoundException(`Template not found`);
+    }
+    template.status = 'deleted';  
+    return this.formTemplateRepository.save(template);
+  }
 }
