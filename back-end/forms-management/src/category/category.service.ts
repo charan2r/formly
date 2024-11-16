@@ -3,13 +3,14 @@ import { Category } from '../model/category.entity';
 import { CreateCategoryDto } from 'src/dto/Create-Category.dto';
 import { CategoryRepository } from './category.repository';
 import { UserRepository } from '../user/user.repository';
+import { OrganizationRepository } from 'src/organization/organization.repository';
 import { In } from 'typeorm';
 
 @Injectable()
 export class CategoryService {
   constructor(
     private readonly categoryRepository: CategoryRepository,
-    private readonly userRepository: UserRepository, 
+    private readonly organizationRepository: OrganizationRepository, 
   ) {}
 
 
@@ -18,19 +19,20 @@ export class CategoryService {
     const { name, description, createdById } = createCategoryDto;
 
     // Find the user by ID (using createdById)
-    const user = await this.userRepository.findOne({
-      where: { id: createdById },
+    const user = await this.organizationRepository.findOne({
+      where: { orgId: createdById },
     });
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('Organization not found');
     }
 
     // Create a new category and associate the user
     const newCategory = this.categoryRepository.create({
       name,
       description,
-      createdById: user.id,
+      createdById: user.orgId,
       createdAt: new Date(),
+      status: 'active',
     });
 
     // Save the new category to the database
@@ -43,9 +45,7 @@ export class CategoryService {
   }
 
   // Get a single category by ID
-  async getCategoryById(
-    categoryId: string,
-  ): Promise<{
+  async getCategoryById(categoryId: string): Promise<{
     categoryId: string;
     name: string;
     description: string;
