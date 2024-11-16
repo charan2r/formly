@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Box, Typography, List, ListItemButton, ListItemText, Stack, TextField } from '@mui/material';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
-import CreateOutlinedIcon from '@mui/icons-material/CreateOutlined';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import SubjectIcon from '@mui/icons-material/Subject';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
@@ -12,15 +11,83 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import TableChartIcon from '@mui/icons-material/TableChart';
 
-const Sidebar: React.FC = () => {
-  const [searchText, setSearchText] = useState('');
-  const [elements, setElements] = useState([
-    { id: '1', category: 'Layout Elements', items: [{ label: 'Sections', icon: <ViewModuleIcon fontSize="small" /> }, { label: 'Tables', icon: <TableChartIcon fontSize="small" /> }] },
-    { id: '2', category: 'Text Elements', items: [{ label: 'Single Line', icon: <TextFieldsIcon fontSize="small" /> }, { label: 'Multiline', icon: <SubjectIcon fontSize="small" /> }, { label: 'Number', icon: <KeyboardIcon fontSize="small" /> }, { label: 'Rich Text', icon: <FormatBoldIcon fontSize="small" /> }] },
-    { id: '3', category: 'Date Elements', items: [{ label: 'Date', icon: <EventNoteIcon fontSize="small" /> }, { label: 'Date & Time', icon: <EventNoteIcon fontSize="small" /> }] },
-    { id: '4', category: 'Multi Elements', items: [{ label: 'Yes/No', icon: <CheckBoxIcon fontSize="small" /> }, { label: 'Checkbox', icon: <CheckBoxIcon fontSize="small" /> }] },
-  ]);
+// Sample Sidebar Data
+const initialElements = [
+  { id: '1', category: 'Layout Elements', items: [{ label: 'Sections', icon: <ViewModuleIcon /> }, { label: 'Tables', icon: <TableChartIcon /> }] },
+  { id: '2', category: 'Text Elements', items: [{ label: 'Single Line', icon: <TextFieldsIcon /> }, { label: 'Multiline', icon: <SubjectIcon /> }, { label: 'Number', icon: <KeyboardIcon /> }, { label: 'Rich Text', icon: <FormatBoldIcon /> }] },
+  { id: '3', category: 'Date Elements', items: [{ label: 'Date', icon: <EventNoteIcon /> }, { label: 'Date & Time', icon: <EventNoteIcon /> }] },
+  { id: '4', category: 'Multi Elements', items: [{ label: 'Yes/No', icon: <CheckBoxIcon /> }, { label: 'Checkbox', icon: <CheckBoxIcon /> }] },
+];
 
+// Draggable Item Component
+const DraggableItem = memo(({ item, index }) => (
+  <Draggable key={item.label} draggableId={item.label} index={index}>
+    {(provided) => (
+      <Box
+        ref={provided.innerRef}
+        {...provided.draggableProps}
+        {...provided.dragHandleProps}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: '40px',
+        }}
+      >
+        <ListItemButton
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: '4px',
+            p: 0.5,
+            backgroundColor: '#fff',
+            boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
+            height: '35px',
+          }}
+        >
+          {React.cloneElement(item.icon, { fontSize: 'small' })}
+          <ListItemText
+            primary={item.label}
+            primaryTypographyProps={{
+              fontWeight: 'bold',
+              textAlign: 'center',
+              fontSize: '0.75rem',
+            }}
+          />
+        </ListItemButton>
+      </Box>
+    )}
+  </Draggable>
+));
+
+// Category Component
+const Category = memo(({ category, filteredItems }) => (
+  <Box key={category.id} sx={{ mb: 1 }}>
+    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+      {category.category}
+    </Typography>
+    <Droppable droppableId={category.id} direction="horizontal">
+      {(provided) => (
+        <List ref={provided.innerRef} {...provided.droppableProps} sx={{ mt: 0.5, padding: 0 }}>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {filteredItems.map((item, index) => (
+              <DraggableItem key={item.label} item={item} index={index} />
+            ))}
+          </Stack>
+          {provided.placeholder}
+        </List>
+      )}
+    </Droppable>
+  </Box>
+));
+
+const LeftSidebar: React.FC = () => {
+  const [searchText, setSearchText] = useState('');
+  const [elements, setElements] = useState(initialElements);
+
+  // Handle Drag End
   const handleDragEnd = (result: any) => {
     const { source, destination } = result;
     if (!destination) return;
@@ -31,140 +98,75 @@ const Sidebar: React.FC = () => {
     const sourceItems = Array.from(elements[sourceCategoryIndex].items);
     const [movedItem] = sourceItems.splice(source.index, 1);
 
+    const newElements = [...elements];
     if (sourceCategoryIndex === destinationCategoryIndex) {
       sourceItems.splice(destination.index, 0, movedItem);
-      const newElements = [...elements];
       newElements[sourceCategoryIndex].items = sourceItems;
-      setElements(newElements);
     } else {
       const destinationItems = Array.from(elements[destinationCategoryIndex].items);
       destinationItems.splice(destination.index, 0, movedItem);
-
-      const newElements = [...elements];
       newElements[sourceCategoryIndex].items = sourceItems;
       newElements[destinationCategoryIndex].items = destinationItems;
-      setElements(newElements);
     }
+
+    setElements(newElements);
   };
 
-  const filteredElements = elements.map((category) => ({
-    ...category,
-    items: category.items.filter((item) =>
-      item.label.toLowerCase().includes(searchText.toLowerCase())
-    ),
-  })).filter(category => category.items.length > 0);
+  const filteredElements = elements
+    .map((category) => ({
+      ...category,
+      items: category.items.filter((item) =>
+        item.label.toLowerCase().includes(searchText.toLowerCase())
+      ),
+    }))
+    .filter((category) => category.items.length > 0);
 
   return (
     <Box
       sx={{
-        width: { xs: '100%', sm: '250px' },
+        width: { xs: '100%', sm: '20%' },
         backgroundColor: '#F9F9F9',
         color: '#333',
-        p: 1,
+        p: 4,
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
         boxSizing: 'border-box',
-        paddingLeft: '20px',
-        paddingRight: '20px'
       }}
     >
-      {/* Header with Close Icon and Title in a Single Row */}
-      <Stack direction="row" alignItems="center" spacing={1} mb={1}>
+      <Stack direction="row" alignItems="center" spacing={1} mb={1} marginTop={'15%'}>
         <HighlightOffIcon fontSize="large" />
         <Typography variant="h5" fontWeight="bold">
           Form.M
         </Typography>
       </Stack>
 
-      {/* Compact Search Bar */}
       <TextField
         variant="outlined"
         placeholder="Search Components"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
         sx={{
-          marginTop: 2,
-          marginBottom: 2,
+          mt: 2,
+          mb: 2,
           '& .MuiOutlinedInput-root': {
             borderRadius: '20px',
             height: '30px',
             fontSize: '0.75rem',
           },
-          width: '80%', // Adjust width here (e.g., 80% of the container width)
-          maxWidth: '300px', // Optional: set a max width if needed
+          width: '80%',
+          maxWidth: '300px',
         }}
         fullWidth
       />
 
-      {/* Draggable Components with Uniform Padding and Margin */}
       <DragDropContext onDragEnd={handleDragEnd}>
         {filteredElements.map((category) => (
-          <Box key={category.id} sx={{ mb: 1 }}>
-            <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-              {category.category}
-            </Typography>
-            <Droppable droppableId={category.id} direction="horizontal">
-              {(provided) => (
-                <List ref={provided.innerRef} {...provided.droppableProps} sx={{ mt: 0.5, padding: 0 }}>
-                  <Stack direction="row" spacing={1} flexWrap="wrap">
-                    {category.items.map((item, index) => (
-                      <Draggable key={item.label} draggableId={item.label} index={index}>
-                        {(provided) => (
-                          <Box
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              minWidth: '80px',
-                            }}
-                          >
-                            {/* Conditional Gaps above "Multiline", "Number", and "Rich Text" */}
-                            {(item.label === "Multiline" || item.label === "Number" || item.label === "Rich Text") && (
-                              <Box sx={{ height: '8px' }} />  // Adjust gap size as needed
-                            )}
-                            <ListItemButton
-                              sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                borderRadius: '4px',
-                                p: 0.5,
-                                m: 0.5,
-                                backgroundColor: '#fff',
-                                boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
-                                minWidth: '80px',
-                                height: '35px',  // Reduce height for the Single Line and other items
-                              }}
-                            >
-                              {React.cloneElement(item.icon, { fontSize: 'small' })} {/* Adjust icon size */}
-                              <ListItemText
-                                primary={item.label}
-                                primaryTypographyProps={{
-                                  fontWeight: 'bold',
-                                  textAlign: 'center',
-                                  fontSize: '0.75rem',
-                                }}
-                              />
-                            </ListItemButton>
-                          </Box>
-                        )}
-                      </Draggable>
-                    ))}
-                  </Stack>
-                  {provided.placeholder}
-                </List>
-              )}
-            </Droppable>
-          </Box>
+          <Category key={category.id} category={category} filteredItems={category.items} />
         ))}
       </DragDropContext>
     </Box>
   );
 };
 
-export default Sidebar;
+export default LeftSidebar;

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Organization } from './organization.entity';
 import { FormTemplate } from './form-template.entity';
 
@@ -11,6 +11,9 @@ export class Category {
   @Column('text')
   name: string;
 
+  @Column('text')
+  status: string;
+
   @Column('text', { nullable: true })
   description: string;
 
@@ -18,9 +21,12 @@ export class Category {
   createdAt: Date;
 
   @ManyToOne(() => Organization, (organization) => organization.categories, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'createdById' }) // Explicitly sets the foreign key
   organization: Organization;
+
+  @Column('uuid', { nullable: false })
+  createdById: string; // Maps to Organization's orgId
 
   @OneToMany(() => FormTemplate, (formTemplate) => formTemplate.category)
   formTemplates: FormTemplate[];
-
 }

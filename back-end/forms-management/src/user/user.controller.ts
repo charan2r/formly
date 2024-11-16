@@ -11,15 +11,12 @@ export class UserController {
   @Get()
   async getUsers(
     @Query('organizationId') organizationId?: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
-  ): Promise<{ data: User[]; total: number; page: number; limit: number; message: string; status: string }> {
-    const [users, total] = await this.userService.getUsers(organizationId, page, limit);
+  ){
+    const users = await this.userService.getUsers(organizationId);
     return { 
       status: 'success',
       message: 'Users retrieved successfully',
       data: users,
-      total,
     };
   }
 

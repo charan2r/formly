@@ -18,9 +18,7 @@ import { FormTemplateService } from './form-template/form-template.service';
 import { FormTemplateModule } from './form-template/form-template.module';
 import { FormTemplate } from './model/form-template.entity';
 import { FormTemplateRepository } from './form-template/form-template.repository';
-import { CategoryModule } from './category/category.module';
 import { CategoryRepository } from './category/category.repository';
-import { Category } from './model/category.entity';
 
 @Module({
   imports: [

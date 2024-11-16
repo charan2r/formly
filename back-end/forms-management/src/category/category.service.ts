@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException} from '@nestjs/common';
 import { Category } from '../model/category.entity';
-import { CreateCategoryDto } from '../dto/create-category.dto';
+import { CreateCategoryDto } from 'src/dto/Create-Category.dto';
 import { CategoryRepository } from './category.repository';
 import { UserRepository } from '../user/user.repository';
 import { In } from 'typeorm';
@@ -15,10 +15,12 @@ export class CategoryService {
 
   // create a category
   async create(createCategoryDto: CreateCategoryDto): Promise<any> {
-    const { name, description,createdById } = createCategoryDto;
+    const { name, description, createdById } = createCategoryDto;
 
     // Find the user by ID (using createdById)
-    const user = await this.userRepository.findOne({ where: { id: createdById } });
+    const user = await this.userRepository.findOne({
+      where: { id: createdById },
+    });
     if (!user) {
       throw new Error('User not found');
     }
@@ -36,16 +38,22 @@ export class CategoryService {
 
     // Return the saved category along with user first and last name
     return {
-      ...savedCategory,
-      createdBy: {
-        firstName: user.firstName,
-        lastName: user.lastName,
-      },
+      ...savedCategory
     };
   }
 
   // Get a single category by ID
-  async getCategoryById(categoryId: string): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdById: string, createdAt: Date,status: string  }> {
+  async getCategoryById(
+    categoryId: string,
+  ): Promise<{
+    categoryId: string;
+    name: string;
+    description: string;
+    // createdBy: { firstName: string; lastName: string };
+    createdById: string;
+    createdAt: Date;
+    status: string;
+  }> {
     const category = await this.categoryRepository.findOne({
       where: { categoryId },
       relations: ['createdBy'],
@@ -59,36 +67,47 @@ export class CategoryService {
       name: category.name,
       description: category.description,
       createdById: category.createdById,
-      createdBy: {
-        firstName: category.createdBy?.firstName,
-        lastName: category.createdBy?.lastName,
-      },
       createdAt: category.createdAt,
-      status:category.status,
+      status: category.status,
     };
   }
 
   // Get all categories
-  async getAllCategories(): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdAt: Date, status: string}[]> {
+  async getAllCategories() {
     const categories = await this.categoryRepository.find({
-      relations: ['createdBy'],
+      relations: ['createdBy'], // Ensure related entities are fetched
     });
-
-    return categories.map(({ categoryId, name, description, createdBy, createdAt,status }) => ({
+  
+    return categories.map(({ categoryId, name, description, createdAt, status }) => ({
+      categoryId,
       name,
       description,
+      createdAt,
+      status,
+    }));
+  }
+
+  async getCategoriesByOrganization(organizationId: string) {
+    const categories = await this.categoryRepository.find({
+      where: { organization: { orgId: organizationId } }, // Use relations to filter by organization
+      relations: ['organization'], // Ensures the relationship is loaded
+    });
+
+    if (!categories.length) {
+      throw new NotFoundException(`No categories found for organization ID ${organizationId}`);
+    }
+
+    return categories.map(({ categoryId, name, description, createdAt, status }) => ({
       categoryId,
-      createdBy: {
-        firstName: createdBy?.firstName,
-        lastName: createdBy?.lastName,
-      },
+      name,
+      description,
       createdAt,
       status,
     }));
   }
 
   // update category
-  async updateCategory(categoryId: string, updateCategoryDto: CreateCategoryDto): Promise<Category> {
+  async updateCategory(categoryId: string, updateCategoryDto: CreateCategoryDto) {
 
     const category = await this.categoryRepository.findOne({ where: { categoryId } });
 

@@ -1,16 +1,14 @@
 import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CreateCategoryDto } from '../dto/create-category.dto';
+import { CreateCategoryDto } from '../dto/Create-Category.dto';
 import { Category } from '../model/category.entity';
-
 
 interface CategoryResponse {
   categoryId: string;
   name: string;
   description: string;
-  createdBy: { firstName: string; lastName: string };
   createdAt: Date;
-  status:string;
+  status: string;
 }
 
 @Controller('categories')
@@ -28,6 +26,19 @@ export class CategoryController {
     };
   }
 
+  @Get('organization/:orgId')
+  async getCategoriesByOrganization(
+    @Param('orgId') organizationId: string,
+  ): Promise<{ status: string; message: string; data: CategoryResponse[] }> {
+    const categories = await this.categoryService.getCategoriesByOrganization(organizationId);
+    return {
+      status: 'success',
+      message: 'Categories retrieved successfully',
+      data: categories,
+    };
+  }
+
+
   // Get a single category by ID
   @Get('details/:id')
   async getCategoryById(@Param('id') id: string): Promise<{ status: string; message: string; data: CategoryResponse }> {
@@ -40,7 +51,6 @@ export class CategoryController {
   }
 
   // Get all categories
-  @Get()
   async getAllCategories(): Promise<{ status: string; message: string; data: CategoryResponse[] }> {
     const categories = await this.categoryService.getAllCategories();
     return {
@@ -48,7 +58,8 @@ export class CategoryController {
       message: 'Categories retrieved successfully',
       data: categories,
     };
-  } 
+  }
+  
 
   // update/edit 
   @Patch('update/:id')
