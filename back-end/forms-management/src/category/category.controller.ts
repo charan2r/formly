@@ -10,6 +10,7 @@ interface CategoryResponse {
   description: string;
   createdBy: { firstName: string; lastName: string };
   createdAt: Date;
+  status:string;
 }
 
 @Controller('categories')
@@ -39,7 +40,7 @@ export class CategoryController {
   }
 
   // Get all categories
-  @Get('all')
+  @Get()
   async getAllCategories(): Promise<{ status: string; message: string; data: CategoryResponse[] }> {
     const categories = await this.categoryService.getAllCategories();
     return {
