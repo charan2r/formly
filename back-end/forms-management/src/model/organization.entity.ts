@@ -2,6 +2,7 @@
 // organization.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { User } from './user.entity';
+import { Category } from "./category.entity";
 
 @Entity()
 export class Organization {
@@ -56,4 +57,7 @@ export class Organization {
 
   @OneToMany(() => User, (user) => user.organization)
   users: User[]; // Relationship to multiple users
+
+  @OneToMany(() => Category, (category) => category.organization)
+  categories: Category[]; // Relationship to multiple categories
 }

@@ -1,6 +1,7 @@
 import { User } from "src/model/user.entity";
 import { Organization } from "src/model/organization.entity";
 import AppDataSource from "ormconfig";
+import { Category } from "src/model/category.entity";
 
 async function seed() {
     await AppDataSource.initialize();
@@ -34,6 +35,14 @@ async function seed() {
     org2.createdAt = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000); // Set createdAt to two weeks ago
 
     await AppDataSource.manager.save(org2);
+
+    // Step 4: Create a Category associated with org1
+    const category1 = new Category();
+    category1.name = "Feedback Forms";
+    category1.description = "Forms for collecting customer feedback";
+    category1.organization = org1; // Associate category with org1
+
+    await AppDataSource.manager.save(category1);
 
     // Step 3: Create a Super Admin User associated with the organization
     const user2 = new User();

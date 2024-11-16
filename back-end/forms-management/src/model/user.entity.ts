@@ -53,4 +53,5 @@ export class User {
 
   @Column({ type: 'uuid', nullable: true })
   organizationId: string; // Foreign key column to store organization ID
+
 }
