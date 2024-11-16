@@ -18,6 +18,10 @@ export class Category {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
+  
+  @Column({ type: 'text', default: 'active', nullable: true })
+  status: string;
+
   @ManyToOne(() => User, user => user.categories)
   @JoinColumn({ name: 'createdById' })  
   createdBy: User;  

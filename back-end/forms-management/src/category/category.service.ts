@@ -45,7 +45,7 @@ export class CategoryService {
   }
 
   // Get a single category by ID
-  async getCategoryById(categoryId: string): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdById: string, createdAt: Date }> {
+  async getCategoryById(categoryId: string): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdById: string, createdAt: Date,status: string  }> {
     const category = await this.categoryRepository.findOne({
       where: { categoryId },
       relations: ['createdBy'],
@@ -64,16 +64,17 @@ export class CategoryService {
         lastName: category.createdBy?.lastName,
       },
       createdAt: category.createdAt,
+      status:category.status,
     };
   }
 
   // Get all categories
-  async getAllCategories(): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdAt: Date }[]> {
+  async getAllCategories(): Promise<{ categoryId: string, name: string, description: string, createdBy: { firstName: string, lastName: string }, createdAt: Date, status: string}[]> {
     const categories = await this.categoryRepository.find({
       relations: ['createdBy'],
     });
 
-    return categories.map(({ categoryId, name, description, createdBy, createdAt }) => ({
+    return categories.map(({ categoryId, name, description, createdBy, createdAt,status }) => ({
       name,
       description,
       categoryId,
@@ -82,6 +83,7 @@ export class CategoryService {
         lastName: createdBy?.lastName,
       },
       createdAt,
+      status,
     }));
   }
 
@@ -102,29 +104,34 @@ export class CategoryService {
   }
 
   // Delete a single category
-  async deleteCategory(categoryId: string): Promise<void> {
+  async deleteCategory(categoryId: string): Promise<boolean> {
     const category = await this.categoryRepository.findOne({
       where: { categoryId },
     });
-
+  
     if (!category) {
       throw new NotFoundException('Category not found');
     }
-
-    await this.categoryRepository.remove(category);
+  
+    category.status = 'deleted';
+    await this.categoryRepository.save(category);
+    return true;
   }
 
    // Bulk delete categories
-   async deleteCategories(categoryIds: string[]): Promise<void> {
-    const categories = await this.categoryRepository.findBy({
-      categoryId: In(categoryIds),
+   async deleteCategories(categoryIds: string[]): Promise<boolean> {
+    const categories = await this.categoryRepository.find({
+      where: { categoryId: In(categoryIds) },
     });
-
+  
     if (categories.length !== categoryIds.length) {
       throw new NotFoundException('One or more categories not found');
     }
-
-    await this.categoryRepository.remove(categories);
+  
+    categories.forEach(category => category.status = 'deleted');
+  
+    await this.categoryRepository.save(categories);
+    return true;
   }
 
 }
