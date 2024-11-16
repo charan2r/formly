@@ -45,7 +45,7 @@ export class CreateFormTemplateDto {
   @IsString()
   logoImage?: string;
 
-  @IsOptional() 
+  @IsNotEmpty() 
   @IsUUID()
   categoryId?: string; 
 }

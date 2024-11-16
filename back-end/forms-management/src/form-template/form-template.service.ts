@@ -1,19 +1,35 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FormTemplateRepository } from './form-template.repository';
+import { CategoryRepository } from 'src/category/category.repository';
 import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
+//import { Category } from 'src/model/category.entity';
 import { UpdateTemplateDto } from './update-template.dto';
 import { In } from 'typeorm';
 
 @Injectable()
 export class FormTemplateService {
-  constructor(private readonly formTemplateRepository: FormTemplateRepository) {}
+  constructor(private readonly formTemplateRepository: FormTemplateRepository, 
+              private readonly categoryRepository: CategoryRepository ) {}
 
-  // Method to create templates
+
+  // Method to create a form template
   async createTemplate(createFormTemplateDto: CreateFormTemplateDto): Promise<FormTemplate> {
-    return this.formTemplateRepository.createTemplate(createFormTemplateDto);
+    const { categoryId } = createFormTemplateDto;
+    const category = await this.categoryRepository.findOne({ where: { categoryId } });
+    if (!category) {
+      throw new NotFoundException(`Category not found`);
+    }
+    const template = this.formTemplateRepository.create(createFormTemplateDto);
+    template.category = category;
+    return this.formTemplateRepository.save(template);
   }
+
+  
+  /*async createTemplate(createFormTemplateDto: CreateFormTemplateDto): Promise<FormTemplate> {
+    return this.formTemplateRepository.createTemplate(createFormTemplateDto);
+  }*/
  
   // Method to get all form templates
   async getAll(): Promise<FormTemplate[]> {
