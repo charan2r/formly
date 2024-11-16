@@ -11,6 +11,8 @@ import { Organization } from './model/organization.entity';
 import { User } from './model/user.entity';
 import { UserRepository } from './user/user.repository';
 import { UserModule } from './user/user.module';
+import { Category } from './model/category.entity'; 
+import { CategoryModule } from './category/category.module';
 import { FormTemplateController } from './form-template/form-template.controller';
 import { FormTemplateService } from './form-template/form-template.service';
 import { FormTemplateModule } from './form-template/form-template.module';
