@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Query, NotFoundException, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException, Post, Body, Patch} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
+import { UpdateUserDto } from './update-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -44,6 +45,7 @@ export class UserController {
     }
   }
 
+  // API endpoint to create a new user
   @Post('create')
   async addUser(
     @Body() createUserDto: CreateUserDto,
@@ -53,6 +55,21 @@ export class UserController {
       status: 'success',
       message: 'User created successfully',
       data: newUser,
+    };
+  }
+
+
+  // API endpoint to update a user
+  @Patch('edit')
+  async updateUser(
+    @Query('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<{ message: string; status: string; data: User }> {
+    const updatedUser = await this.userService.updateUser(id, updateUserDto);
+    return {
+      status: 'success',
+      message: 'User updated successfully',
+      data: updatedUser,
     };
   }
 }

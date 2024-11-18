@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
+import { UpdateUserDto } from './update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -27,6 +28,16 @@ export class UserService {
   async addUser(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create(createUserDto);
     return await this.userRepository.save(newUser);
+  }
+
+  async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const existingUser = await this.userRepository.findOneBy({ id });
+    if (!existingUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    await this.userRepository.update(id, updateUserDto);
+    return this.userRepository.findOneBy({ id });
   }
   
 }
