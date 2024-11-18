@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Query, NotFoundException, Post, Body, Patch} from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException, Post, Body, Patch, Delete} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
@@ -72,4 +72,15 @@ export class UserController {
       data: updatedUser,
     };
   }
+
+  // API endpoint to delete a user
+  @Delete('delete')
+  async deleteUser(@Query('id') id: string): Promise<{ message: string; status: string }> {
+    await this.userService.deleteUser(id);
+    return {
+      status: 'success',
+      message: 'User deleted successfully',
+    };
+  }
+
 }
