@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException, Post, Body } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/model/user.entity';
+import { CreateUserDto } from './create-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -41,5 +42,17 @@ export class UserController {
       message: 'User details retrieved successfully',
       data: user,
     }
+  }
+
+  @Post('create')
+  async addUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<{ message: string; status: string; data: User }> {
+    const newUser = await this.userService.addUser(createUserDto);
+    return {
+      status: 'success',
+      message: 'User created successfully',
+      data: newUser,
+    };
   }
 }
