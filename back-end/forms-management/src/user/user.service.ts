@@ -4,6 +4,7 @@ import { UserRepository } from './user.repository';
 import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
+import { In } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -41,13 +42,24 @@ export class UserService {
   }
 
   // Method to delete a user
-  async deleteUser(id: string): Promise<void> {
-    const existingUser = await this.userRepository.findOneBy({ id });
-    if (!existingUser) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+  async deleteUser(id: string): Promise<boolean> {
+    const user = await this.userRepository.findOneBy({ id, isDeleted: false });
+    if (!user) {
+      throw new NotFoundException('User is not found');
     }
 
-    await this.userRepository.delete(id);
+    await this.userRepository.update(id, { isDeleted: true });
+    return true;
+  }
+
+  // Method to bulk delete users
+  async bulkDeleteUsers(ids: string[]): Promise<void> {
+    const users = await this.userRepository.find({ where: { id: In(ids), isDeleted: false } });
+    if (users.length !== ids.length) {
+      throw new NotFoundException('Some user IDs are not found');
+    }
+
+    await this.userRepository.update(ids, { isDeleted: true });
   }
   
 }

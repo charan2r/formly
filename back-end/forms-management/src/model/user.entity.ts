@@ -29,6 +29,9 @@ export class User {
   @Column('text', { nullable: true })
   phoneNumber: string;
 
+  @Column('boolean', { default: false })
+  isDeleted: boolean;
+
   @Column({ type: 'enum', enum: ['PlatformAdmin', 'SuperAdmin', 'SubUser'] })
   userType: string;
 

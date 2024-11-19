@@ -75,11 +75,24 @@ export class UserController {
 
   // API endpoint to delete a user
   @Delete('delete')
-  async deleteUser(@Query('id') id: string): Promise<{ message: string; status: string }> {
-    await this.userService.deleteUser(id);
+  async deleteUser(@Query('id') id: string): Promise<{ status: string; message: string }> {
+    const result = await this.userService.deleteUser(id);
+    if (!result) {
+      throw new NotFoundException(`User not found`);
+    }
     return {
       status: 'success',
-      message: 'User deleted successfully',
+      message: `Status of user changed succeessfully`,
+    };
+  }
+
+  // API endpoint to bulk delete users
+  @Delete('bulk-delete')
+  async bulkDeleteUsers(@Body('ids') ids: string[]): Promise<{ status: string; message: string }> {
+    await this.userService.bulkDeleteUsers(ids);
+    return {
+      status: 'success',
+      message: 'Ststus of users changed successfully',
     };
   }
 

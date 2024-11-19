@@ -3,11 +3,9 @@ import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
-    ManyToOne,
     OneToMany,
   } from 'typeorm';
-  import { Section } from './section.entity';
-  import { FormFieldsOption } from './form-fields-option.entity';
+import { FormFieldsOption } from './form-fields-option.entity';
   
   @Entity('form_fields')
   export class FormField {
@@ -22,9 +20,6 @@ import {
   
     @Column('varchar')
     type: string;
-  
-    @ManyToOne(() => Section, (section) => section.formFields)
-    section: Section;
   
     @OneToMany(() => FormFieldsOption, (formFieldsOption) => formFieldsOption.formField)
     options: FormFieldsOption[];
