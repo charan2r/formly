@@ -2,6 +2,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
 import { Form } from './form.entity';
 import { Category } from './category.entity';
+import { FormField } from './form-fields.entity';
 
 @Entity('form_template')
 export class FormTemplate {
@@ -52,4 +53,7 @@ export class FormTemplate {
 
   @ManyToOne(() => Category, (category) => category.formTemplates, { onDelete: 'SET NULL' })
   category: Category;
+
+  @OneToMany(() => FormField, (formField) => formField.formTemplate)
+  formFields: FormField[];
 }
