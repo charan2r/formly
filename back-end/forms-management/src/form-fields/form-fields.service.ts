@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 
 import { Injectable } from '@nestjs/common';
-import { FormFieldsRepository } from './form-fields.repository';
-import { FormField } from 'src/model/form-fields.entity';
-import { CreateFormFieldDto } from './create-form-field.dto';
+import { FormFieldsRepository } from '../form-fields/form-fields.repository';
+import { FormField } from '../model/form-fields.entity';
+import { CreateFormFieldDto } from '../form-fields/create-form-field.dto';
 
 @Injectable()
 export class FormFieldsService {
