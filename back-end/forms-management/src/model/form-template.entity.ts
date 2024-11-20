@@ -54,6 +54,9 @@ export class FormTemplate {
   @OneToMany(() => Form, (form) => form.formTemplate)
   forms: Form[];
 
+  @Column('uuid', { nullable: true })
+  categoryId: string;
+
   @ManyToOne(() => Category, (category) => category.formTemplates, { onDelete: 'SET NULL' })
   category: Category;
 }

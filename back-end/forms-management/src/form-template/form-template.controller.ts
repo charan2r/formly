@@ -19,6 +19,7 @@ export class FormTemplateController {
   // API endpoint to create templates
   @Post('create')
   async createFormTemplate(@Body() createFormTemplateDto: CreateFormTemplateDto): Promise<FormTemplate> {
+    console.log(createFormTemplateDto)
     return this.formTemplateService.createTemplate(createFormTemplateDto);
   }
 
@@ -97,7 +98,4 @@ export class FormTemplateController {
       message: 'Status of Form templates changed successfully',
     };
   }
-
-
-
 }

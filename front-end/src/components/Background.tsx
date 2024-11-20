@@ -14,6 +14,7 @@ import Template from './Template';
 import Category from './Category';
 import LeftSidebar from './LeftSidebar';
 import EditPageSettings from './RightSidebar';
+import ViewTemplate from './ViewTemplate';
 
 const Background: React.FC = () => {
   const location = useLocation(); // Get the current route
@@ -39,6 +40,7 @@ const Background: React.FC = () => {
         <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
         <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
         <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
+        <Route path='/viewtemplate' element={<ViewTemplate />} />
       </Routes>
     </Box>
   );
