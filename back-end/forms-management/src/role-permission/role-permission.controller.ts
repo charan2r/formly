@@ -1,4 +1,4 @@
-import { Controller, Body, Param, Post, Get, Delete, Patch } from '@nestjs/common';
+import { Controller, Body, Param, Post, Get, Delete, Patch, BadRequestException } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
 import { PermissionRepository } from '../permission/permission.repository';
 
@@ -39,6 +39,26 @@ export class RolePermissionController {
     return await this.rolePermissionService.getOne(roleId);
   }
 
+
+   // edit permissions or reactivate previously deleted permissions
+   @Patch(':roleId')
+async updateRolePermissions(
+  @Param('roleId') roleId: string,
+  @Body('permissionIds') permissionIds: string[],
+) {
+  if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
+    throw new BadRequestException('permissionIds must be a non-empty array');
+  }
+
+  await this.rolePermissionService.updateRolePermissions(roleId, permissionIds);
+  return {
+    status: 'success',
+    message: 'Role permissions updated successfully',
+    data: { roleId, permissionIds },
+  };
+}
+
+ 
 
   
 }

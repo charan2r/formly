@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { RolePermissionRepository } from './role-permission.repository';
 import { RolePermission } from '../model/role-permission.entity';
 import { RoleRepository } from '../role/role.repository';
@@ -116,6 +116,36 @@ export class RolePermissionService {
       })),
     };
   }
-
-
+// update 
+  async updateRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {
+    if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
+      throw new BadRequestException('permissionIds must be a non-empty array');
+    }
+  
+    const rolePermissions = await this.rolePermissionRepository.find({
+      where: { role: { roleId }, permission: { permissionId: In(permissionIds) } },
+      relations: ['role', 'permission'],
+    });
+  
+    for (const permissionId of permissionIds) {
+      const existingPermission = rolePermissions.find(
+        (rolePermission) => rolePermission.permission?.permissionId === permissionId
+      );
+  
+      if (existingPermission) {
+        if (existingPermission.status === 'deleted') {
+          existingPermission.status = 'active';
+          await this.rolePermissionRepository.save(existingPermission);
+        }
+      } else {
+        const newRolePermission = this.rolePermissionRepository.create({
+          role: { roleId },
+          permission: { permissionId },
+          status: 'active',
+        });
+        await this.rolePermissionRepository.save(newRolePermission);
+      }
+    }
+  }
+  
 }
