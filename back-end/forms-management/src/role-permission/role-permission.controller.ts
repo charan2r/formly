@@ -58,7 +58,39 @@ async updateRolePermissions(
   };
 }
 
- 
+  // Delete a specific role-permission
+@Delete(':roleId/:permissionId')
+async softDeleteRolePermission(
+  @Param('roleId') roleId: string,
+  @Param('permissionId') permissionId: string,
+) {
+  await this.rolePermissionService.softDeleteRolePermission(roleId, permissionId);
+  return {
+    status: 'success',
+    message: 'Role permission soft deleted successfully',
+    data: { roleId, permissionId },
+  };
+}
+
+// Bulk delete permissions from a role
+@Delete(':roleId')
+async softBulkDelete(
+  @Param('roleId') roleId: string,
+  @Body('permissionIds') permissionIds: string[],
+) {
+  if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
+    throw new BadRequestException('permissionIds must be a non-empty array');
+  }
+
+  await this.rolePermissionService.softBulkDeleteRolePermissions(roleId, permissionIds);
+
+  return {
+    status: 'success',
+    message: 'Role permissions soft deleted successfully',
+    data: { roleId, permissionIds },
+  };
+}
+
 
   
 }

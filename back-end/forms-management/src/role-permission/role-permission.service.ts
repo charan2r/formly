@@ -147,5 +147,56 @@ export class RolePermissionService {
       }
     }
   }
-  
+
+    // Delete a specific role-permission
+async softDeleteRolePermission(roleId: string, permissionId: string): Promise<void> {
+  const rolePermission = await this.rolePermissionRepository.findOne({
+    where: { role: { roleId }, permission: { permissionId }, status: 'active' }, // Only active records
+  });
+
+  if (!rolePermission) {
+    throw new NotFoundException(
+      `Active role-permission with roleId: ${roleId} and permissionId: ${permissionId} not found or already deleted`,
+    );
+  }
+
+  rolePermission.status = 'deleted';
+  await this.rolePermissionRepository.save(rolePermission);
+}
+
+// Bulk delete permissions
+async softBulkDeleteRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {
+  if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
+    throw new BadRequestException('permissionIds must be a non-empty array');
+  }
+
+  const permissions = await this.permissionRepository.find({
+    where: { permissionId: In(permissionIds) },
+  });
+
+  if (permissions.length !== permissionIds.length) {
+    throw new NotFoundException('One or more permissions not found');
+  }
+
+  const rolePermissions = await this.rolePermissionRepository.find({
+    where: {
+      role: { roleId },
+      permission: { permissionId: In(permissionIds) },
+      status: 'active',
+    },
+  });
+
+  if (rolePermissions.length === 0) {
+    throw new NotFoundException(
+      'No active role-permissions found for the given role and permissions',
+    );
+  }
+
+  rolePermissions.forEach((rolePermission) => {
+    rolePermission.status = 'deleted';
+  });
+
+  await this.rolePermissionRepository.save(rolePermissions);
+}
+
 }
