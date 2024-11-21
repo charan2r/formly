@@ -11,6 +11,14 @@ import { Organization } from './model/organization.entity';
 import { User } from './model/user.entity';
 import { UserRepository } from './user/user.repository';
 import { UserModule } from './user/user.module';
+import { Category } from './model/category.entity'; 
+import { CategoryModule } from './category/category.module';
+import { FormTemplateController } from './form-template/form-template.controller';
+import { FormTemplateService } from './form-template/form-template.service';
+import { FormTemplateModule } from './form-template/form-template.module';
+import { FormTemplate } from './model/form-template.entity';
+import { FormTemplateRepository } from './form-template/form-template.repository';
+import { CategoryRepository } from './category/category.repository';
 
 @Module({
   imports: [
@@ -21,15 +29,17 @@ import { UserModule } from './user/user.module';
       username: 'postgres',
       password: 'postgres',
       database: 'postgres',
-      entities: [User, Organization],
+      entities: [__dirname + '/**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category]),
     OrganizationModule,
-    UserModule
+    UserModule,
+    FormTemplateModule,
+    CategoryModule
   ],
-  controllers: [AppController, OrganizationController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository],
+  controllers: [AppController, OrganizationController, FormTemplateController],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository],
 })
 export class AppModule { }

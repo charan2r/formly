@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // create-organization.dto.ts
 import { IsNotEmpty, IsOptional, IsEmail, IsString } from 'class-validator';
 

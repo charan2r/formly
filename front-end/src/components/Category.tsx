@@ -24,6 +24,8 @@ import {
     DialogTitle,
     Grid,
 } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -38,10 +40,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface Category {
-    categoryId: number;
+    categoryId: string;
     name: string;
-    createdDate: string;
-    createdBy: string;
+    description: string;
+    createdAt: string;
+    status: string;
+    createdById: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -81,28 +85,83 @@ const Category: React.FC = () => {
     const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
     const [newCategory, setNewCategory] = useState({
         name: '',
-        createdBy: '',
-        createdAt: ''
+        description: '',
+        createdById: 'f247546a-eea9-4678-ac24-5924e0a58250'
     });
+     // Adjust `createdById` as needed
+     const [error, setError] = useState<string | null>(null); // Optional: To display errors
 
+    const [loading, setLoading] = useState(false); // Optional: To handle button loading state
+    const [viewCategoryOpen, setViewCategoryOpen] = useState(false);
+    const [editCategoryOpen, setEditCategoryOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+    const [editFormData, setEditFormData] = useState({ name: '', description: '' });
+
+    const handleCreateCategory = async () => {
+        setLoading(true);
+        setError(null);
+      
+        try {
+            const response = await axios.post('http://localhost:3001/categories/create', newCategory);
+            
+            // Add the new category to the existing categories
+            setCategories(prevCategories => [...prevCategories, response.data]);
+            
+            // Close the dialog
+            setCreateCategoryOpen(false);
+            
+            // Reset the form
+            setNewCategory({ 
+                name: '', 
+                description: '', 
+                createdById: 'f247546a-eea9-4678-ac24-5924e0a58250' 
+            });
+
+            // Show success message
+            toast.success("Category created successfully!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                style: {
+                    backgroundColor: 'black',
+                    color: 'white',
+                    borderRadius: '10px',
+                    fontWeight: 'bold',
+                },
+            });
+
+            // Refresh the categories list
+            fetchCategories();
+
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Something went wrong');
+            toast.error(err.response?.data?.message || "Failed to create category");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`http://localhost:3001/categories/organization/f247546a-eea9-4678-ac24-5924e0a58250`);
+            const activeCategories = response.data.data.filter(cat => cat.status === 'active');
+            setCategories(activeCategories);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            setError('Unable to fetch categories. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get('http://localhost:3001/category');
-                // Filter Categories where the status is 'active'
-                const activeCategories = response.data.data.filter(cat => cat.status === 'active');
-                console.log(activeCategories);
-                setCategories(activeCategories);
-            } catch (error) {
-                console.error('Error fetching categories data:', error);
-            }
-        };
-
         fetchCategories();
     }, []);
-
-
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
         setMenuAnchor(event.currentTarget);
@@ -166,29 +225,24 @@ const Category: React.FC = () => {
         setConfirmationBulkOpen(true);
     };
 
-    const handleCreateCategory = async () => {
-        try {
-            const response = await axios.post('http://localhost:3001/category', newCategory);
-            setCategories([...categories, response.data]);
-            setCreateCategoryOpen(false);
-            toast.success("Category created successfully!");
-        } catch (error) {
-            toast.error("Failed to create category");
-        }
-    };
 
     const handleDeleteCategories = async () => {
         try {
-            const response = await axios.delete('http://localhost:3001/category/bulk-delete', {
-                data: { ids: Object.keys(selectedCategories) },
+            // Get array of selected category IDs
+            const selectedIds = Object.entries(selectedCategories)
+                .filter(([_, isSelected]) => isSelected)
+                .map(([id, _]) => id);
+
+            await axios.delete('http://localhost:3001/categories/bulk-delete', {
+                data: selectedIds // Send array directly as the request body
             });
 
-            // Filter out the categoires that were deleted
+            // Filter out the deleted categories
             setCategories((prevCategories) =>
-                prevCategories.filter(cat => !Object.keys(selectedCategories).includes(cat.categoryId))
+                prevCategories.filter(cat => !selectedIds.includes(cat.categoryId.toString()))
             );
 
-            toast.success("Category has been deleted successfully!", {
+            toast.success("Categories have been deleted successfully!", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: true,
@@ -204,10 +258,10 @@ const Category: React.FC = () => {
                 },
             });
 
-            setSelectedCategories([]);
+            setSelectedCategories({});
             setConfirmationBulkOpen(false);
         } catch (error) {
-            toast.error("Failed to delete the Category. Please try again.", {
+            toast.error("Failed to delete categories. Please try again.", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: true,
@@ -222,15 +276,15 @@ const Category: React.FC = () => {
                     fontWeight: 'bold',
                 },
             });
-        };
-    }
+        }
+    };
 
     // Method to handle deletion of an category
     const handleDeleteCategory = async () => {
         try {
-            await axios.delete(`http://localhost:3001/category/delete?id=${categoryToDelete}`);
+            await axios.delete(`http://localhost:3001/categories/delete/${categoryToDelete}`);
             setCategories((prev) => prev.filter((cat) => cat.categoryId !== categoryToDelete));
-            setConfirmationOpen(false); 
+            setConfirmationOpen(false);
             toast.success("Category has been deleted successfully!", {
                 position: "top-right",
                 autoClose: 5000,
@@ -267,22 +321,37 @@ const Category: React.FC = () => {
 
     const filteredData = categories
         .filter((cat) => {
-            const nameMatches = cat.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                cat.name.toLowerCase().includes(filters.name.toLowerCase());
+            // Name filter
+            const nameMatches = cat.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                cat.name?.toLowerCase().includes(filters.name.toLowerCase());
 
-            const createdByMatches = cat.createdBy
-                ? cat.createdBy.toLowerCase().includes(filters.createdBy.toLowerCase())
+            // Description filter
+            const descriptionMatches = cat.description
+                ? cat.description.toLowerCase().includes(filters.createdBy.toLowerCase())
                 : !filters.createdBy;
 
+            // Created date filter - using createdAt instead of createdDate
             const createdAtMatches = cat.createdAt
-                ? cat.createdAt.toLowerCase().includes(filters.createdAt.toLowerCase())
+                ? new Date(cat.createdAt).toLocaleDateString().toLowerCase()
+                    .includes(filters.createdAt.toLowerCase())
                 : !filters.createdAt;
 
-            return nameMatches && createdByMatches && createdAtMatches;
+            return nameMatches && descriptionMatches && createdAtMatches;
         })
         .sort((a, b) => {
             const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
-            return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
+            
+            // Handle different field types appropriately
+            switch (orderBy) {
+                case 'name':
+                    return (a.name || "").localeCompare(b.name || "") * orderMultiplier;
+                case 'description':
+                    return (a.description || "").localeCompare(b.description || "") * orderMultiplier;
+                case 'createdAt': // Changed from createdDate to createdAt
+                    return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * orderMultiplier;
+                default:
+                    return 0;
+            }
         });
 
     const selectedCount = Object.values(selectedCategories).filter(Boolean).length;
@@ -292,6 +361,38 @@ const Category: React.FC = () => {
     const handleCloseDialog = () => {
         setDialogOpen(false);
         setCategoryDetails(null);
+    };
+
+    const handleEditCategory = async () => {
+        try {
+            await axios.patch(`http://localhost:3001/categories/update/${selectedCategory?.categoryId}`, editFormData);
+            
+            // Update the categories list
+            setCategories(categories.map(cat => 
+                cat.categoryId === selectedCategory?.categoryId 
+                    ? { ...cat, ...editFormData }
+                    : cat
+            ));
+            
+            setEditCategoryOpen(false);
+            toast.success("Category has been updated successfully!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                style: {
+                    backgroundColor: 'black',
+                    color: 'white',
+                    borderRadius: '10px',
+                    fontWeight: 'bold',
+                },
+            });
+        } catch (error) {
+            toast.error("Failed to update category");
+        }
     };
 
     return (
@@ -405,7 +506,7 @@ const Category: React.FC = () => {
                                     }
                                 />
                             </TableCell>
-                            <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
+                            {/* <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} /> */}
                             <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
                                 <TableSortLabel
                                     active={orderBy === 'name'}
@@ -432,13 +533,14 @@ const Category: React.FC = () => {
                                     </div>
                                 )}
                             </TableCell>
+                            
                             <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
                                 <TableSortLabel
-                                    active={orderBy === 'createdBy'}
+                                    active={orderBy === 'description'}
                                     direction={orderDirection}
-                                    onClick={() => handleRequestSort('createdBy')}
+                                    onClick={() => handleRequestSort('description')}
                                 >
-                                    Created by
+                                    Description
                                 </TableSortLabel>
                                 {showFilters && (
                                     <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
@@ -498,7 +600,7 @@ const Category: React.FC = () => {
                                     />
                                 </TableCell>
                                 <TableCell>{row.name}</TableCell>
-                                <TableCell>{row.createdBy}</TableCell>
+                                <TableCell>{row.description}</TableCell>
                                 <TableCell>{new Date(row.createdAt).toLocaleString("en-GB", {
                                     day: "2-digit",
                                     month: "short",
@@ -509,7 +611,7 @@ const Category: React.FC = () => {
                                         <MoreVertIcon />
                                     </IconButton>
                                     <Popover
-                                        open={Boolean(menuAnchor) && selectedRowId === row.id}
+                                        open={Boolean(menuAnchor) && selectedRowId === row.categoryId}
                                         anchorEl={menuAnchor}
                                         onClose={handleMenuClose}
                                         anchorOrigin={{
@@ -531,7 +633,8 @@ const Category: React.FC = () => {
                                         <MenuItem
                                             onClick={() => {
                                                 handleMenuClose();
-                                                navigate(`/view-category/${row.categoryId}`);
+                                                setSelectedCategory(row);
+                                                setViewCategoryOpen(true);
                                             }}
                                             sx={{
                                                 backgroundColor: 'white',
@@ -549,7 +652,12 @@ const Category: React.FC = () => {
                                         <MenuItem
                                             onClick={() => {
                                                 handleMenuClose();
-                                                navigate(`/edit-category/${row.categoryId}`);
+                                                setSelectedCategory(row);
+                                                setEditFormData({
+                                                    name: row.name,
+                                                    description: row.description
+                                                });
+                                                setEditCategoryOpen(true);
                                             }}
                                             sx={{
                                                 backgroundColor: 'white',
@@ -639,8 +747,8 @@ const Category: React.FC = () => {
                 PaperProps={{
                     sx: {
                         borderRadius: '20px',
-                        padding: '16px 28px 40px',
-                        maxWidth: '650px',
+                        padding: '16px',
+                        maxWidth: '550px',
                         backgroundColor: '#f9f9f9',
                         boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
                     }
@@ -660,45 +768,323 @@ const Category: React.FC = () => {
                     </IconButton>
 
                     {/* Header section */}
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'left', 
+                        mb: 2,
+                        mt: 1,
+                        pl: 5
+                    }}>
+                        <Box sx={{ textAlign: 'left' }}>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                                 Create a Category
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 Boost your employee's productivity with digital forms.
                             </Typography>
                         </Box>
-
-
                     </Box>
 
-                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
-                        <Box display="flex" flexDirection="column" gap={2.5}>
-                            <Grid item xs={12} sm={6} mt={-3.5}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Name</Typography>
+                    {/* Form Content */}
+                    <DialogContent sx={{ px: 2, py: 1 }}>
+                        <Box display="flex" flexDirection="column" gap={2}>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" gutterBottom sx={{ 
+                                    mb: 0.5,
+                                    color: '#555',
+                                    fontWeight: 500 
+                                }}>
+                                    Name
+                                </Typography>
                                 <TextField
                                     value={newCategory.name}
-                                    InputProps={{ readOnly: true }}
+                                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                                     fullWidth
                                     variant="outlined"
                                     size="small"
                                     inputProps={{
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                                        sx: { 
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            padding: '8px 12px',
+                                            '&:focus': {
+                                                boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                            }
+                                        },
                                     }}
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={6} mt={-2}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" gutterBottom sx={{
+                                    mb: 0.5,
+                                    color: '#555',
+                                    fontWeight: 500
+                                }}>
+                                    Description
+                                </Typography>
                                 <TextField
                                     fullWidth
                                     multiline
-                                    rows={4}
+                                    rows={3}
                                     value={newCategory.description}
                                     onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
                                     InputProps={{
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                        sx: {
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            '& .MuiOutlinedInput-input': {
+                                                padding: '8px 12px'
+                                            },
+                                            '&:focus-within': {
+                                                boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                            }
+                                        },
+                                    }}
+                                />
+                            </Grid>
+                        </Box>
+                    </DialogContent>
+
+                    {/* Actions */}
+                    <DialogActions sx={{ 
+                        p: 2,
+                        justifyContent: 'right' 
+                    }}>
+                        <Button
+                            variant="contained"
+                            onClick={handleCreateCategory}
+                            disabled={loading}
+                            sx={{
+                                backgroundColor: '#1a1a1a',
+                                color: 'white',
+                                borderRadius: '25px',
+                                width: '120px',
+                                padding: '8px 16px',
+                                fontSize: '0.95rem',
+                                fontWeight: 500,
+                                textTransform: 'none',
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    backgroundColor: '#333',
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
+                                },
+                                '&:disabled': {
+                                    backgroundColor: '#555',
+                                    opacity: 0.7
+                                },
+                            }}
+                        >
+                            {loading ? (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <CircularProgress size={16} sx={{ color: 'white' }} />
+                                    Creating...
+                                </Box>
+                            ) : 'Create'}
+                        </Button>
+                    </DialogActions>
+                </Box>
+            </Dialog>
+
+            {/* View Category Dialog */}
+            <Dialog
+                open={viewCategoryOpen}
+                onClose={() => setViewCategoryOpen(false)}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                    sx: {
+                        borderRadius: '20px',
+                        padding: '16px 28px 40px',
+                        maxWidth: '650px',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+                    }
+                }}
+            >
+                <Box sx={{ position: 'relative' }}>
+                    <IconButton
+                        onClick={() => setViewCategoryOpen(false)}
+                        sx={{
+                            position: 'absolute',
+                            left: 8,
+                            top: 8,
+                            transition: 'transform 0.2s',
+                            '&:hover': {
+                              transform: 'scale(1.1)'
+                            }
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                View Category
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#666' }}>
+                                Category details
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                        <Box display="flex" flexDirection="column" gap={3.5}>
+                            <Grid item xs={12} sm={6} mt={-3}>
+                                <Typography variant="subtitle2" gutterBottom sx={{ 
+                                  marginBottom: '8px',
+                                  color: '#555',
+                                  fontWeight: 500 
+                                }}>
+                                    Name
+                                </Typography>
+                                <TextField
+                                    value={selectedCategory?.name || ''}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    InputProps={{
+                                        readOnly: true,
+                                        sx: { 
+                                          backgroundColor: '#ffffff', 
+                                          borderRadius: '8px',
+                                          '& .MuiOutlinedInput-input': {
+                                            padding: '12px 15px'
+                                          }
+                                        }
+                                    }}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} mt={-1}>
+                                <Typography variant="subtitle2" gutterBottom sx={{ 
+                                  marginBottom: '8px',
+                                  color: '#555',
+                                  fontWeight: 500 
+                                }}>
+                                    Description
+                                </Typography>
+                                <TextField
+                                    value={selectedCategory?.description || ''}
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    InputProps={{
+                                        readOnly: true,
+                                        sx: { 
+                                          backgroundColor: '#ffffff', 
+                                          borderRadius: '8px',
+                                          '& .MuiOutlinedInput-input': {
+                                            padding: '12px 15px'
+                                          }
+                                        }
+                                    }}
+                                />
+                            </Grid>
+                        </Box>
+                    </DialogContent>
+                </Box>
+            </Dialog>
+
+            {/* Edit Category Dialog */}
+            <Dialog
+                open={editCategoryOpen}
+                onClose={() => setEditCategoryOpen(false)}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                    sx: {
+                        borderRadius: '20px',
+                        padding: '16px 28px 40px',
+                        maxWidth: '650px',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+                    }
+                }}
+            >
+                <Box sx={{ position: 'relative' }}>
+                    <IconButton
+                        onClick={() => setEditCategoryOpen(false)}
+                        sx={{
+                            position: 'absolute',
+                            left: 8,
+                            top: 8,
+                            transition: 'transform 0.2s',
+                            '&:hover': {
+                              transform: 'scale(1.1)'
+                            }
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                Edit Category
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: '#666' }}>
+                                Update category details
+                            </Typography>
+                        </Box>
+                    </Box>
+
+                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                        <Box display="flex" flexDirection="column" gap={3.5}>
+                            <Grid item xs={12} sm={6} mt={-3}>
+                                <Typography variant="subtitle2" gutterBottom sx={{ 
+                                  marginBottom: '8px',
+                                  color: '#555',
+                                  fontWeight: 500 
+                                }}>
+                                    Name
+                                </Typography>
+                                <TextField
+                                    value={editFormData.name}
+                                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    inputProps={{
+                                        sx: { 
+                                          backgroundColor: '#ffffff', 
+                                          borderRadius: '8px',
+                                          padding: '12px 15px',
+                                          '&:focus': {
+                                            boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                          }
+                                        }
+                                    }}
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} mt={-1}>
+                                <Typography variant="subtitle2" gutterBottom sx={{ 
+                                  marginBottom: '8px',
+                                  color: '#555',
+                                  fontWeight: 500 
+                                }}>
+                                    Description
+                                </Typography>
+                                <TextField
+                                    value={editFormData.description}
+                                    onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    InputProps={{
+                                        sx: { 
+                                          backgroundColor: '#ffffff', 
+                                          borderRadius: '8px',
+                                          '& .MuiOutlinedInput-input': {
+                                            padding: '12px 15px'
+                                          },
+                                          '&:focus-within': {
+                                            boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                          }
+                                        }
                                     }}
                                 />
                             </Grid>
@@ -708,21 +1094,28 @@ const Category: React.FC = () => {
                     <DialogActions sx={{ p: 3, justifyContent: 'right' }}>
                         <Button
                             variant="contained"
-                            onClick={handleCreateCategory}
+                            onClick={handleEditCategory}
                             sx={{
-                                backgroundColor: 'black',
+                                backgroundColor: '#1a1a1a',
                                 color: 'white',
-                                borderRadius: '20px',
-                                width: '30%',
-                                marginTop: '-20px',
-                                marginBottom: '-25px',
-                                marginRight:'80px',
+                                borderRadius: '25px',
+                                width: '35%',
+                                padding: '10px 25px',
+                                marginTop: '-15px',
+                                marginBottom: '-20px',
+                                marginRight: '80px',
+                                fontSize: '0.95rem',
+                                fontWeight: 500,
+                                textTransform: 'none',
+                                transition: 'all 0.2s ease-in-out',
                                 '&:hover': {
-                                    backgroundColor: '#333'
+                                    backgroundColor: '#333',
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                                 }
                             }}
                         >
-                            Create
+                            Update
                         </Button>
                     </DialogActions>
                 </Box>
