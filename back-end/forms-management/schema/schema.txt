@@ -1,0 +1,112 @@
+mermaid
+erDiagram
+
+    USER {
+        UUID id PK 
+		VARCHAR first_name
+        VARCHAR last_name
+        VARCHAR email "Email used for login"
+        VARCHAR password_hash 
+        ENUM user_type "SuperSuperAdmin, SuperAdmin, SubUser"
+        UUID super_user_id FK "Foreign key to Organization (for SubUser only)"
+        TIMESTAMP created_at 
+        TIMESTAMP last_login 
+        TIMESTAMP updated_at
+    }
+
+    ORGANIZATION {
+        UUID org_id PK
+        VARCHAR name
+        UUID supersuper_admin_id FK "Foreign key to SuperSuperAdmin"
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+	
+    ROLE {
+        UUID role_id PK
+        UUID super_user_id FK "Foreign key to SuperAdmin"
+        VARCHAR name 
+        TIMESTAMP created_at
+    }
+
+    PERMISSION {
+        UUID permission_id PK
+        VARCHAR name
+        TIMESTAMP created_at
+    }
+
+    RolePermissions {
+        UUID role_id FK 
+        UUID permission_id FK 
+    }
+
+    SubUserRole {
+        UUID sub_user_id FK
+        UUID role_id FK
+    }
+
+    FORM {
+        UUID form_id PK
+        UUID form_template_id FK
+        String name
+    }
+
+    FORM_TEMPLATE {
+        UUID form_template_id PK
+        String name
+        Text description
+        Integer version
+        String status
+        UUID category_id FK
+        String header_text
+        String header_image_url
+        String question_font_style
+        String question_text_color
+        String background_color
+        String header_image
+        String logo_image
+        Timestamp created_at
+        Timestamp updated_at
+    }
+
+    CATEGORY {
+        UUID category_id PK
+        UUID user_id FK
+        String name
+        String description
+    }
+
+    SECTION {
+        UUID section_id PK
+        String name
+        String description
+        UUID form_template_id FK
+    }
+
+    FORM_FIELDS {
+        UUID field_id PK
+        String image
+        UUID section_id FK
+        String question
+        String type
+    }
+
+    FORM_FIELDS_OPTION {
+        UUID form_fields_option_id PK
+        UUID field_id FK
+        String option
+    }
+
+    USER ||--o{ ORGANIZATION : "belongs to"
+    ORGANIZATION ||--o{ USER : "manages members"
+    USER ||--o{ CATEGORY : "creates"
+    CATEGORY ||--o{ FORM_TEMPLATE: "creates"
+    FORM_TEMPLATE ||--o{ SECTION : "contains"
+    SECTION ||--o{ FORM_FIELDS : "contains"
+    FORM_FIELDS ||--o{ FORM_FIELDS_OPTION: "has" 
+    FORM_TEMPLATE ||--o{ FORM : "creates"
+    USER ||--o{ ROLE: "define"
+    ROLE ||--o{ RolePermissions : "has many"
+    PERMISSION ||--o{ RolePermissions : "has many"
+    USER ||--o{ SubUserRole : "can assign"
+    ROLE ||--o{ SubUserRole : "belongs to"

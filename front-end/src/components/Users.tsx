@@ -1,0 +1,572 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Table,
+  InputAdornment,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Checkbox,
+  TextField,
+  IconButton,
+  Button,
+  Typography,
+  Menu,
+  MenuItem,
+  Avatar,
+  Box,
+  Pagination,
+  TableSortLabel,
+  Popover,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import SearchIcon from '@mui/icons-material/Search';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import CircleIcon from '@mui/icons-material/Circle';
+import AddIcon from '@mui/icons-material/Add';
+import { styled } from '@mui/material/styles';
+import { ArrowForward, Delete } from '@mui/icons-material';
+import MenuIcon from '@mui/icons-material/Menu';
+import axios from 'axios';
+
+interface Users {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  userType?: string;
+  lastLogin?: string;
+}
+
+const SquarePagination = styled(Pagination)(({ theme }) => ({
+  '& .MuiPaginationItem-root': {
+    borderRadius: '5px',
+    fontSize: '1.25rem',
+    marginTop: '15px',
+    padding: theme.spacing(2.5, 2.5),
+  },
+  '& .Mui-selected': {
+    backgroundColor: '#000000 !important',
+    color: 'white !important',
+    '&:hover': {
+      backgroundColor: 'black',
+    },
+  },
+}));
+
+const Users: React.FC = () => {
+  const [organizations, setOrganizations] = useState<Users[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedOrganizations, setSelectedOrganizations] = useState<Record<number, boolean>>({});
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(4);
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '' });
+  const [orderBy, setOrderBy] = useState<keyof Users>('email');
+  const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
+  const [userDetails, setUserDetails] = useState<Users | null>(null); // For storing user details
+  const [isDialogOpen, setDialogOpen] = useState(false); // For opening the user details dialog
+
+
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/users?organizationId=72a53cab-e8a8-4072-bf91-d2643b22851b');
+        console.log(response.data)
+        setOrganizations(response.data.data);
+      } catch (error) {
+        console.error('Error fetching organization data:', error);
+      }
+    };
+
+    fetchOrganizations();
+  }, []);
+
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
+    setMenuAnchor(event.currentTarget);
+    setSelectedRowId(id);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setSelectedRowId(null);
+  };
+
+  const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = event.target.checked;
+    const newSelectedOrganizations = organizations.reduce((acc, org) => {
+      acc[org.id] = checked;  // Apply the same checked state to all organizations
+      return acc;
+    }, {} as Record<number, boolean>);
+
+    setSelectedOrganizations(newSelectedOrganizations);
+  };
+
+
+  const handleSelectOrganization = (id: number) => {
+    setSelectedOrganizations((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleChangePage = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleFilterToggle = () => {
+    setShowFilters(!showFilters);
+  };
+
+  const handleFilterChange = (event: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [field]: event.target.value,
+    }));
+  };
+
+  const handleRequestSort = (property: keyof U) => {
+    const isAsc = orderBy === property && orderDirection === 'asc';
+    setOrderDirection(isAsc ? 'desc' : 'asc');
+    setOrderBy(property);
+  };
+
+  const handleDeleteOrganization = async (orgId: string) => {
+    try {
+      await axios.delete(`http://localhost:3001/organization/${orgId}`);
+      setOrganizations((prev) => prev.filter((org) => org.orgId !== orgId));
+      handleMenuClose();
+    } catch (error) {
+      console.error(`Error deleting organization with ID ${orgId}:`, error);
+    }
+  };
+
+  const handleViewUser = async (userId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
+      setUserDetails(response.data); // Store user details
+      setDialogOpen(true); // Open dialog
+      handleMenuClose(); // Close the options menu
+    } catch (error) {
+      console.error(`Error fetching user details for ID ${userId}:`, error);
+    }
+  };
+
+  const filteredData = organizations
+    .filter((org) => {
+      const nameMatches = org.firstName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        org.firstName.toLowerCase().includes(filters.firstName.toLowerCase());
+
+      const categoryMatches = org.lastName
+        ? org.lastName.toLowerCase().includes(filters.lastName.toLowerCase())
+        : !filters.lastName; // If org.category is null, match only if filters.category is empty
+
+      const lastActiveMatches = org.email
+        ? org.email.toLowerCase().includes(filters.email.toLowerCase())
+        : !filters.email; // If org.lastActive is null, match only if filters.lastActive is empty
+
+      return nameMatches && categoryMatches && lastActiveMatches;
+    })
+    .sort((a, b) => {
+      const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
+      return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
+    });
+
+
+  const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
+
+  const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setUserDetails(null);
+  };
+
+  return (
+    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
+          <IconButton onClick={() => console.log("Back arrow clicked")}>
+            <CircleIcon style={{ color: 'black' }} />
+          </IconButton>
+          <ArrowForward style={{ color: 'black' }} />
+          <Typography variant="body2" color="textSecondary">
+            Atlas corp
+          </Typography>
+          <ArrowForward style={{ color: 'black' }} />
+          <Typography variant="body2" color="textSecondary">
+            User Management
+          </Typography>
+        </Box>
+        <Typography variant="h5" fontWeight="bold">Users Management</Typography>
+        <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
+          Manage your teams and their account permissions here.
+        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" component="span">
+            <strong>All Users</strong> <span style={{ color: 'gray' }}>{filteredData.length}</span>
+          </Typography>
+          <Box display="flex" alignItems="center" gap={2}>
+            <TextField
+              variant="outlined"
+              size="small"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <IconButton>
+                      <MenuIcon sx={{ color: 'grey.600' }} /> {/* Hamburger menu icon */}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <SearchIcon sx={{ color: 'grey.600' }} />
+                  </InputAdornment>
+                ),
+                style: { backgroundColor: '#f9f9f9', borderRadius: '20px' },
+              }}
+              sx={{
+                border: 'none',
+                borderRadius: '20px',
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    border: 'none',
+                  },
+                },
+              }}
+            />
+            <Box sx={{ backgroundColor: '#f9f9f9', borderRadius: '20px', padding: '2px', paddingRight: '15px', paddingLeft: '15px', display: 'flex', alignItems: 'center' }}>
+              <Button
+                sx={{ borderRadius: '20px', color: 'black' }} onClick={handleFilterToggle}
+              >
+                Filters
+              </Button>
+            </Box>
+            {selectedCount > 0 ? (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+              >
+                <Delete sx={{ marginRight: 1 }} />
+                Delete
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+              >
+                <AddIcon sx={{ marginRight: 1 }} />
+                Add Users
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Box>
+      <TableContainer sx={{ maxHeight: '400px', overflow: 'auto' }}>
+        <Table stickyHeader sx={{ marginTop: '25px' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: '#f9f9f9',
+                  borderStartStartRadius: '20px',
+                  borderEndStartRadius: '20px',
+                  padding: '4px',
+                  position: 'relative', 
+                }}
+              >
+                <Checkbox
+                  onChange={handleSelectAll}
+                  checked={
+                    organizations.length > 0 &&
+                    organizations.every((org) => selectedOrganizations[org.id])
+                  }
+                  indeterminate={
+                    organizations.some((org) => selectedOrganizations[org.id]) &&
+                    !organizations.every((org) => selectedOrganizations[org.id])
+                  }
+                />
+              </TableCell>
+              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'email'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('email')}
+                >
+                  Username
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      placeholder="Filter"
+                      value={filters.email}
+                      onChange={(e) => handleFilterChange(e, 'email')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'userType'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('userType')}
+                >
+                  Role
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Filter"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      value={filters.userType}
+                      onChange={(e) => handleFilterChange(e, 'userType')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                <TableSortLabel
+                  active={orderBy === 'lastActive'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('lastActive')}
+                >
+                  Last Active
+                </TableSortLabel>
+                {showFilters && (
+                  <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                    <TextField
+                      variant="outlined"
+                      size="small"
+                      placeholder="Filter"
+                      inputProps={{
+                        style: {
+                          height: "10px",
+                        },
+                      }}
+                      value={filters.lastActive}
+                      onChange={(e) => handleFilterChange(e, 'lastActive')}
+                      sx={{ width: '100%', marginTop: '4px' }}
+                    />
+                  </div>
+                )}
+              </TableCell>
+              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', borderStartEndRadius: '20px', borderEndEndRadius: '20px', padding: '1px' }} />
+            </TableRow>
+          </TableHead>
+
+
+          <TableBody>
+            {paginatedData.map((row) => (
+              <TableRow key={row.id} sx={{ height: '60px' }}>
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
+                    onChange={() => handleSelectOrganization(row.orgId)}
+                  />
+                </TableCell>
+                <TableCell padding="checkbox">
+                  <Avatar sx={{ width: '34px', height: '34px' }}>O</Avatar>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="subtitle2">
+                    {row.firstName} {row.lastName}
+                  </Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {row.email}
+                  </Typography>
+                </TableCell>
+                <TableCell>{row.userType}</TableCell>
+                <TableCell>{row.lastLogin ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
+                <TableCell padding="checkbox">
+                  <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Popover
+                    open={Boolean(menuAnchor) && selectedRowId === row.id}
+                    anchorEl={menuAnchor}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{
+                      vertical: 'center',
+                      horizontal: 'left',
+                    }}
+                    transformOrigin={{
+                      vertical: 'center',
+                      horizontal: 'right',
+                    }}
+                    PaperProps={{
+                      sx: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.25)', // Slightly transparent light gray
+                        color: 'black',
+                        padding: '5px',
+                      },
+                    }}
+                  >
+                    <MenuItem
+                      onClick={() => handleViewUser(row.id)}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '40px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      View
+                    </MenuItem>
+                    <MenuItem
+                      onClick={handleMenuClose}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '40px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Edit
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleDeleteOrganization(row.id)}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '40px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        color: 'red', // Red text color for "Delete"
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
+                  </Popover>
+                </TableCell>
+
+
+
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
+        <SquarePagination
+          count={Math.ceil(filteredData.length / rowsPerPage)}
+          page={page}
+          onChange={handleChangePage}
+          variant="outlined"
+          color="primary"
+        />
+      </Box>
+
+      {/* Dialog to display user details */}
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth sx={{ borderRadius: '60px' }}>
+        <IconButton onClick={handleCloseDialog} sx={{ position: 'absolute', top: '10px', left: '10px' }}>
+          <ArrowBackIcon style={{ color: 'black' }} />
+        </IconButton>
+        <Box sx={{ position: 'relative', padding: '16px', alignContent: 'ceter', borderRadius: '60px' }}>
+          {/* Header with Avatar, Title, and Subtitle */}
+          <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" mb={2} borderRadius='60px' >
+            <Avatar
+              sx={{ width: 80, height: 80, mr: 2 }}
+              src={userDetails?.avatarUrl || '/default-avatar.png'}
+            >
+              {/* Optional initial if avatar URL is not provided */}
+              {userDetails?.firstName ? userDetails.firstName[0] : 'U'}
+            </Avatar>
+
+            <Box>
+              <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'left', m: 0 }}>User Details</DialogTitle>
+              <Typography variant="body2" sx={{ textAlign: 'left', color: 'gray' }}>
+                Look through your user's information easily.
+              </Typography>
+            </Box>
+          </Box>
+          <DialogContent>
+            {userDetails ? (
+              <Box display="flex" flexDirection="column" gap={2}>
+                <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2} mb={2}>
+                  <TextField
+                    label="Name"
+                    value={`${userDetails.firstName}`}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Name"
+                    value={`${userDetails.lastName}`}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                  />
+                </Box>
+                <TextField
+                  label="Email"
+                  value={userDetails.email}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="Phone Number"
+                  value={userDetails.phoneNumber}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="Role"
+                  value={userDetails.userType}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+              </Box>
+            ) : (
+              <Typography>Loading user details...</Typography>
+            )}
+          </DialogContent>
+        </Box>
+      </Dialog>
+    </Paper>
+  );
+};
+
+export default Users;
