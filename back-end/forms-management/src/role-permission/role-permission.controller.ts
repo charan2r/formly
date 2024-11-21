@@ -25,5 +25,20 @@ export class RolePermissionController {
       permissions,
     };
   }  
+
+  // Get all role-permission
+  @Get()
+  async getAllRolePermissions() {
+    const rolePermissions = await this.rolePermissionService.getAllRolePermissions();
+    return rolePermissions;
+  }
+
+  // Get a role with its permissions
+  @Get(':roleId')
+  async getOne(@Param('roleId') roleId: string) {
+    return await this.rolePermissionService.getOne(roleId);
+  }
+
+
   
 }
