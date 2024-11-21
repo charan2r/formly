@@ -57,7 +57,8 @@ export class RoleService {
       await this.roleRepository.save(role);
       return true;
     }
-  
+
+    //Soft bulk delete
     async deleteRoles(roleIds: string[]): Promise<boolean> {
       const roles = await this.roleRepository.find({
         where: { roleId: In(roleIds), status: 'active' },
@@ -66,8 +67,6 @@ export class RoleService {
       if (roles.length === 0) {
         throw new NotFoundException('No active roles found for the provided IDs');
       }
-  
-      console.log('Roles to be soft deleted:', roles);
   
       roles.forEach((role) => {
         role.status = 'deleted';

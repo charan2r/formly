@@ -43,4 +43,15 @@ export class RoleController {
       data: { roleId: id },
     };
   }
+
+  //soft bulk delete
+  @Delete()
+  async deleteRoles(@Body() ids: string[]) {
+    await this.roleService.deleteRoles(ids);
+    return {
+      status: 'success',
+      message: 'Roles soft deleted successfully',
+      data: { deletedIds: ids },
+    };
+  }
 };
