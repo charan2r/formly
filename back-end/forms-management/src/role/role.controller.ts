@@ -1,9 +1,26 @@
-import { Controller, Get} from '@nestjs/common';
+import { Controller, Get, Delete, Param, Post, Body} from '@nestjs/common';
 import { RoleService } from './role.service';
+import { CreateRoleDto } from '../dto/create-role.dto';
 
 @Controller('roles')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
+
+  @Post()
+  async createRole(@Body() createRoleDto: CreateRoleDto) {
+    const role = await this.roleService.create(createRoleDto);  
+    const { organization, ...roleData } = role;
+
+    return {
+      status: 'success',
+      message: 'Role created successfully',
+      data: {
+        ...roleData,
+        organizationId: role.organization?.orgId,
+      },
+    };
+  }
+
 
   @Get()
   async getAllRoles() {
@@ -13,6 +30,17 @@ export class RoleController {
       message: 'Roles retrieved successfully',
       data: roles,
       
+    };
+  }
+
+  // Soft delete a role
+  @Delete(':id')
+  async deleteRole(@Param('id') id: string) {
+    await this.roleService.deleteRole(id);
+    return {
+      status: 'success',
+      message: 'Role deleted successfully',
+      data: { roleId: id },
     };
   }
 };
