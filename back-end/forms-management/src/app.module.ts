@@ -19,6 +19,9 @@ import { FormTemplateModule } from './form-template/form-template.module';
 import { FormTemplate } from './model/form-template.entity';
 import { FormTemplateRepository } from './form-template/form-template.repository';
 import { CategoryRepository } from './category/category.repository';
+import { Role } from './model/role.entity';
+import { RoleModule } from './role/role.module';
+import { RoleRepository } from './role/role.repository';
 
 @Module({
   imports: [
@@ -33,13 +36,14 @@ import { CategoryRepository } from './category/category.repository';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, Role]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
-    CategoryModule
+    CategoryModule,
+    RoleModule,
   ],
   controllers: [AppController, OrganizationController, FormTemplateController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository,RoleRepository],
 })
 export class AppModule { }
