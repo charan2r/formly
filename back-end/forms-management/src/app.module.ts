@@ -24,6 +24,11 @@ import { FormFieldsRepository } from './form-fields/form-fields.repository';
 import { FormField } from './model/form-fields.entity';
 import { FormFieldsService } from './form-fields/form-fields.service';
 import { FormFieldsController } from './form-fields/form-fields.controller';
+import { FormFieldsOptionsController } from './form-fields-options/form-fields-options.controller';
+import { FormFieldsOptionsService } from './form-fields-options/form-fields-options.service';
+import { FormFieldsOptionsModule } from './form-fields-options/form-fields-options.module';
+import { FormFieldsOptionsRepository } from './form-fields-options/form-fields-options.repository';
+import { FormFieldsOption } from './model/form-fields-option.entity';
 
 @Module({
   imports: [
@@ -38,14 +43,15 @@ import { FormFieldsController } from './form-fields/form-fields.controller';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, FormField]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, FormField, FormFieldsOption]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
     CategoryModule,
-    FormFieldsModule
+    FormFieldsModule,
+    FormFieldsOptionsModule
   ],
-  controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService],
+  controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController, FormFieldsOptionsController],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository],
 })
 export class AppModule { }
