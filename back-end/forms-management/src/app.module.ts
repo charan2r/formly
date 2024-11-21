@@ -22,6 +22,9 @@ import { CategoryRepository } from './category/category.repository';
 import { Role } from './model/role.entity';
 import { RoleModule } from './role/role.module';
 import { RoleRepository } from './role/role.repository';
+import { PermissionModule } from '../src/permission/permission.module'
+import { Permission } from './model/permission.entity';
+import { PermissionRepository } from './permission/permission.repository';
 
 @Module({
   imports: [
@@ -36,14 +39,15 @@ import { RoleRepository } from './role/role.repository';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, Role]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, Role, Permission]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
     CategoryModule,
     RoleModule,
+    PermissionModule,
   ],
   controllers: [AppController, OrganizationController, FormTemplateController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository,RoleRepository],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository,RoleRepository,PermissionRepository],
 })
 export class AppModule { }
