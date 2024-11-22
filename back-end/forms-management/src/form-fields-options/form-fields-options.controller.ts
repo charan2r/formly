@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Query } from '@nestjs/common';
 import { FormFieldsOption } from '../model/form-fields-option.entity';
 import { CreateFormFieldsOptionDto } from './create-form-fields-option.dto';
 import { FormFieldsOptionsService } from './form-fields-options.service';
@@ -47,4 +47,40 @@ export class FormFieldsOptionsController {
       data: option,
     };
   }
+
+  // API Endpoint to update an option
+  @Patch('update')
+  async updateOption(
+    @Query('optionId') optionId: string,
+    @Body() createFormFieldsOptionDto: CreateFormFieldsOptionDto,
+  ): Promise<MetaSchemaResponse<FormFieldsOption>> {
+    const option = await this.formFieldsOptionsService.updateOption(optionId, createFormFieldsOptionDto);
+    return {
+      success: true,
+      message: 'Option updated successfully.',
+      data: option,
+    };
+  }
+
+  // API Endpoint to delete an option
+  @Delete('delete')
+  async deleteOption(@Query('optionId') optionId: string): Promise<MetaSchemaResponse> {
+    await this.formFieldsOptionsService.deleteOption(optionId);
+    return {
+      success: true,
+      message: 'Option deleted successfully.',
+    };
+  }
+
+  // API Endpoint to soft bulk delete options
+  @Delete('bulk-delete')
+  async bulkDeleteOptions(@Body('optionIds') optionIds: string[]): Promise<MetaSchemaResponse> {
+    await this.formFieldsOptionsService.bulkDeleteOptions(optionIds);
+    return {
+      success: true,
+      message: 'Options deleted successfully.',
+    };
+  }
+
+ 
 }
