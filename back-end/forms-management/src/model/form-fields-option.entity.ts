@@ -14,6 +14,9 @@ import {
   
     @Column('text')
     option: string;
+
+    @Column({ type: 'text',  default: 'active' })
+    status: string; 
   
     @ManyToOne(() => FormField, (formField) => formField.options)
     formField: FormField;

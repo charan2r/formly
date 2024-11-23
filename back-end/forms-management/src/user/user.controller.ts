@@ -1,7 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException, Post, Body, Patch, Delete} from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from 'src/model/user.entity';
+import { CreateUserDto } from './create-user.dto';
+import { UpdateUserDto } from './update-user.dto';
 
 @Controller('users')
 export class UserController {
@@ -37,4 +39,56 @@ export class UserController {
       data: user,
     }
   }
+
+  // API endpoint to create a new user
+  @Post('create')
+  async addUser(
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<{ message: string; status: string; data: User }> {
+    const newUser = await this.userService.addUser(createUserDto);
+    return {
+      status: 'success',
+      message: 'User created successfully',
+      data: newUser,
+    };
+  }
+
+
+  // API endpoint to update a user
+  @Patch('edit')
+  async updateUser(
+    @Query('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ): Promise<{ message: string; status: string; data: User }> {
+    const updatedUser = await this.userService.updateUser(id, updateUserDto);
+    return {
+      status: 'success',
+      message: 'User updated successfully',
+      data: updatedUser,
+    };
+  }
+
+  // API endpoint to delete a user
+  @Delete('delete')
+  async deleteUser(@Query('id') id: string): Promise<{ status: string; message: string }> {
+    const result = await this.userService.deleteUser(id);
+    if (!result) {
+      throw new NotFoundException(`User not found`);
+    }
+    return {
+      status: 'success',
+      message: `Status of user changed succeessfully`,
+    };
+  }
+
+  // API endpoint to bulk delete users
+  @Delete('bulk-delete')
+  async bulkDeleteUsers(@Body('ids') ids: string[]): Promise<{ status: string; message: string }> {
+    await this.userService.bulkDeleteUsers(ids);
+    return {
+      status: 'success',
+      message: 'Ststus of users changed successfully',
+    };
+  }
+
 }

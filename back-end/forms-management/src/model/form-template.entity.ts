@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
-import { Section } from './section.entity';
 import { Form } from './form.entity';
 import { Category } from './category.entity';
+import { FormField } from './form-fields.entity';
 
 @Entity('form_template')
 export class FormTemplate {
@@ -48,9 +48,6 @@ export class FormTemplate {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => Section, (section) => section.formTemplate)
-  sections: Section[];
-
   @OneToMany(() => Form, (form) => form.formTemplate)
   forms: Form[];
 
@@ -59,4 +56,7 @@ export class FormTemplate {
 
   @ManyToOne(() => Category, (category) => category.formTemplates, { onDelete: 'SET NULL' })
   category: Category;
+
+  @OneToMany(() => FormField, (formField) => formField.formTemplate)
+  formFields: FormField[];
 }

@@ -19,6 +19,12 @@ import { FormTemplateModule } from './form-template/form-template.module';
 import { FormTemplate } from './model/form-template.entity';
 import { FormTemplateRepository } from './form-template/form-template.repository';
 import { CategoryRepository } from './category/category.repository';
+import { Category } from './model/category.entity';
+import { FormFieldsModule } from './form-fields/form-fields.module';
+import { FormFieldsRepository } from './form-fields/form-fields.repository';
+import { FormField } from './model/form-fields.entity';
+import { FormFieldsService } from './form-fields/form-fields.service';
+import { FormFieldsController } from './form-fields/form-fields.controller';
 
 @Module({
   imports: [
@@ -33,13 +39,14 @@ import { CategoryRepository } from './category/category.repository';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, FormField]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
-    CategoryModule
+    CategoryModule,
+    FormFieldsModule
   ],
-  controllers: [AppController, OrganizationController, FormTemplateController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository],
+  controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService],
 })
 export class AppModule { }
