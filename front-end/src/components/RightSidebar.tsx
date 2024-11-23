@@ -21,6 +21,9 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import CircleIcon from '@mui/icons-material/Circle';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import DraggableQuestion from './DraggableQuestion';
 
 const pageSizes = {
   A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
@@ -30,6 +33,7 @@ const pageSizes = {
 
 const initialItems = [
   { id: "1", x: 0, y: 0, width: 150, height: 150, color: "#a8d8ea" },
+  { id: "2", x: 0, y: 0, width: 150, height: 150, color: "#a8d8ea",type: 'title' },
 ];
 
 const getRandomPosition = (maxWidth: number, maxHeight: number, itemWidth: number, itemHeight: number) => {
@@ -37,6 +41,21 @@ const getRandomPosition = (maxWidth: number, maxHeight: number, itemWidth: numbe
     x: Math.random() * (maxWidth - itemWidth),
     y: Math.random() * (maxHeight - itemHeight)
   };
+};
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'script': 'sub'}, { 'script': 'super' }],
+    [{ 'indent': '-1'}, { 'indent': '+1' }],
+    [{ 'direction': 'rtl' }],
+    [{ 'align': [] }],
+    ['link', 'image', 'video'],
+    ['clean']
+  ],
 };
 
 const EditPageSettings: React.FC = () => {
@@ -178,32 +197,12 @@ const EditPageSettings: React.FC = () => {
     );
   };
 
-  const handlePrint = async () => {
-    if (rndContainerRef.current) {
-      const canvas = await html2canvas(rndContainerRef.current, { scale: 2 });
-      const imgData = canvas.toDataURL("image/png");
 
-      const pdfWidth = (pageSizes[selectedSize].width * 72) / 96;
-      const pdfHeight = (pageSizes[selectedSize].height * 72) / 96;
-
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: [pdfWidth, pdfHeight],
-      });
-
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      pdf.save("dataurlnewwindow.pdf");
-    }
-  };
 
   const handlePageSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setSelectedSize(event.target.value as string);
   };
-  
-  const handleOrientationChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setOrientation(event.target.value as string);
-  };
+
 
   const handleBackgroundColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setBackgroundColor(event.target.value);
@@ -243,22 +242,22 @@ const EditPageSettings: React.FC = () => {
     return showSidebar ? '55vw' : '70vw';
   };
 
-  const handleQuestionChange = (itemId: string, newQuestion: string) => {
+  const handleQuestionChange = (itemId: string, newContent: string) => {
     setItems(prevItems =>
       prevItems.map(item =>
-        item.id === itemId ? { ...item, question: newQuestion } : item
+        item.id === itemId ? { ...item, question: newContent } : item
       )
     );
   };
 
-  const handleOptionChange = (itemId: string, optionId: number, newText: string) => {
+  const handleOptionChange = (itemId: string, optionId: number, newContent: string) => {
     setItems(prevItems =>
       prevItems.map(item =>
         item.id === itemId
           ? {
               ...item,
               options: item.options.map(opt =>
-                opt.id === optionId ? { ...opt, text: newText } : opt
+                opt.id === optionId ? { ...opt, text: newContent } : opt
               )
             }
           : item
@@ -399,136 +398,19 @@ const EditPageSettings: React.FC = () => {
     }}
   >
     {items.map((item) => (
-      <Rnd
+      <DraggableQuestion
         key={item.id}
-        size={{
-          width: (item.width / pageSizes[selectedSize].width) * gridSize.width,
-          height: (item.height / pageSizes[selectedSize].height) * gridSize.height,
-        }}
-        position={{
-          x: (item.x / pageSizes[selectedSize].width) * gridSize.width,
-          y: (item.y / pageSizes[selectedSize].height) * gridSize.height,
-        }}
-        onDragStop={(e, data) => handleDragStop(item.id, e, data)}
-        onResizeStop={(e, direction, ref, delta, position) =>
-          handleResizeStop(item.id, e, direction, ref, delta, position)
-        }
-        minWidth={300}
-        minHeight={200}
-        bounds="parent"
-        style={{
-          backgroundColor: '#ffffff',
-          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-          borderRadius: '12px',
-          border: '1px solid #e0e0e0',
-          overflow: 'hidden',
-        }}
-      >
-        <Box
-          sx={{
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            p: 2,
-          }}
-        >
-          {/* Question Header */}
-          <Box sx={{ mb: 2 }}>
-            <Typography
-              variant="subtitle1"
-              sx={{
-                fontWeight: 600,
-                color: '#1a1a1a',
-                mb: 1,
-              }}
-            >
-              Question {item.id}
-            </Typography>
-            <TextField
-              fullWidth
-              multiline
-              value={item.question}
-              onChange={(e) => handleQuestionChange(item.id, e.target.value)}
-              variant="outlined"
-              sx={{
-                '& .MuiOutlinedInput-root': {
-                  backgroundColor: '#ffffff',
-                  '&:hover': {
-                    '& > fieldset': {
-                      borderColor: '#2196f3',
-                    }
-                  }
-                }
-              }}
-            />
-          </Box>
-
-          {/* Rating Options */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            {item.options.map((option) => (
-              <Box
-                key={option.id}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  p: 1,
-                  borderRadius: '8px',
-                  border: '1px solid #e0e0e0',
-                  backgroundColor: '#ffffff',
-                }}
-              >
-                <Radio
-                  size="small"
-                  sx={{
-                    color: '#757575',
-                    '&.Mui-checked': {
-                      color: '#2196f3',
-                    },
-                  }}
-                />
-                <TextField
-                  value={option.text}
-                  onChange={(e) => handleOptionChange(item.id, option.id, e.target.value)}
-                  variant="standard"
-                  fullWidth
-                  sx={{
-                    '& .MuiInput-root': {
-                      fontSize: '0.875rem',
-                      color: '#424242',
-                    }
-                  }}
-                />
-                <IconButton 
-                  size="small" 
-                  onClick={() => handleDeleteOption(item.id, option.id)}
-                  sx={{ 
-                    color: '#757575',
-                    '&:hover': { color: '#f44336' }
-                  }}
-                >
-                  <DeleteOutlineIcon fontSize="small" />
-                </IconButton>
-              </Box>
-            ))}
-            
-            <Button
-              startIcon={<AddIcon />}
-              onClick={() => handleAddOption(item.id)}
-              sx={{
-                mt: 1,
-                color: '#2196f3',
-                borderColor: '#2196f3',
-                '&:hover': {
-                  backgroundColor: 'rgba(33, 150, 243, 0.04)',
-                }
-              }}
-            >
-              Add Option
-            </Button>
-          </Box>
-        </Box>
-      </Rnd>
+        item={item}
+        gridSize={gridSize}
+        selectedSize={selectedSize}
+        pageSizes={pageSizes}
+        onDragStop={handleDragStop}
+        onResizeStop={handleResizeStop}
+        onQuestionChange={handleQuestionChange}
+        onOptionChange={handleOptionChange}
+        onDeleteOption={handleDeleteOption}
+        onAddOption={handleAddOption}
+      />
     ))}
   </div>
 </div>
