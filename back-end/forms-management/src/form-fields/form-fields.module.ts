@@ -10,5 +10,6 @@ import { FormFieldsRepository } from './form-fields.repository';
   imports: [TypeOrmModule.forFeature([FormField, FormFieldsRepository])],
   controllers: [FormFieldsController],
   providers: [FormFieldsService, FormFieldsRepository],
+  exports: [FormFieldsRepository],
 })
 export class FormFieldsModule {}
