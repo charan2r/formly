@@ -12,6 +12,7 @@ import { TitleItem } from '../types/questions';
 import axios from 'axios'; // dont add this import ^ _ ^
 import { Droppable } from 'react-beautiful-dnd';
 import { useTemplate } from '../context/TemplateContext';
+import './DraggableQuestion.css';
 
 
 interface DraggableQuestionProps {
@@ -179,6 +180,35 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
     setIsDragging(true);
   };
   
+  // Add this function to handle question content updates
+  const handleQuestionUpdate = async (id: string, newContent: string) => {
+    try {
+      const updateData = {
+        question: newContent,
+        // Include other necessary fields to prevent them from being lost
+        x: formFields.find(field => field.id === id)?.x.toString(),
+        y: formFields.find(field => field.id === id)?.y.toString(),
+        width: formFields.find(field => field.id === id)?.width.toString(),
+        height: formFields.find(field => field.id === id)?.height.toString(),
+        type: formFields.find(field => field.id === id)?.type,
+        color: formFields.find(field => field.id === id)?.color,
+      };
+
+      await axios.patch(`http://localhost:3001/form-fields/update?id=${id}`, updateData);
+      
+      // Update local state after successful API call
+      setFormFields(prevFields => prevFields.map(field => 
+        field.id === id 
+          ? { 
+              ...field, 
+              question: newContent
+            }
+          : field
+      ));
+    } catch (error) {
+      console.error('Error updating question content:', error);
+    }
+  };
 
   return (
     <Droppable droppableId="rnd-container">
@@ -201,7 +231,11 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 borderRadius: '12px',
                 border: '1px solid #e0e0e0',
                 overflow: 'hidden',
+                '&:hover': {
+                  overflow: 'auto',
+                },
               }}
+              className="draggable-question"
               size={{
                 width: (item.width / pageSizes[selectedSize].width) * gridSize.width,
                 height: (item.height / pageSizes[selectedSize].height) * gridSize.height
@@ -211,17 +245,24 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 y: (item.y / pageSizes[selectedSize].height) * gridSize.height
               }}
               onDragStart={handleDragStart}
-              onDragStop={(e, data) => handleDragStop(e, data, item)}
-              onResizeStop={(e, direction, ref, delta, position) => 
-                handleResizeStop(e, direction, ref, delta, position, item)}
-              minWidth={300}
-              minHeight={item.type === 'title' ? 150 : 200}
+              onDragStop={(e, data) => {
+                const newX = (data.x / gridSize.width) * pageSizes[selectedSize].width;
+                const newY = (data.y / gridSize.height) * pageSizes[selectedSize].height;
+                handleDragStop(e, { x: newX, y: newY }, item);
+              }}
+              onResizeStop={(e, direction, ref, delta, position) => {
+                const newWidth = (ref.offsetWidth / gridSize.width) * pageSizes[selectedSize].width;
+                const newHeight = (ref.offsetHeight / gridSize.height) * pageSizes[selectedSize].height;
+                const newX = (position.x / gridSize.width) * pageSizes[selectedSize].width;
+                const newY = (position.y / gridSize.height) * pageSizes[selectedSize].height;
+                handleResizeStop(e, direction, ref, { width: newWidth, height: newHeight }, { x: newX, y: newY }, item);
+              }}
               bounds="parent"
               dragHandleClassName="drag-handle"
             >
               <QuestionContent
                 item={item}
-                onQuestionChange={onQuestionChange}
+                onQuestionChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
                 onOptionChange={onOptionChange}
                 onDeleteOption={onDeleteOption}
                 onAddOption={onAddOption}

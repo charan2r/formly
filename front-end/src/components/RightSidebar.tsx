@@ -442,9 +442,82 @@ const EditPageSettings: React.FC = () => {
     fetchFormFields();
   }, [formTemplateId]);
 
-  const handlePageSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
-    setSelectedSize(event.target.value as string);
+  const handlePageSizeChange = async (event: SelectChangeEvent) => {
+    const newSize = event.target.value;
+    const oldSize = selectedSize;
+
+    try {
+      if (formTemplateId) {
+        // First update the template in database
+        await axios.patch(`http://localhost:3001/form-templates/edit?id=${formTemplateId}`, {
+          pageSize: newSize,
+          // Include other fields to prevent them from being lost
+          backgroundColor,
+          marginTop: gridPadding.top.toString(),
+          marginBottom: gridPadding.bottom.toString(),
+          marginLeft: gridPadding.left.toString(),
+          marginRight: gridPadding.right.toString(),
+          version: templateData?.version,
+          status: templateData?.status,
+          categoryId: templateData?.categoryId,
+          name: templateName,
+          description: templateDescription
+        });
+
+        // Then update local states
+        setSelectedSize(newSize);
+        setGridSize({
+          width: pageSizes[newSize].width,
+          height: pageSizes[newSize].height
+        });
+
+        // Fix the scaling calculation
+        // When going from A4 to A3, we want items to appear smaller (divide by scale)
+        // When going from A3 to A4, we want items to appear larger (multiply by scale)
+        const scaleX = pageSizes[oldSize].width / pageSizes[newSize].width; // Inverted ratio
+        const scaleY = pageSizes[oldSize].height / pageSizes[newSize].height; // Inverted ratio
+
+        const updatedItems = items.map(item => ({
+          ...item,
+          width: item.width * scaleX,  // Now scales correctly
+          height: item.height * scaleY, // Now scales correctly
+          x: item.x * scaleX,          // Now scales correctly
+          y: item.y * scaleY           // Now scales correctly
+        }));
+
+        // Update form fields in database
+        await Promise.all(updatedItems.map(item => 
+          axios.patch(`http://localhost:3001/form-fields/update?id=${item.id}`, {
+            width: item.width.toString(),
+            height: item.height.toString(),
+            x: item.x.toString(),
+            y: item.y.toString(),
+            question: item.question,
+            type: item.type,
+            color: item.color,
+          })
+        ));
+
+        setItems(updatedItems);
+      }
+    } catch (error) {
+      console.error('Error updating page size:', error);
+      // Revert changes on error
+      setSelectedSize(oldSize);
+      setGridSize({
+        width: pageSizes[oldSize].width,
+        height: pageSizes[oldSize].height
+      });
+    }
   };
+
+  // Also update gridSize when component mounts or selectedSize changes
+  useEffect(() => {
+    setGridSize({
+      width: pageSizes[selectedSize].width,
+      height: pageSizes[selectedSize].height
+    });
+  }, [selectedSize]);
 
   const handleBackgroundColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setBackgroundColor(event.target.value);
@@ -481,7 +554,7 @@ const EditPageSettings: React.FC = () => {
   };
 
   const getContainerWidth = () => {
-    return showSidebar ? '55vw' : '70vw';
+    return "100vw";
   };
 
   // Update handleQuestionChange to include all fields
@@ -883,6 +956,8 @@ const EditPageSettings: React.FC = () => {
     paddingLeft: gridPadding.left,
     paddingRight: gridPadding.right,
     boxSizing: "border-box",
+    maxWidth: "100%",
+    marginRight: 0,
   }}
 >
   <div 
@@ -891,7 +966,8 @@ const EditPageSettings: React.FC = () => {
       position: "relative", 
       width: "100%", 
       height: "100%",
-      transition: "all 0.3s ease"
+      transition: "all 0.3s ease",
+      marginRight: 0,
     }}
   >
     <DraggableQuestion
@@ -916,122 +992,149 @@ const EditPageSettings: React.FC = () => {
         {showSidebar && (
           <Box
             sx={{
-              width: { xs: '100%', sm: '250px' },
+              position: 'fixed',
+              right: 0,
+              top: 0,
+              width: '250px',
               backgroundColor: '#F9F9F9',
               color: '#333',
-              // p: 4,
-              display: 'flex',
-              flexDirection: 'column',
               height: '100vh',
               boxSizing: 'border-box',
-              marginLeft: '2%',
-              marginRight: '2%',
-              justifyContent: 'space-between',
-              marginTop: '5%'
-              // transition: 'width 0.3s ease',
-              // paddingLeft: '2px', // Added more padding to the left side of the sidebar
-              // paddingRight: '2px',
+              padding: '20px',
+              boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.1)',
+              zIndex: 1000,
+              overflowY: 'auto',
+              transition: 'transform 0.3s ease',
+              transform: showSidebar ? 'translateX(0)' : 'translateX(100%)',
+              '&::-webkit-scrollbar': {
+                width: '8px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#bdbdbd',
+                borderRadius: '4px',
+                '&:hover': {
+                  background: '#9e9e9e',
+                },
+              },
             }}
           >
-            <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: '20px',  }}>Page Settings</Typography>
+            {/* Header with toggle button */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center',
+              marginBottom: '20px'
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+                Page Settings
+              </Typography>
+              <IconButton
+                onClick={toggleSidebar}
+                sx={{
+                  padding: '4px',
+                  '&:hover': {
+                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                  },
+                }}
+              >
+                <ArrowForward sx={{ 
+                  transform: 'rotate(180deg)',
+                  transition: 'transform 0.3s ease',
+                }} />
+              </IconButton>
+            </Box>
 
             {/* Page Size Selection */}
             <FormControl fullWidth variant="outlined" margin="dense" sx={{ marginBottom: '20px' }}>
-  <InputLabel>Page Size</InputLabel>
-  <Select value={selectedSize} onChange={handlePageSizeChange} label="Page Size">
-    <MenuItem value="A4">A4</MenuItem>
-    <MenuItem value="A3">A3</MenuItem>
-    <MenuItem value="Custom">Custom</MenuItem>
-  </Select>
-</FormControl>
+              <InputLabel>Page Size</InputLabel>
+              <Select value={selectedSize} onChange={handlePageSizeChange} label="Page Size">
+                <MenuItem value="A4">A4</MenuItem>
+                <MenuItem value="A3">A3</MenuItem>
+                <MenuItem value="Custom">Custom</MenuItem>
+              </Select>
+            </FormControl>
 
-<Typography 
-  variant="body1" 
-  sx={{ 
-    fontWeight: 600, 
-    marginBottom: 2, 
-    fontSize: '16px', 
-    color: '#333' 
-  }}
->
-  Grid Padding
-</Typography>
-<Box 
-  sx={{ 
-    display: 'flex', 
-    flexDirection: 'column', 
-    gap: 1, 
-    padding: 1, 
-    backgroundColor: '#f9f9f9', 
-    borderRadius: '8px', 
-    border: '1px solid #e0e0e0' 
-  }}
->
-  {['Top', 'Bottom', 'Left', 'Right'].map((side) => (
-    <Box 
-      key={side} 
-      display="flex" 
-      alignItems="center" 
-      justifyContent="space-between" 
-      sx={{ 
-        paddingY: 0.5, 
-        borderBottom: '1px solid #e0e0e0', 
-        '&:last-child': { borderBottom: 'none' } 
-      }}
-    >
-      <Typography 
-        variant="body2" 
-        sx={{ 
-          color: '#555', 
-          fontSize: '14px' 
-        }}
-      >
-        {side}:
-      </Typography>
-      <TextField
-        type="number"
-        size="small"
-        value={gridPadding[side.toLowerCase()]}
-        onChange={(e) => handleGridPaddingChange(side.toLowerCase(), parseInt(e.target.value, 10))}
-        inputProps={{ 
-          min: 0, 
-          style: { textAlign: 'center', fontSize: '14px' } 
-        }}
-        sx={{
-          width: '100px',
-          '& .MuiOutlinedInput-root': {
-            borderRadius: '6px',
-            fontSize: '14px',
-            padding: '2px 6px',
-          },
-          '& .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#dcdcdc',
-          },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#999',
-          },
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#333',
-          },
-        }}
-      />
-    </Box>
-  ))}
-</Box>
-
-
-
-
+            {/* Grid Padding Controls */}
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                fontWeight: 600, 
+                marginBottom: 2, 
+                fontSize: '16px', 
+                color: '#333' 
+              }}
+            >
+              Grid Padding
+            </Typography>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: 1, 
+                padding: 1, 
+                backgroundColor: '#f9f9f9', 
+                borderRadius: '8px', 
+                border: '1px solid #e0e0e0' 
+              }}
+            >
+              {['Top', 'Bottom', 'Left', 'Right'].map((side) => (
+                <Box 
+                  key={side} 
+                  display="flex" 
+                  alignItems="center" 
+                  justifyContent="space-between" 
+                  sx={{ 
+                    paddingY: 0.5, 
+                    borderBottom: '1px solid #e0e0e0', 
+                    '&:last-child': { borderBottom: 'none' } 
+                  }}
+                >
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: '#555', 
+                      fontSize: '14px' 
+                    }}
+                  >
+                    {side}:
+                  </Typography>
+                  <TextField
+                    type="number"
+                    size="small"
+                    value={gridPadding[side.toLowerCase()]}
+                    onChange={(e) => handleGridPaddingChange(side.toLowerCase(), parseInt(e.target.value, 10))}
+                    inputProps={{ 
+                      min: 0, 
+                      style: { textAlign: 'center', fontSize: '14px' } 
+                    }}
+                    sx={{
+                      width: '100px',
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        padding: '2px 6px',
+                      },
+                    }}
+                  />
+                </Box>
+              ))}
+            </Box>
 
             {/* Images Section */}
             <Typography variant="body1" 
-  sx={{ 
-    fontWeight: 600, 
-    marginBottom: 2, 
-    marginTop: 2,
-    fontSize: '16px', 
-    color: '#333' 
-  }}>Images</Typography>
+              sx={{ 
+                fontWeight: 600, 
+                marginBottom: 2, 
+                marginTop: 2,
+                fontSize: '16px', 
+                color: '#333' 
+              }}
+            >
+              Images
+            </Typography>
             <Box sx={{ display: 'flex', justifyContent: 'space-around', mb: 2 }}>
               {['Background', 'Footer', 'Header'].map((label) => (
                 <Box
@@ -1062,7 +1165,9 @@ const EditPageSettings: React.FC = () => {
             </Box>
 
             {/* Background Color Picker */}
-            <Typography variant="body1" sx={{ fontWeight: 'medium', marginBottom: '15px' }}>Background Color</Typography>
+            <Typography variant="body1" sx={{ fontWeight: 'medium', marginBottom: '15px' }}>
+              Background Color
+            </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1, marginBottom: '20px' }}>
               <Box sx={{ width: '100%', backgroundColor: '#fff', boxShadow: 2, borderRadius: 1, p: 2 }}>
                 <input
@@ -1074,6 +1179,26 @@ const EditPageSettings: React.FC = () => {
               </Box>
             </Box>
           </Box>
+        )}
+
+        {/* Main toggle button (visible when sidebar is closed) */}
+        {!showSidebar && (
+          <IconButton
+            onClick={toggleSidebar}
+            sx={{
+              position: 'fixed',
+              right: '20px',
+              top: '20px',
+              backgroundColor: '#F9F9F9',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              zIndex: 1000,
+              '&:hover': {
+                backgroundColor: '#fff',
+              },
+            }}
+          >
+            <ArrowForward />
+          </IconButton>
         )}
       </>
   );

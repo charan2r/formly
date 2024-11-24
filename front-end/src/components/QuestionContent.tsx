@@ -51,6 +51,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                 backgroundColor: '#ffffff',
                 borderRadius: '4px',
               }}
+              preserveWhitespace={true}
             />
             {item.options?.map((option) => (
               // ... existing option rendering code ...
@@ -124,6 +125,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                 backgroundColor: '#ffffff',
                 borderRadius: '4px',
               }}
+              preserveWhitespace={true}
             />
           </Box>
         </Box>
