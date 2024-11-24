@@ -14,11 +14,23 @@ export class CreateFormFieldDto {
 
   @IsOptional()
   @IsString()
+  color?: string;
+
+  @IsOptional()
+  @IsString()
   width?: string;
 
   @IsOptional()
   @IsString()
   height?: string;
+
+  @IsOptional()
+  @IsString()
+  x?: string;
+
+  @IsOptional()
+  @IsString()
+  y?: string;
 
   @IsOptional()
   @IsString()

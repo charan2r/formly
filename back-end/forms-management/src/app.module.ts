@@ -19,7 +19,6 @@ import { FormTemplateModule } from './form-template/form-template.module';
 import { FormTemplate } from './model/form-template.entity';
 import { FormTemplateRepository } from './form-template/form-template.repository';
 import { CategoryRepository } from './category/category.repository';
-import { Category } from './model/category.entity';
 import { FormFieldsModule } from './form-fields/form-fields.module';
 import { FormFieldsRepository } from './form-fields/form-fields.repository';
 import { FormField } from './model/form-fields.entity';

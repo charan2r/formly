@@ -2,17 +2,19 @@
 import { IsString, IsOptional, IsUUID } from 'class-validator';
 
 export class UpdateFormFieldDto {
-  @IsOptional()
   @IsString()
-  question?: string;
+  question: string;
 
-  @IsOptional()
   @IsString()
-  type?: string;
+  type: string;
 
   @IsOptional()
   @IsString()
   image?: string;
+
+  @IsOptional()
+  @IsString()
+  color?: string;
 
   @IsOptional()
   @IsString()
@@ -24,9 +26,16 @@ export class UpdateFormFieldDto {
 
   @IsOptional()
   @IsString()
-  status?: string;
+  x?: string;
 
   @IsOptional()
+  @IsString()
+  y?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: string;
+
   @IsUUID()
-  formTemplateId?: string;
+  formTemplateId: string;
 }

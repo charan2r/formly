@@ -129,7 +129,7 @@ const Template: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/categories/organization/f247546a-eea9-4678-ac24-5924e0a58250');
+                const response = await axios.get('http://localhost:3001/categories/organization/3f1b43a2-8add-4145-a4ec-6c560c7ac766');
                 // Filter categories where status is 'active'
                 const activeCategories = response.data.data.filter((cat: Category) => cat.status === 'active');
                 setCategories(activeCategories);
@@ -227,9 +227,11 @@ const Template: React.FC = () => {
 
     const handleCreateTemplate = async () => {
         try {
+            console.log(newTemplate);
             const response = await axios.post('http://localhost:3001/form-templates/create', {
                 ...newTemplate,
                 categoryId: newTemplate.categoryId,
+                pageSize: newTemplate.pageSize,
                 status: 'active',
                 version: 1
             });
@@ -238,8 +240,8 @@ const Template: React.FC = () => {
             
             toast.success("Template has been created successfully!", toastConfig);
             
-            // Add navigation to edittemplate route
-            navigate('/edittemplate', { 
+            // Navigate to edittemplate route with formTemplateId as parameter
+            navigate(`/edittemplate/${response.data.formTemplateId}`, { 
                 state: { templateData: response.data } 
             });
         } catch (error) {
@@ -642,12 +644,9 @@ const Template: React.FC = () => {
                                             onClick={() => {
                                                 handleMenuClose();
                                                 setSelectedTemplate(row);
-                                                setEditFormData({
-                                                    name: row.name,
-                                                    description: row.description,
-                                                    categoryId: row.category.categoryId
+                                                navigate(`/edittemplate/${row.formTemplateId}`, { 
+                                                    state: { templateData: row } 
                                                 });
-                                                setEditTemplateOpen(true); // You'll need to add this state
                                             }}
                                             sx={{
                                                 backgroundColor: 'white',

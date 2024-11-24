@@ -17,9 +17,10 @@ export class FormFieldsService {
         return this.formFieldsRepository.save(field);
     }
 
-    // Method to get all form fields
-    async getFields(): Promise<FormField[]>{
-        return this.formFieldsRepository.find();
+    // Method to get all form fields by template ID
+    async getFields(formTemplateId: string): Promise<FormField[]> {
+        console.log("formTemplateId", formTemplateId);
+        return this.formFieldsRepository.find({ where: { formTemplateId } });
     }
 
     // Method to get a form field by id

@@ -26,10 +26,10 @@ export class FormFieldsController {
     };
   }
 
-  // API endpoint to get all form fields
+  // API endpoint to get all form fields by template ID
   @Get()
-  async getFields(): Promise<MetaSchemaResponse<FormField[]>> {
-    const fields = await this.formFieldsService.getFields();
+  async getFields(@Query('formTemplateId') formTemplateId: string): Promise<MetaSchemaResponse<FormField[]>> {
+    const fields = await this.formFieldsService.getFields(formTemplateId);
     return {
       success: true,
       message: 'Form fields retrieved successfully.',

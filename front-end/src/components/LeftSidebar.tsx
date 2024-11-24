@@ -10,57 +10,127 @@ import EventNoteIcon from '@mui/icons-material/EventNote';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import axios from 'axios';
+import { useTemplate } from '../context/TemplateContext';
 
 // Sample Sidebar Data
 const initialElements = [
-  { id: '1', category: 'Layout Elements', items: [{ label: 'Sections', icon: <ViewModuleIcon /> }, { label: 'Tables', icon: <TableChartIcon /> }] },
-  { id: '2', category: 'Text Elements', items: [{ label: 'Single Line', icon: <TextFieldsIcon /> }, { label: 'Multiline', icon: <SubjectIcon /> }, { label: 'Number', icon: <KeyboardIcon /> }, { label: 'Rich Text', icon: <FormatBoldIcon /> }] },
-  { id: '3', category: 'Date Elements', items: [{ label: 'Date', icon: <EventNoteIcon /> }, { label: 'Date & Time', icon: <EventNoteIcon /> }] },
-  { id: '4', category: 'Multi Elements', items: [{ label: 'Yes/No', icon: <CheckBoxIcon /> }, { label: 'Checkbox', icon: <CheckBoxIcon /> }] },
+  { 
+    id: '1', 
+    category: 'Layout Elements', 
+    items: [
+      { label: 'Sections', icon: <ViewModuleIcon />, type: 'section' }, 
+      { label: 'Tables', icon: <TableChartIcon />, type: 'table' }
+    ] 
+  },
+  { 
+    id: '2', 
+    category: 'Text Elements', 
+    items: [
+      { label: 'Single Line', icon: <TextFieldsIcon />, type: 'single-line' }, 
+      { label: 'Multiline', icon: <SubjectIcon />, type: 'multiline' }, 
+      { label: 'Number', icon: <KeyboardIcon />, type: 'number' }, 
+      { label: 'Rich Text', icon: <FormatBoldIcon />, type: 'rich-text' }
+    ] 
+  },
+  { 
+    id: '3', 
+    category: 'Date Elements', 
+    items: [
+      { label: 'Date', icon: <EventNoteIcon />, type: 'date' }, 
+      { label: 'Date & Time', icon: <EventNoteIcon />, type: 'datetime' }
+    ] 
+  },
+  { 
+    id: '4', 
+    category: 'Multi Elements', 
+    items: [
+      { label: 'Yes/No', icon: <CheckBoxIcon />, type: 'yes-no' }, 
+      { label: 'Checkbox', icon: <CheckBoxIcon />, type: 'checkbox' }
+    ] 
+  },
 ];
 
 // Draggable Item Component
-const DraggableItem = memo(({ item, index }) => (
-  <Draggable key={item.label} draggableId={item.label} index={index}>
-    {(provided) => (
-      <Box
-        ref={provided.innerRef}
-        {...provided.draggableProps}
-        {...provided.dragHandleProps}
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minWidth: '40px',
-        }}
-      >
-        <ListItemButton
+const DraggableItem = memo(({ item, index }) => {
+  const { formTemplateId } = useTemplate();
+
+  const handleClick = async () => {
+    if (!formTemplateId) {
+      console.error('No template ID available');
+      return;
+    }
+
+    try {
+      const newField = {
+        question: "New Question",
+        type: item.type,
+        x: "0",
+        y: "0",
+        width: "300",
+        height: "200",
+        color: "#a8d8ea",
+        formTemplateId: formTemplateId,
+        options: JSON.stringify(
+          item.type === 'checkbox' || item.type === 'yes-no' 
+            ? [
+                { id: 1, text: "Option 1", value: 1 },
+                { id: 2, text: "Option 2", value: 2 }
+              ]
+            : []
+        )
+      };
+
+      await axios.post('http://localhost:3001/form-fields/create', newField);
+    } catch (error) {
+      console.error('Error creating form field:', error);
+    }
+  };
+
+  return (
+    <Draggable key={item.type} draggableId={item.type} index={index}>
+      {(provided) => (
+        <Box
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          onClick={handleClick}
           sx={{
             display: 'flex',
-            justifyContent: 'center',
+            flexDirection: 'column',
             alignItems: 'center',
-            borderRadius: '4px',
-            p: 0.5,
-            backgroundColor: '#fff',
-            boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
-            height: '35px',
+            justifyContent: 'center',
+            minWidth: '40px',
+            cursor: 'pointer',
           }}
         >
-          {React.cloneElement(item.icon, { fontSize: 'small' })}
-          <ListItemText
-            primary={item.label}
-            primaryTypographyProps={{
-              fontWeight: 'bold',
-              textAlign: 'center',
-              fontSize: '0.75rem',
+          <ListItemButton
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              borderRadius: '4px',
+              p: 0.5,
+              backgroundColor: '#fff',
+              boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
+              height: '35px',
             }}
-          />
-        </ListItemButton>
-      </Box>
-    )}
-  </Draggable>
-));
+          >
+            {React.cloneElement(item.icon, { fontSize: 'small' })}
+            <ListItemText
+              primary={item.label}
+              primaryTypographyProps={{
+                fontWeight: 'bold',
+                textAlign: 'center',
+                fontSize: '0.75rem',
+              }}
+            />
+          </ListItemButton>
+        </Box>
+      )}
+    </Draggable>
+  );
+});
 
 // Category Component
 const Category = memo(({ category, filteredItems }) => (
@@ -84,16 +154,62 @@ const Category = memo(({ category, filteredItems }) => (
 ));
 
 const LeftSidebar: React.FC = () => {
+  const { formTemplateId } = useTemplate();
   const [searchText, setSearchText] = useState('');
   const [elements, setElements] = useState(initialElements);
 
-  // Handle Drag End
-  const handleDragEnd = (result: any) => {
-    const { source, destination } = result;
+  const handleDragEnd = async (result: any) => {
+    const { source, destination, draggableId: type } = result;
+    
     if (!destination) return;
 
-    const sourceCategoryIndex = elements.findIndex((category) => category.id === source.droppableId);
-    const destinationCategoryIndex = elements.findIndex((category) => category.id === destination.droppableId);
+    // Check if dropping into RND container
+    if (destination.droppableId === 'rnd-container') {
+      if (!formTemplateId) {
+        console.error('No template ID available');
+        return;
+      }
+
+      try {
+        const newField = {
+          question: "New Question",
+          type: type,
+          x: "0",
+          y: "0",
+          width: "300",
+          height: "200",
+          color: "#a8d8ea",
+          formTemplateId: formTemplateId,
+          options: JSON.stringify(
+            type === 'checkbox' || type === 'yes-no' 
+              ? [
+                  { id: 1, text: "Option 1", value: 1 },
+                  { id: 2, text: "Option 2", value: 2 }
+                ]
+              : []
+          )
+        };
+
+        await axios.post('http://localhost:3001/form-fields', newField);
+        
+        // Don't reorder items when dropping into RND container
+        return;
+      } catch (error) {
+        console.error('Error creating form field:', error);
+      }
+    }
+
+    // Only handle reordering if not dropping into RND container
+    if (source.droppableId !== destination.droppableId) {
+      return;
+    }
+
+    // Update category reordering logic to use new droppableId format
+    const sourceCategoryId = source.droppableId.replace('category-', '');
+    const destinationCategoryId = destination.droppableId.replace('category-', '');
+
+    const sourceCategoryIndex = elements.findIndex((category) => category.id === sourceCategoryId);
+    const destinationCategoryIndex = elements.findIndex((category) => category.id === destinationCategoryId);
 
     const sourceItems = Array.from(elements[sourceCategoryIndex].items);
     const [movedItem] = sourceItems.splice(source.index, 1);
@@ -160,11 +276,9 @@ const LeftSidebar: React.FC = () => {
         fullWidth
       />
 
-      <DragDropContext onDragEnd={handleDragEnd}>
-        {filteredElements.map((category) => (
-          <Category key={category.id} category={category} filteredItems={category.items} />
-        ))}
-      </DragDropContext>
+      {filteredElements.map((category) => (
+        <Category key={category.id} category={category} filteredItems={category.items} />
+      ))}
     </Box>
   );
 };

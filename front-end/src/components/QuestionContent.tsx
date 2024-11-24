@@ -36,6 +36,47 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   onDeleteOption,
   onAddOption,
 }) => {
+   // Add conditional rendering based on type
+   const renderContent = () => {
+    switch (item.type) {
+      case 'checkbox':
+      case 'yes-no':
+        return (
+          <>
+            <ReactQuill
+              value={item.question}
+              onChange={(content) => onQuestionChange(item.id, content)}
+              modules={quillModules}
+              style={{
+                backgroundColor: '#ffffff',
+                borderRadius: '4px',
+              }}
+            />
+            {item.options?.map((option) => (
+              // ... existing option rendering code ...
+              console.log('hello')
+            ))}
+            <Button
+              className="add-option"
+              startIcon={<AddIcon />}
+              onClick={() => onAddOption(item.id)}
+              // ... existing button styles ...
+            >
+              Add Option
+            </Button>
+          </>
+        );
+      default:
+        return (
+          <Box sx={{ /* existing styles */ }}>
+      <DragHandle />
+      <Box sx={{ /* existing styles */ }}>
+        {renderContent()}
+      </Box>
+    </Box>
+        );
+    }
+  };
   return (
     <Box 
       sx={{ 
@@ -95,7 +136,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
             opacity: 1,
           },
         }}>
-          {item.options.map((option) => (
+          {/* {item.options.map((option) => (
             <Box
               key={option.id}
               sx={{
@@ -162,7 +203,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                 <DeleteOutlineIcon fontSize="small" />
               </IconButton>
             </Box>
-          ))}
+          ))} */}
           
           <Button
             className="add-option"

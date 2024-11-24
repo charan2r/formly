@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsNotEmpty, IsOptional, IsString, IsInt, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsInt, IsUUID, IsNumber } from 'class-validator';
 
 export class CreateFormTemplateDto {
   @IsNotEmpty()
@@ -45,7 +45,28 @@ export class CreateFormTemplateDto {
   @IsString()
   logoImage?: string;
 
-  @IsNotEmpty() 
+  @IsNotEmpty()
   @IsUUID()
-  categoryId?: string; 
+  categoryId?: string;
+
+  // New fields added
+  @IsOptional()
+  @IsString()
+  paperSize?: string; // e.g., "A4", "Letter", etc.
+
+  @IsOptional()
+  @IsNumber()
+  marginTop?: number; // Margin at the top in units like mm or inches
+
+  @IsOptional()
+  @IsNumber()
+  marginBottom?: number; // Margin at the bottom
+
+  @IsOptional()
+  @IsNumber()
+  marginLeft?: number; // Margin on the left
+
+  @IsOptional()
+  @IsNumber()
+  marginRight?: number; // Margin on the right
 }

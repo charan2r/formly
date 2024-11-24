@@ -24,6 +24,9 @@ import AddIcon from '@mui/icons-material/Add';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import DraggableQuestion from './DraggableQuestion';
+import { useParams, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import { useTemplate } from '../context/TemplateContext';
 
 const pageSizes = {
   A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
@@ -36,49 +39,49 @@ const initialItems = [
   { id: "2", x: 0, y: 0, width: 150, height: 150, color: "#a8d8ea",type: 'title' },
 ];
 
-const getRandomPosition = (maxWidth: number, maxHeight: number, itemWidth: number, itemHeight: number) => {
-  return {
-    x: Math.random() * (maxWidth - itemWidth),
-    y: Math.random() * (maxHeight - itemHeight)
-  };
-};
 
-const quillModules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, false] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ 'color': [] }, { 'background': [] }],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    [{ 'script': 'sub'}, { 'script': 'super' }],
-    [{ 'indent': '-1'}, { 'indent': '+1' }],
-    [{ 'direction': 'rtl' }],
-    [{ 'align': [] }],
-    ['link', 'image', 'video'],
-    ['clean']
-  ],
-};
+
+interface TemplateData {
+  formTemplateId: string;
+  name: string;
+  description: string;
+  backgroundColor: string;
+  pageSize: string;
+  marginTop: string;
+  marginBottom: string;
+  marginLeft: string;
+  marginRight: string;
+  version: number;
+  status: string;
+  categoryId: string;
+}
+
+// Add this interface for the form field type
+interface FormField {
+  fieldId: string;
+  question: string;
+  type: string;
+  color: string;
+  width: string;
+  height: string;
+  x: string;
+  y: string;
+  formTemplateId: string;
+  // Add other fields as needed
+}
 
 const EditPageSettings: React.FC = () => {
   const [pageSize, setPageSize] = useState<string>('Letter');
   const [orientation, setOrientation] = useState<string>('Portrait');
   const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState("A4");
   const [gridPadding, setGridPadding] = useState({ top: 10, bottom: 10, left: 10, right: 10 });
+  const { formTemplateId } = useParams();
+  const { setFormTemplateId } = useTemplate();
 
 
-  const [items, setItems] = useState(initialItems.map(item => ({
-    ...item,
-    question: "How satisfied are you with the company's professional development opportunities?",
-    options: [
-      { id: 1, text: 'Very Satisfied', value: 5 },
-      { id: 2, text: 'Satisfied', value: 4 },
-      { id: 3, text: 'Neutral', value: 3 },
-      { id: 4, text: 'Dissatisfied', value: 2 },
-      { id: 5, text: 'Very Dissatisfied', value: 1 }
-    ]
-  })));
+  const [items, setItems] = useState<any[]>([]);
   const rndContainerRef = useRef(null);
   const paperRef = useRef<HTMLDivElement>(null);
   const [gridSize, setGridSize] = useState({ width: 210 * 3.7795, height: 297 * 3.7795 });
@@ -89,8 +92,77 @@ const EditPageSettings: React.FC = () => {
     Header: ''
   });
 
+  useEffect(() => {
+    if (formTemplateId) {
+      setFormTemplateId(formTemplateId);
+    }
+  }, [formTemplateId, setFormTemplateId]);
+
+
   // Add new state to track initial page size for scaling
   const [initialPageSize] = useState(selectedSize);
+
+  // Get the formTemplateId from URL parameters
+  // const { formTemplateId } = useParams();
+  
+  const [templateData, setTemplateData] = useState<TemplateData | null>(null);
+
+  // Add new state for template name and description
+  const [templateName, setTemplateName] = useState('Employee Survey');
+  const [templateDescription, setTemplateDescription] = useState('Add a description');
+
+  // Add these state initializations with templateData values
+  const [pageSettings, setPageSettings] = useState({
+    pageSize: 'A4',
+    margins: {
+      top: 10,
+      bottom: 10,
+      left: 10,
+      right: 10
+    }
+  });
+
+  // Add state to track if settings have changed
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Add these new states
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [tempName, setTempName] = useState('');
+  const [tempDescription, setTempDescription] = useState('');
+  const [templateId, setTemplateId] = useState('');
+
+  useEffect(() => {
+    const fetchTemplateData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/form-templates/details?id=${formTemplateId}`);
+        
+        if (response.data.status === 'success') {
+          const template = response.data.data;
+          console.log("temasd awd Adplate", template);
+          setTemplateData(template);
+          setTemplateId(template.formTemplateId);
+          // Initialize states with template data
+          setBackgroundColor(template.backgroundColor || '#ffffff');
+          setSelectedSize(template.pageSize || 'A4');
+          setGridPadding({
+            top: parseInt(template.marginTop) || 10,
+            bottom: parseInt(template.marginBottom) || 10,
+            left: parseInt(template.marginLeft) || 10,
+            right: parseInt(template.marginRight) || 10
+          });
+          setTemplateName(template.name);
+          setTemplateDescription(template.description);
+        }
+      } catch (error) {
+        console.error('Error fetching template data:', error);
+      }
+    };
+
+    if (formTemplateId) {
+      fetchTemplateData();
+    }
+  }, [formTemplateId]);
 
   useEffect(() => {
     const savedSettings = JSON.parse(localStorage.getItem('pageSettings') || '{}');
@@ -102,47 +174,208 @@ const EditPageSettings: React.FC = () => {
     }
   }, []);
 
-  const handleSave = () => {
-    const settings = {
-      pageSize,
-      orientation,
-      backgroundColor,
-      showSidebar,
-    };
-    localStorage.setItem('pageSettings', JSON.stringify(settings));
-    console.log('Settings saved');
+  // Modify the hasChanges useEffect to include name and description changes
+  useEffect(() => {
+    if (templateData) {
+      const hasSettingsChanged = 
+        backgroundColor !== templateData.backgroundColor ||
+        selectedSize !== templateData.pageSize ||
+        gridPadding.top !== parseInt(templateData.marginTop) ||
+        gridPadding.bottom !== parseInt(templateData.marginBottom) ||
+        gridPadding.left !== parseInt(templateData.marginLeft) ||
+        gridPadding.right !== parseInt(templateData.marginRight) ||
+        templateName !== templateData.name ||  // Add name check
+        templateDescription !== templateData.description;  // Add description check
+
+      setHasChanges(hasSettingsChanged);
+    }
+  }, [
+    backgroundColor, 
+    selectedSize, 
+    gridPadding, 
+    templateData, 
+    templateName,     // Add to dependency array
+    templateDescription  // Add to dependency array
+  ]);
+
+  // Modify the name and description handlers to use the main save button
+  const handleNameDoubleClick = () => {
+    setIsEditingName(true);
+    setTempName(templateName);
   };
 
-  const handleSizeChange = (event) => {
-    const newSize = event.target.value;
-    const oldSize = selectedSize;
-    
-    setItems(prevItems => prevItems.map(item => {
-      // Calculate distances from right and bottom edges
-      const distanceFromRight = pageSizes[oldSize].width - (item.x + item.width);
-      const distanceFromBottom = pageSizes[oldSize].height - (item.y + item.height);
-      
-      // If item is closer to right edge than left, maintain right distance
-      const newX = distanceFromRight < item.x
-        ? pageSizes[newSize].width - distanceFromRight - item.width
-        : (item.x / pageSizes[oldSize].width) * pageSizes[newSize].width;
+  const handleDescriptionDoubleClick = () => {
+    setIsEditingDescription(true);
+    setTempDescription(templateDescription);
+  };
 
-      // If item is closer to bottom edge than top, maintain bottom distance
-      const newY = distanceFromBottom < item.y
-        ? pageSizes[newSize].height - distanceFromBottom - item.height
-        : (item.y / pageSizes[oldSize].height) * pageSizes[newSize].height;
-      
-      return {
-        ...item,
-        x: newX,
-        y: newY,
-        width: (item.width / pageSizes[oldSize].width) * pageSizes[newSize].width,
-        height: (item.height / pageSizes[oldSize].height) * pageSizes[newSize].height,
+  // Update these handlers to just update the state without saving
+  const handleNameChange = () => {
+    setTemplateName(tempName);
+    setIsEditingName(false);
+  };
+
+  const handleDescriptionChange = () => {
+    setTemplateDescription(tempDescription);
+    setIsEditingDescription(false);
+  };
+
+  // Update the TextField components to use the new handlers
+  {isEditingName ? (
+    <TextField
+      fullWidth
+      value={tempName}
+      onChange={(e) => setTempName(e.target.value)}
+      onBlur={handleNameChange}  // Changed from handleNameSave
+      onKeyPress={(e) => {
+        if (e.key === 'Enter') {
+          handleNameChange();  // Changed from handleNameSave
+        }
+      }}
+      autoFocus
+      variant="outlined"
+      size="small"
+      sx={{
+        marginBottom: '8px',
+        '& .MuiOutlinedInput-root': {
+          fontSize: '1.5rem',
+          fontWeight: 'bold',
+          backgroundColor: '#fff',
+          borderRadius: '8px',
+          '& fieldset': {
+            borderColor: '#e0e0e0',
+          },
+          '&:hover fieldset': {
+            borderColor: '#999',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#333',
+            borderWidth: '2px',
+          },
+        },
+        '& .MuiOutlinedInput-input': {
+          padding: '8px 12px',
+        }
+      }}
+    />
+  ) : (
+    <Typography 
+      variant="h5" 
+      fontWeight="bold"
+      onDoubleClick={handleNameDoubleClick}
+      sx={{ 
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          borderRadius: '4px',
+          transition: 'background-color 0.2s'
+        },
+        padding: '4px 8px',
+      }}
+    >
+      {templateName}
+    </Typography>
+  )}
+
+  {isEditingDescription ? (
+    <TextField
+      fullWidth
+      value={tempDescription}
+      onChange={(e) => setTempDescription(e.target.value)}
+      onBlur={handleDescriptionChange}  // Changed from handleDescriptionSave
+      onKeyPress={(e) => {
+        if (e.key === 'Enter') {
+          handleDescriptionChange();  // Changed from handleDescriptionSave
+        }
+      }}
+      autoFocus
+      variant="outlined"
+      size="small"
+      multiline
+      sx={{
+        marginTop: '-5px',
+        marginBottom: '5px',
+        '& .MuiOutlinedInput-root': {
+          fontSize: '0.875rem',
+          color: 'text.secondary',
+          backgroundColor: '#fff',
+          borderRadius: '6px',
+          '& fieldset': {
+            borderColor: '#e0e0e0',
+          },
+          '&:hover fieldset': {
+            borderColor: '#999',
+          },
+          '&.Mui-focused fieldset': {
+            borderColor: '#333',
+            borderWidth: '2px',
+          },
+        },
+        '& .MuiOutlinedInput-input': {
+          padding: '6px 10px',
+        }
+      }}
+    />
+  ) : (
+    <Typography 
+      variant="body2" 
+      color="textSecondary" 
+      marginBottom="5px" 
+      marginTop="-10px"
+      onDoubleClick={handleDescriptionDoubleClick}
+      sx={{ 
+        cursor: 'pointer',
+        '&:hover': {
+          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+          borderRadius: '4px',
+          transition: 'background-color 0.2s'
+        },
+        padding: '4px 8px',
+      }}
+    >
+      {templateDescription}
+    </Typography>
+  )}
+
+  // Update the main save button to include name and description in the save
+  const handleSave = async () => {
+    try {
+      if (!formTemplateId || !hasChanges) return;
+
+      const updateData = {
+        name: templateName,
+        description: templateDescription,
+        backgroundColor: backgroundColor,
+        pageSize: selectedSize,
+        marginTop: gridPadding.top.toString(),
+        marginBottom: gridPadding.bottom.toString(),
+        marginLeft: gridPadding.left.toString(),
+        marginRight: gridPadding.right.toString(),
+        version: templateData?.version,
+        status: templateData?.status,
+        categoryId: templateData?.categoryId
       };
-    }));
-    
-    setSelectedSize(newSize);
+
+      const response = await axios.patch(
+        `http://localhost:3001/form-templates/edit?id=${formTemplateId}`,
+        updateData
+      );
+
+      if (response.data.status === 'success') {
+        setHasChanges(false);
+        // Fetch updated data after successful save
+        const updatedResponse = await axios.get(`http://localhost:3001/form-templates/details?id=${formTemplateId}`);
+        if (updatedResponse.data.status === 'success') {
+          setTemplateData(updatedResponse.data.data);
+        }
+        console.log('Template updated successfully');
+      }
+    } catch (error) {
+      console.error('Error updating template:', error);
+    }
   };
+
+
 
   const calculateGridSize = () => {
     if (paperRef.current) {
@@ -167,42 +400,51 @@ const EditPageSettings: React.FC = () => {
     calculateGridSize();
   }, [selectedSize, orientation]);
 
-  const handleDragStop = (id, e, data) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              x: (data.x / gridSize.width) * pageSizes[selectedSize].width,
-              y: (data.y / gridSize.height) * pageSizes[selectedSize].height,
-            }
-          : item
-      )
-    );
-  };
+  // Add new useEffect to fetch form fields
+  useEffect(() => {
+    const fetchFormFields = async () => {
+      try {
+        if (!formTemplateId) return;
 
-  const handleResizeStop = (id, e, direction, ref, delta, position) => {
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              width: (ref.offsetWidth / gridSize.width) * pageSizes[selectedSize].width,
-              height: (ref.offsetHeight / gridSize.height) * pageSizes[selectedSize].height,
-              x: (position.x / gridSize.width) * pageSizes[selectedSize].width,
-              y: (position.y / gridSize.height) * pageSizes[selectedSize].height,
-            }
-          : item
-      )
-    );
-  };
+        const response = await axios.get(`http://localhost:3001/form-fields`, {
+          params: { formTemplateId: formTemplateId }
+        });
 
+        if (response.data.success) {
+          // Transform backend data to match your items structure
+          const transformedItems = response.data.data.map((field: FormField) => ({
+            id: field.fieldId
+            ,
+            x: parseFloat(field.x) || 0,
+            y: parseFloat(field.y) || 0,
+            width: parseFloat(field.width) || 150,
+            height: parseFloat(field.height) || 150,
+            color: field.color || "#a8d8ea",
+            type: field.type || 'question',
+            question: field.question || "How satisfied are you with the company's professional development opportunities?",
+           
+          }));
+          console.log("transformedItems", transformedItems);
 
+          setItems(transformedItems);
+        }
+      } catch (error) {
+        console.error('Error fetching form fields:', error);
+        // Fallback to initial items if fetch fails
+        setItems(initialItems.map(item => ({
+          ...item,
+          question: "How satisfied are you with the company's professional development opportunities?",
+         
+        })));
+      }
+    };
+
+    fetchFormFields();
+  }, [formTemplateId]);
 
   const handlePageSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
     setSelectedSize(event.target.value as string);
   };
-
 
   const handleBackgroundColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setBackgroundColor(event.target.value);
@@ -242,61 +484,184 @@ const EditPageSettings: React.FC = () => {
     return showSidebar ? '55vw' : '70vw';
   };
 
-  const handleQuestionChange = (itemId: string, newContent: string) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId ? { ...item, question: newContent } : item
-      )
-    );
+  // Update handleQuestionChange to include all fields
+  const handleQuestionChange = async (itemId: string, newContent: string) => {
+    const item = items.find(item => item.id === itemId);
+    if (!item) return;
+
+    try {
+      const updateData = {
+        question: newContent,
+        x: item.x.toString(),
+        y: item.y.toString(),
+        width: item.width.toString(),
+        height: item.height.toString(),
+        type: item.type,
+        color: item.color,
+        options: JSON.stringify(item.options)
+      };
+
+      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item.id === itemId ? { ...item, question: newContent } : item
+        )
+      );
+    } catch (error) {
+      console.error('Error updating question:', error);
+    }
   };
 
-  const handleOptionChange = (itemId: string, optionId: number, newContent: string) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId
-          ? {
-              ...item,
-              options: item.options.map(opt =>
-                opt.id === optionId ? { ...opt, text: newContent } : opt
-              )
-            }
-          : item
-      )
-    );
+  
+
+  // Update handleOptionChange to include all fields
+  const handleOptionChange = async (itemId: string, optionId: number, newContent: string) => {
+    const item = items.find(item => item.id === itemId);
+    if (!item) return;
+
+    try {
+      const updatedOptions = item.options.map(opt =>
+        opt.id === optionId ? { ...opt, text: newContent } : opt
+      );
+
+      const updateData = {
+        options: JSON.stringify(updatedOptions),
+        question: item.question,
+        x: item.x.toString(),
+        y: item.y.toString(),
+        width: item.width.toString(),
+        height: item.height.toString(),
+        type: item.type,
+        color: item.color
+      };
+
+      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item.id === itemId
+            ? {
+                ...item,
+                options: updatedOptions
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error('Error updating option:', error);
+    }
   };
 
-  const handleAddOption = (itemId: string) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId
-          ? {
-              ...item,
-              options: [
-                ...item.options,
-                {
-                  id: item.options.length + 1,
-                  text: 'New Option',
-                  value: item.options.length + 1
-                }
-              ]
-            }
-          : item
-      )
-    );
+  // Helper function to create update data
+  const createUpdateData = (item: any, partialUpdate: any) => {
+    return {
+      
+      x: item.x.toString(),
+      y: item.y.toString(),
+      width: item.width.toString(),
+      height: item.height.toString(),
+      question: item.question,
+      type: item.type,
+      color: item.color,
+      options: JSON.stringify(item.options),
+      ...partialUpdate
+    };
   };
 
-  const handleDeleteOption = (itemId: string, optionId: number) => {
-    setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId
-          ? {
-              ...item,
-              options: item.options.filter(opt => opt.id !== optionId)
-            }
-          : item
-      )
-    );
+  // Update handleAddOption to include all fields
+  const handleAddOption = async (itemId: string) => {
+    const item = items.find(item => item.id === itemId);
+    if (!item) return;
+
+    try {
+      const newOption = {
+        id: item.options.length + 1,
+        text: 'New Option',
+        value: item.options.length + 1
+      };
+      const updatedOptions = [...item.options, newOption];
+
+      const updateData = createUpdateData(item, {
+        options: JSON.stringify(updatedOptions)
+      });
+
+      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item.id === itemId
+            ? {
+                ...item,
+                options: updatedOptions
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error('Error adding option:', error);
+    }
   };
+
+  // Update handleDeleteOption to include all fields
+  const handleDeleteOption = async (itemId: string, optionId: number) => {
+    const item = items.find(item => item.id === itemId);
+    if (!item) return;
+
+    try {
+      const updatedOptions = item.options.filter(opt => opt.id !== optionId);
+
+      const updateData = createUpdateData(item, {
+        options: JSON.stringify(updatedOptions)
+      });
+
+      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+
+      setItems(prevItems =>
+        prevItems.map(item =>
+          item.id === itemId
+            ? {
+                ...item,
+                options: updatedOptions
+              }
+            : item
+        )
+      );
+    } catch (error) {
+      console.error('Error deleting option:', error);
+    }
+  };
+
+  // Optional: Add a pulsing animation to the save button when there are changes
+  <Button
+    variant="contained"
+    size="small"
+    sx={{
+      backgroundColor: hasChanges ? 'black' : '#666',
+      color: 'white',
+      borderRadius: '20px',
+      paddingX: '15px',
+      '&:hover': {
+        backgroundColor: hasChanges ? '#333' : '#777',
+      },
+      animation: hasChanges ? 'pulse 2s infinite' : 'none',
+      '@keyframes pulse': {
+        '0%': {
+          boxShadow: '0 0 0 0 rgba(0,0,0, 0.4)',
+        },
+        '70%': {
+          boxShadow: '0 0 0 10px rgba(0,0,0, 0)',
+        },
+        '100%': {
+          boxShadow: '0 0 0 0 rgba(0,0,0, 0)',
+        },
+      },
+    }}
+    onClick={handleSave}
+    disabled={!hasChanges}
+  >
+    Save
+  </Button>
 
   return (
       <>
@@ -351,23 +716,155 @@ const EditPageSettings: React.FC = () => {
                       variant="contained"
                       size="small"
                       sx={{
-                        backgroundColor: 'black',
+                        backgroundColor: hasChanges ? 'black' : '#666',
                         color: 'white',
                         borderRadius: '20px',
                         paddingX: '15px',
                         '&:hover': {
-                          backgroundColor: '#333',
+                          backgroundColor: hasChanges ? '#333' : '#777',
+                        },
+                        animation: hasChanges ? 'pulse 2s infinite' : 'none',
+                        '@keyframes pulse': {
+                          '0%': {
+                            boxShadow: '0 0 0 0 rgba(0,0,0, 0.4)',
+                          },
+                          '70%': {
+                            boxShadow: '0 0 0 10px rgba(0,0,0, 0)',
+                          },
+                          '100%': {
+                            boxShadow: '0 0 0 0 rgba(0,0,0, 0)',
+                          },
                         },
                       }}
                       onClick={handleSave}
+                      disabled={!hasChanges}
                     >
                       Save
                     </Button>
                   </Box>
                 </Box>
-                <Typography variant="h5" fontWeight="bold">Employee Survey</Typography>
-                <Typography variant="body2" color="textSecondary" marginBottom="5px" marginTop="-10px">
-                  Add a description
+                <Typography variant="h5" fontWeight="bold">
+                  {isEditingName ? (
+                    <TextField
+                      fullWidth
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      onBlur={handleNameChange}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleNameChange();
+                        }
+                      }}
+                      autoFocus
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        marginBottom: '8px',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '1.5rem',
+                          fontWeight: 'bold',
+                          backgroundColor: '#fff',
+                          borderRadius: '8px',
+                          '& fieldset': {
+                            borderColor: '#e0e0e0',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#999',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#333',
+                            borderWidth: '2px',
+                          },
+                        },
+                        '& .MuiOutlinedInput-input': {
+                          padding: '8px 12px',
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Typography 
+                      variant="h5" 
+                      fontWeight="bold"
+                      onDoubleClick={handleNameDoubleClick}
+                      sx={{ 
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          borderRadius: '4px',
+                          transition: 'background-color 0.2s'
+                        },
+                        padding: '4px 8px',
+                      }}
+                    >
+                      {templateName}
+                    </Typography>
+                  )}
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  color="textSecondary" 
+                  marginBottom="5px" 
+                  marginTop="-10px"
+                >
+                  {isEditingDescription ? (
+                    <TextField
+                      fullWidth
+                      value={tempDescription}
+                      onChange={(e) => setTempDescription(e.target.value)}
+                      onBlur={handleDescriptionChange}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleDescriptionChange();
+                        }
+                      }}
+                      autoFocus
+                      variant="outlined"
+                      size="small"
+                      multiline
+                      sx={{
+                        marginTop: '-5px',
+                        marginBottom: '5px',
+                        '& .MuiOutlinedInput-root': {
+                          fontSize: '0.875rem',
+                          color: 'text.secondary',
+                          backgroundColor: '#fff',
+                          borderRadius: '6px',
+                          '& fieldset': {
+                            borderColor: '#e0e0e0',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: '#999',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#333',
+                            borderWidth: '2px',
+                          },
+                        },
+                        '& .MuiOutlinedInput-input': {
+                          padding: '6px 10px',
+                        }
+                      }}
+                    />
+                  ) : (
+                    <Typography 
+                      variant="body2" 
+                      color="textSecondary" 
+                      marginBottom="5px" 
+                      marginTop="-10px"
+                      onDoubleClick={handleDescriptionDoubleClick}
+                      sx={{ 
+                        cursor: 'pointer',
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          borderRadius: '4px',
+                          transition: 'background-color 0.2s'
+                        },
+                        padding: '4px 8px',
+                      }}
+                    >
+                      {templateDescription}
+                    </Typography>
+                  )}
                 </Typography>
               </Box>
 
@@ -397,21 +894,17 @@ const EditPageSettings: React.FC = () => {
       transition: "all 0.3s ease"
     }}
   >
-    {items.map((item) => (
-      <DraggableQuestion
-        key={item.id}
-        item={item}
-        gridSize={gridSize}
-        selectedSize={selectedSize}
-        pageSizes={pageSizes}
-        onDragStop={handleDragStop}
-        onResizeStop={handleResizeStop}
-        onQuestionChange={handleQuestionChange}
-        onOptionChange={handleOptionChange}
-        onDeleteOption={handleDeleteOption}
-        onAddOption={handleAddOption}
-      />
-    ))}
+    <DraggableQuestion
+      formTemplateId={formTemplateId!}
+      items={items}
+      gridSize={gridSize}
+      selectedSize={selectedSize}
+      pageSizes={pageSizes}
+      onQuestionChange={handleQuestionChange}
+      onOptionChange={handleOptionChange}
+      onDeleteOption={handleDeleteOption}
+      onAddOption={handleAddOption}
+    />
   </div>
 </div>
 

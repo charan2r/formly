@@ -42,6 +42,21 @@ export class FormTemplate {
   @Column('varchar', { length: 255, nullable: true })
   logoImage: string;
 
+  @Column('varchar', { length: 255, nullable: true })
+  pageSize: string;
+
+  @Column('varchar', { length: 255, nullable: true, default: '10' })
+  marginTop: number;
+
+  @Column('varchar', { length: 255, nullable: true, default: '10' })
+  marginBottom: number;
+
+  @Column('varchar', { length: 255, nullable: true, default: '10' })
+  marginLeft: number;
+
+  @Column('varchar', { length: 255, nullable: true, default: '10' })
+  marginRight: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
