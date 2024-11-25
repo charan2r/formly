@@ -731,8 +731,8 @@ const Template: React.FC = () => {
                                             onClick={() => {
                                                 handleMenuClose();
                                                 setSelectedTemplate(row);
-                                                navigate(`/viewtemplate/${row.formTemplateId}`, { 
-                                                    state: { templateData: row } 
+                                                navigate(`/viewtemplate/${row.formTemplateId}`, {
+                                                    state: { templateData: row }
                                                 });
                                             }}
                                             sx={{
@@ -917,15 +917,9 @@ const Template: React.FC = () => {
                     </IconButton>
 
                     {/* Header section */}
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'left',
-                        mb: 2,
-                        mt: 1,
-                        pl: 5
-                    }}>
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
                         <Box sx={{ textAlign: 'left' }}>
-                            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                                 Create Template
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
@@ -935,11 +929,9 @@ const Template: React.FC = () => {
                     </Box>
 
                     {/* Form Content */}
-                    <DialogContent sx={{ px: 2, py: 1 }}>
-                        <Box display="flex" flexDirection="column" gap={2}>
-                            <Grid container spacing={3}>
-                                {/* Template Name */}
-                                <Grid item xs={12}>
+                    <DialogContent sx={{ px: 3, ml: 5, mr: 5 }}>
+                        <Box display="flex" flexDirection="column" gap={2.5}>
+                            <Grid item xs={12} sm={6} mt={-2.5}>
                                     <Typography variant="subtitle2" gutterBottom sx={{
                                         mb: 0.5,
                                         color: '#555',
@@ -1052,14 +1044,14 @@ const Template: React.FC = () => {
                                         }}
                                     />
                                 </Grid>
-                            </Grid>
+                           
                         </Box>
                     </DialogContent>
 
                     {/* Actions */}
                     <DialogActions sx={{
-                        p: 2,
-                        justifyContent: 'right'
+                        p: 3, 
+                        justifyContent: 'center'
                     }}>
                         <Button
                             variant="contained"
