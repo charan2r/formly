@@ -120,7 +120,7 @@ const ViewTemplate: React.FC = () => {
               onOptionChange={() => {}}
               onDeleteOption={() => {}}
               onAddOption={() => {}}
-              viewMode={true}
+              isViewMode={true}
             />
           </div>
         </Grid>

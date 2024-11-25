@@ -15,7 +15,6 @@ interface QuestionContentProps {
   onOptionChange: (itemId: string, optionId: string, newContent: string) => void;
   onDeleteOption: (itemId: string, optionId: string) => void;
   onAddOption: (itemId: string) => void;
-  viewMode?: boolean;
 }
 
 interface Option {
@@ -61,7 +60,6 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   onOptionChange,
   onDeleteOption,
   onAddOption,
-  viewMode = false,
 }) => {
   const [options, setOptions] = useState<Option[]>([]);
   const [pendingUpdates, setPendingUpdates] = useState<{[key: string]: string}>({});
@@ -192,22 +190,12 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   };
 
   return (
-    <Box sx={{ 
-      position: 'relative',
-      height: '100%',
-      '& .delete-icon, & .add-option': {
-        display: viewMode ? 'none' : 'flex',
-      },
-      '& .ql-toolbar': {
-        display: viewMode ? 'none' : 'block',
-      },
-      '& .ql-container': {
-        border: viewMode ? 'none' : '1px solid #ccc',
-      },
-      '& .ql-editor': {
-        padding: viewMode ? '0' : '12px 15px',
-      },
-    }}>
+    <Box 
+      sx={{ 
+        position: 'relative',
+        height: '100%',
+      }}
+    >
       <Box
         sx={{
           height: '100%',
@@ -279,7 +267,6 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
               value={item.question}
               onChange={(content) => onQuestionChange(formFieldId, content)}
               modules={quillModules}
-              readOnly={viewMode}
               style={{
                 backgroundColor: '#ffffff',
                 borderRadius: '4px',
@@ -357,7 +344,6 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                   value={pendingUpdates[option.formFieldsOptionId] || option.option}
                   onChange={(content) => handleOptionChange(option.formFieldsOptionId, content)}
                   modules={quillModules}
-                  readOnly={viewMode}
                   style={{
                     backgroundColor: '#ffffff',
                   }}
