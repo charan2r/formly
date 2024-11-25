@@ -20,10 +20,10 @@ import { TemplateProvider } from '../context/TemplateContext';
 
 
 const Background: React.FC = () => {
-  const location = useLocation(); // Get the current route
-
-  // Check if the current route is "/edittemplate"
-  const isEditTemplate = location.pathname === '/edittemplate';
+  const location = useLocation();
+  
+  // Check if the current route matches /edittemplate/{id}
+  const isEditTemplate = location.pathname.match(/^\/edittemplate\/[^/]+$/);
 
   const handleDragEnd = (result: any) => {
     // Let the individual components handle their own drag end logic
@@ -33,26 +33,26 @@ const Background: React.FC = () => {
   return (
     <TemplateProvider>
       <DragDropContext onDragEnd={handleDragEnd}>
-
-      <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
-        {/* Conditionally render Sidebar or LeftSidebar */}
-       <LeftSidebar />
-        <Routes>
-          <Route path="/" element={<Navigate to="/overview" replace />} />
-          <Route path="/overview" element={<Overview />} />
-          <Route path="/useroverview" element={<UserOverview />} />
-          <Route path="/organizations" element={<DataTable />} />
-          <Route path="/users" element={<Users />} />
-          <Route path='/templates' element={<Template />} />
-          <Route path='/edittemplate/:formTemplateId' element={<EditPageSettings />} />
-          <Route path='/categories' element={<Category />} />
-          <Route path="/create-organization" element={<CreateOrganization />} />
-          <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
-          <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
-          <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
-          <Route path='/viewtemplate/:templateId' element={<ViewTemplate />} />
-        </Routes>
-      </Box>
+        <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
+          {/* Conditionally render Sidebar or LeftSidebar */}
+          {isEditTemplate ? <LeftSidebar /> : <Sidebar />}
+          
+          <Routes>
+            <Route path="/" element={<Navigate to="/overview" replace />} />
+            <Route path="/overview" element={<Overview />} />
+            <Route path="/useroverview" element={<UserOverview />} />
+            <Route path="/organizations" element={<DataTable />} />
+            <Route path="/users" element={<Users />} />
+            <Route path='/templates' element={<Template />} />
+            <Route path='/edittemplate/:formTemplateId' element={<EditPageSettings />} />
+            <Route path='/categories' element={<Category />} />
+            <Route path="/create-organization" element={<CreateOrganization />} />
+            <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
+            <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
+            <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
+            <Route path='/viewtemplate/:templateId' element={<ViewTemplate />} />
+          </Routes>
+        </Box>
       </DragDropContext>
     </TemplateProvider>
   );
