@@ -10,6 +10,7 @@ import EventNoteIcon from '@mui/icons-material/EventNote';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import TitleIcon from '@mui/icons-material/Title';
 import axios from 'axios';
 import { useTemplate } from '../context/TemplateContext';
 
@@ -19,6 +20,7 @@ const initialElements = [
     id: '1', 
     category: 'Layout Elements', 
     items: [
+      { label: 'Title', icon: <TitleIcon />, type: 'title' }, 
       { label: 'Sections', icon: <ViewModuleIcon />, type: 'section' }, 
       { label: 'Tables', icon: <TableChartIcon />, type: 'table' }
     ] 
@@ -63,12 +65,12 @@ const DraggableItem = memo(({ item, index }) => {
 
     try {
       const newField = {
-        question: "New Question",
+        question: item.type === 'title' ? "New Title" : "New Question",
         type: item.type,
         x: "0",
         y: "0",
         width: "300",
-        height: "200",
+        height: item.type === 'title' ? "150" : "200",
         color: "#a8d8ea",
         formTemplateId: formTemplateId,
         options: JSON.stringify(
@@ -77,7 +79,9 @@ const DraggableItem = memo(({ item, index }) => {
                 { id: 1, text: "Option 1", value: 1 },
                 { id: 2, text: "Option 2", value: 2 }
               ]
-            : []
+            : item.type === 'title' 
+              ? [{ id: 1, text: "New Subtitle", value: 1 }]
+              : []
         )
       };
 
@@ -172,12 +176,12 @@ const LeftSidebar: React.FC = () => {
 
       try {
         const newField = {
-          question: "New Question",
+          question: type === 'title' ? "New Title" : "New Question",
           type: type,
           x: "0",
           y: "0",
           width: "300",
-          height: "200",
+          height: type === 'title' ? "150" : "200",
           color: "#a8d8ea",
           formTemplateId: formTemplateId,
           options: JSON.stringify(
@@ -186,7 +190,9 @@ const LeftSidebar: React.FC = () => {
                   { id: 1, text: "Option 1", value: 1 },
                   { id: 2, text: "Option 2", value: 2 }
                 ]
-              : []
+              : type === 'title'
+                ? [{ id: 1, text: "New Subtitle", value: 1 }]
+                : []
           )
         };
 

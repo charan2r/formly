@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { In } from 'typeorm';
+import { In, Not } from 'typeorm';
 import { FormFieldsRepository } from '../form-fields/form-fields.repository';
 import { FormField } from '../model/form-fields.entity';
 import { CreateFormFieldDto } from '../form-fields/create-form-field.dto';
@@ -20,7 +20,13 @@ export class FormFieldsService {
     // Method to get all form fields by template ID
     async getFields(formTemplateId: string): Promise<FormField[]> {
         console.log("formTemplateId", formTemplateId);
-        return this.formFieldsRepository.find({ where: { formTemplateId } });
+        console.log(this.formFieldsRepository.find({ where: { formTemplateId:formTemplateId,status: 'active'  }}));
+        return this.formFieldsRepository.find({ 
+            where: { 
+                formTemplateId:formTemplateId,
+                status: 'active'  // Only get fields with active status
+            },
+        });
     }
 
     // Method to get a form field by id
@@ -38,8 +44,8 @@ export class FormFieldsService {
         if (!field) {
           throw new Error('Form Field not found');
         }
-        field.status = 'deleted';
-        await this.formFieldsRepository.save(field);
+        // field.status = 'deleted';
+        await this.formFieldsRepository.delete(field);
     }
 
     // Method to bulk delete form fields

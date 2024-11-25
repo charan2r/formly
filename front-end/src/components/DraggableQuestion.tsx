@@ -210,6 +210,37 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
     }
   };
 
+  const handleOptionChange = async (itemId: string, optionId: string, newContent: string) => {
+    try {
+      await axios.patch(`http://localhost:3001/form-fields-options/update`, {
+        optionId,
+        option: newContent,
+        formFieldId: itemId
+      });
+    } catch (error) {
+      console.error('Error updating option:', error);
+    }
+  };
+
+  const handleDeleteOption = async (itemId: string, optionId: string) => {
+    try {
+      await axios.delete(`http://localhost:3001/form-fields-options/delete?optionId=${optionId}`);
+    } catch (error) {
+      console.error('Error deleting option:', error);
+    }
+  };
+
+  const handleAddOption = async (itemId: string) => {
+    try {
+      await axios.post(`http://localhost:3001/form-fields-options/create`, {
+        option: 'New Option',
+        formFieldId: itemId
+      });
+    } catch (error) {
+      console.error('Error adding option:', error);
+    }
+  };
+
   return (
     <Droppable droppableId="rnd-container">
       {(provided) => (
@@ -260,13 +291,25 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
               bounds="parent"
               dragHandleClassName="drag-handle"
             >
-              <QuestionContent
-                item={item}
-                onQuestionChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
-                onOptionChange={onOptionChange}
-                onDeleteOption={onDeleteOption}
-                onAddOption={onAddOption}
-              />
+              {item.type === 'title' ? (
+                <TitleContent
+                  item={item}
+                  formFieldId={item.id}
+                  onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
+                  onSubtitleChange={handleOptionChange}
+                  onDeleteSubtitle={handleDeleteOption}
+                  onAddSubtitle={handleAddOption}
+                />
+              ) : (
+                <QuestionContent
+                  item={item}
+                  formFieldId={item.id}
+                  onQuestionChange={handleQuestionUpdate}
+                  onOptionChange={handleOptionChange}
+                  onDeleteOption={handleDeleteOption}
+                  onAddOption={handleAddOption}
+                />
+              )}
             </Rnd>
           ))}
           {provided.placeholder}

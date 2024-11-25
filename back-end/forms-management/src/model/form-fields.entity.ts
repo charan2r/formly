@@ -48,6 +48,7 @@ import { FormTemplate } from './form-template.entity';
     @Column({ type: 'varchar', nullable: true })
     formTemplateId: string;
 
+
     @ManyToOne(() => FormTemplate, (formTemplate) => formTemplate.formFields, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'formTemplateId' })
     formTemplate: FormTemplate;

@@ -28,7 +28,7 @@ export class FormFieldsOptionsController {
 
   // API Endpoint to get all options of a form field
   @Get()
-  async getOptions(@Body('formFieldId') formFieldId: string): Promise<MetaSchemaResponse<FormFieldsOption[]>> {
+  async getOptions(@Query('formFieldId') formFieldId: string): Promise<MetaSchemaResponse<FormFieldsOption[]>> {
     const options = await this.formFieldsOptionsService.getOptions(formFieldId);
     return {
       success: true,
@@ -51,15 +51,23 @@ export class FormFieldsOptionsController {
   // API Endpoint to update an option
   @Patch('update')
   async updateOption(
-    @Query('optionId') optionId: string,
-    @Body() createFormFieldsOptionDto: CreateFormFieldsOptionDto,
+    @Body() updateData: { optionId: string; option: string; formFieldId: string },
   ): Promise<MetaSchemaResponse<FormFieldsOption>> {
-    const option = await this.formFieldsOptionsService.updateOption(optionId, createFormFieldsOptionDto);
-    return {
-      success: true,
-      message: 'Option updated successfully.',
-      data: option,
-    };
+    try {
+      const option = await this.formFieldsOptionsService.updateOption(
+        updateData.optionId,
+        { option: updateData.option, formFieldId: updateData.formFieldId }
+      );
+      
+      return {
+        success: true,
+        message: 'Option updated successfully.',
+        data: option,
+      };
+    } catch (error) {
+      console.error('Error updating option:', error);
+      throw error;
+    }
   }
 
   // API Endpoint to delete an option

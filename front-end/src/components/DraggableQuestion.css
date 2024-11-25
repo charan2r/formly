@@ -1,6 +1,7 @@
 .draggable-question {
   scrollbar-width: none;  /* Firefox */
   -ms-overflow-style: none;  /* IE and Edge */
+  position: relative;
 }
 
 .draggable-question::-webkit-scrollbar {
@@ -34,4 +35,8 @@
   overflow: auto !important;
   scrollbar-width: thin;
   scrollbar-color: #bdbdbd transparent;
+}
+
+.draggable-question:hover .MuiIconButton-root {
+  opacity: 1;
 }
