@@ -49,8 +49,8 @@ interface Template {
         categoryId: string;
         name: string;
     };
-    createdAt: string;
-    updatedAt: string;
+    createdDate: string;
+    lastModifiedDate: string;
     // ... other optional fields
 }
 
@@ -88,8 +88,8 @@ const Template: React.FC = () => {
     const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
     const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
     const [showFilters, setShowFilters] = useState(false);
-    const [filters, setFilters] = useState({ name: '', type: '', category: '', lastActive: '' });
-    const [orderBy, setOrderBy] = useState<'name' | 'category' | 'createdAt' | 'updatedAt'>('name');
+    const [filters, setFilters] = useState({ name: '', category: '', createdDate: '', lastModifiedDate: '' });
+    const [orderBy, setOrderBy] = useState<'name' | 'category' | 'createdDate' | 'lastModifiedDate'>('name');
     const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
     const [confirmationOpen, setConfirmationOpen] = useState(false);
     const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
@@ -298,17 +298,18 @@ const Template: React.FC = () => {
 
     const StyledDialog = styled(Dialog)(({ theme }) => ({
         '& .MuiDialog-paper': {
-          borderRadius: '16px',
-          padding: '32px',
-          maxWidth: '500px',
-          width: '100%'
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '100%'
         }
-      }));
+    }));
 
     const handleCloseDialog = () => {
         setDialogOpen(false);
         setTemplateDetails(null);
     };
+
 
     const filteredData = templates
         .filter((temp) => {
@@ -316,15 +317,21 @@ const Template: React.FC = () => {
                 temp.name?.toLowerCase().includes(filters.name.toLowerCase());
 
             const categoryMatches = temp.category?.name
-                ? temp.category.name.toLowerCase().includes(filters.category.toLowerCase())
+                ? temp.category.name.toLowerCase()
+                    .includes(filters.category.toLowerCase())
                 : !filters.category;
 
-            const lastActiveMatches = temp.updatedAt
-                ? new Date(temp.updatedAt).toLocaleDateString().toLowerCase()
-                    .includes(filters.lastActive.toLowerCase())
-                : !filters.lastActive;
+            const createdDateMatches = temp.createdDate
+                ? new Date(temp.createdDate).toLocaleDateString().toLowerCase()
+                    .includes(filters.createdDate.toLowerCase())
+                : !filters.createdDate;
 
-            return nameMatches && categoryMatches && lastActiveMatches;
+            const lastModifiedDateMatches = temp.lastModifiedDate
+                ? new Date(temp.lastModifiedDate).toLocaleDateString().toLowerCase()
+                    .includes(filters.lastModifiedDate.toLowerCase())
+                : !filters.lastModifiedDate;
+
+            return nameMatches && categoryMatches && createdDateMatches && lastModifiedDateMatches;
         })
         .sort((a, b) => {
             const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
@@ -334,10 +341,10 @@ const Template: React.FC = () => {
                     return (a.name || "").localeCompare(b.name || "") * orderMultiplier;
                 case 'category':
                     return (a.category?.name || "").localeCompare(b.category?.name || "") * orderMultiplier;
-                case 'createdAt':
-                    return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * orderMultiplier;
-                case 'updatedAt':
-                    return (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()) * orderMultiplier;
+                case 'createdDate':
+                    return (new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime()) * orderMultiplier;
+                case 'lastModifiedDate':
+                    return (new Date(a.lastModifiedDate).getTime() - new Date(b.lastModifiedDate).getTime()) * orderMultiplier;
                 default:
                     return 0;
             }
@@ -536,7 +543,30 @@ const Template: React.FC = () => {
                                 height: '48px',
                                 width: '30%'
                             }}>
-                                Template Name
+                                <TableSortLabel
+                                    active={orderBy === 'name'}
+                                    direction={orderDirection}
+                                    onClick={() => handleRequestSort('name')}
+                                >
+                                    Template Name
+                                </TableSortLabel>
+                                {showFilters && (
+                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                                        <TextField
+                                            variant="outlined"
+                                            size="small"
+                                            inputProps={{
+                                                style: {
+                                                    height: "10px",
+                                                },
+                                            }}
+                                            placeholder="Filter"
+                                            value={filters.name}
+                                            onChange={(e) => handleFilterChange(e, 'name')}
+                                            sx={{ width: '100%', marginTop: '4px' }}
+                                        />
+                                    </div>
+                                )}
                             </TableCell>
                             <TableCell sx={{
                                 backgroundColor: '#f9f9f9',
@@ -544,7 +574,30 @@ const Template: React.FC = () => {
                                 height: '48px',
                                 width: '25%'
                             }}>
-                                Category
+                                <TableSortLabel
+                                    active={orderBy === 'category'}
+                                    direction={orderDirection}
+                                    onClick={() => handleRequestSort('category')}
+                                >
+                                    Category
+                                </TableSortLabel>
+                                {showFilters && (
+                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                                        <TextField
+                                            variant="outlined"
+                                            size="small"
+                                            placeholder="Filter"
+                                            inputProps={{
+                                                style: {
+                                                    height: "10px",
+                                                },
+                                            }}
+                                            value={filters.category}
+                                            onChange={(e) => handleFilterChange(e, 'category')}
+                                            sx={{ width: '100%', marginTop: '4px' }}
+                                        />
+                                    </div>
+                                )}
                             </TableCell>
                             <TableCell sx={{
                                 backgroundColor: '#f9f9f9',
@@ -552,7 +605,30 @@ const Template: React.FC = () => {
                                 height: '48px',
                                 width: '20%'
                             }}>
-                                Created Date
+                                <TableSortLabel
+                                    active={orderBy === 'createdDate'}
+                                    direction={orderDirection}
+                                    onClick={() => handleRequestSort('createdDate')}
+                                >
+                                    Created Date
+                                </TableSortLabel>
+                                {showFilters && (
+                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                                        <TextField
+                                            variant="outlined"
+                                            size="small"
+                                            placeholder="Filter"
+                                            inputProps={{
+                                                style: {
+                                                    height: "10px",
+                                                },
+                                            }}
+                                            value={filters.createdDate}
+                                            onChange={(e) => handleFilterChange(e, 'createdDate')}
+                                            sx={{ width: '100%', marginTop: '4px' }}
+                                        />
+                                    </div>
+                                )}
                             </TableCell>
                             <TableCell sx={{
                                 backgroundColor: '#f9f9f9',
@@ -560,7 +636,30 @@ const Template: React.FC = () => {
                                 height: '48px',
                                 width: '20%'
                             }}>
-                                Last Modified Date
+                                <TableSortLabel
+                                    active={orderBy === 'lastModifiedDate'}
+                                    direction={orderDirection}
+                                    onClick={() => handleRequestSort('lastModifiedDate')}
+                                >
+                                    Last Modified Date
+                                </TableSortLabel>
+                                {showFilters && (
+                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                                        <TextField
+                                            variant="outlined"
+                                            size="small"
+                                            placeholder="Filter"
+                                            inputProps={{
+                                                style: {
+                                                    height: "10px",
+                                                },
+                                            }}
+                                            value={filters.lastModifiedDate}
+                                            onChange={(e) => handleFilterChange(e, 'lastModifiedDate')}
+                                            sx={{ width: '100%', marginTop: '4px' }}
+                                        />
+                                    </div>
+                                )}
                             </TableCell>
                             <TableCell sx={{
                                 backgroundColor: '#f9f9f9',
@@ -591,14 +690,14 @@ const Template: React.FC = () => {
                                 <TableCell>{row.name}</TableCell>
                                 <TableCell>{row.category?.name}</TableCell>
                                 <TableCell>
-                                    {new Date(row.createdAt).toLocaleString("en-GB", {
+                                    {new Date(row.createdDate).toLocaleString("en-GB", {
                                         day: "2-digit",
                                         month: "short",
                                         year: "numeric"
                                     })}
                                 </TableCell>
                                 <TableCell>
-                                    {new Date(row.updatedAt).toLocaleString("en-GB", {
+                                    {new Date(row.lastModifiedDate).toLocaleString("en-GB", {
                                         day: "2-digit",
                                         month: "short",
                                         year: "numeric"
@@ -704,7 +803,7 @@ const Template: React.FC = () => {
             </Box>
 
             {/* Single Delete Confirmation Dialog */}
-            <StyledDialog 
+            <StyledDialog
                 open={confirmationOpen}
                 onClose={() => {
                     setConfirmationOpen(false);
@@ -1072,7 +1171,7 @@ const Template: React.FC = () => {
                 </Box>
             )}
 
-            
+
         </Paper >
     );
 };
