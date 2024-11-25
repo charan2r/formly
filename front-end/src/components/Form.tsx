@@ -595,24 +595,6 @@ const FormTable: React.FC = () => {
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
-                        navigate(`/view-form/${row.formId}`);
-                      }}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '10px',
-                        margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      View
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleMenuClose();
                         navigate(`/edit-form/${row.formId}`);
                       }}
                       sx={{
@@ -627,6 +609,24 @@ const FormTable: React.FC = () => {
                       }}
                     >
                       Edit
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/share-form/${row.formId}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Share
                     </MenuItem>
                     <MenuItem
                       onClick={() => handleDeleteConfirmation(row.formId)}
