@@ -38,6 +38,21 @@ const quillModules = {
     ],
   };
 
+// Add a debounce utility
+const useDebounce = (callback: Function, delay: number) => {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  
+  return (...args: any[]) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      callback(...args);
+    }, delay);
+  };
+};
+
 const QuestionContent: React.FC<QuestionContentProps> = ({
   item,
   formFieldId,
@@ -47,8 +62,60 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   onAddOption,
 }) => {
   const [options, setOptions] = useState<Option[]>([]);
+  const [pendingUpdates, setPendingUpdates] = useState<{[key: string]: string}>({});
 
-  // Fetch options when component mounts or when options change
+  // Debounced update function
+  const debouncedUpdate = useDebounce(async (formFieldsOptionId: string, newContent: string) => {
+    try {
+      const response = await axios.patch(`http://localhost:3001/form-fields-options/update`, {
+        optionId: formFieldsOptionId,
+        option: newContent,
+        formFieldId: formFieldId
+      });
+
+      if (response.data.success) {
+        // Clear pending update after successful save
+        setPendingUpdates(prev => {
+          const updated = { ...prev };
+          delete updated[formFieldsOptionId];
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error('Error updating option:', error);
+      // Revert the option content on error
+      setOptions(prevOptions => 
+        prevOptions.map(opt => 
+          opt.formFieldsOptionId === formFieldsOptionId
+            ? { ...opt, option: pendingUpdates[formFieldsOptionId] || opt.option }
+            : opt
+        )
+      );
+    }
+  }, 1000); // 1 second delay
+
+  // Modified handleOptionChange
+  const handleOptionChange = (formFieldsOptionId: string, newContent: string) => {
+    // Update local state immediately for responsive UI
+    setOptions(prevOptions => 
+      prevOptions.map(opt => 
+        opt.formFieldsOptionId === formFieldsOptionId 
+          ? { ...opt, option: newContent }
+          : opt
+      )
+    );
+
+    // Store the pending update
+    setPendingUpdates(prev => ({
+      ...prev,
+      [formFieldsOptionId]: newContent
+    }));
+
+    // Trigger debounced update
+    debouncedUpdate(formFieldsOptionId, newContent);
+  };
+
+  // Modified useEffect to handle polling
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -56,7 +123,12 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
           params: { formFieldId: formFieldId }
         });
         if (response.data.success) {
-          setOptions(response.data.data);
+          // Merge server data with pending updates
+          const updatedOptions = response.data.data.map((opt: Option) => ({
+            ...opt,
+            option: pendingUpdates[opt.formFieldsOptionId] || opt.option
+          }));
+          setOptions(updatedOptions);
         }
       } catch (error) {
         console.error('Error fetching options:', error);
@@ -64,7 +136,9 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
     };
 
     fetchOptions();
-  }, [formFieldId]);
+    const intervalId = setInterval(fetchOptions, 2000);
+    return () => clearInterval(intervalId);
+  }, [formFieldId, pendingUpdates]);
 
   // Add local handler for adding option
   const handleAddOption = async () => {
@@ -81,35 +155,6 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
       }
     } catch (error) {
       console.error('Error adding option:', error);
-    }
-  };
-
-  // Simplified handleOptionChange without timers
-  const handleOptionChange = async (formFieldsOptionId: string, newContent: string) => {
-    try {
-      // Update local state immediately
-      setOptions(prevOptions => 
-        prevOptions.map(opt => 
-          opt.formFieldsOptionId === formFieldsOptionId 
-            ? { ...opt, option: newContent }
-            : opt
-        )
-      );
-
-      // Save to database immediately
-      await axios.patch(`http://localhost:3001/form-fields-options/update?optionId=${formFieldsOptionId}`, {
-        option: newContent,
-        formFieldId: formFieldId
-      });
-    } catch (error) {
-      console.error('Error updating option:', error);
-      // On error, fetch all options again to restore correct state
-      const response = await axios.get(`http://localhost:3001/form-fields-options`, {
-        params: { formFieldId: formFieldId }
-      });
-      if (response.data.success) {
-        setOptions(response.data.data);
-      }
     }
   };
 
@@ -149,45 +194,46 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
       sx={{ 
         position: 'relative',
         height: '100%',
-        '&:hover .drag-handle': {
-          opacity: 1,
-        },
-        '&:hover .delete-form-field': {
-          opacity: 1,
-        },
       }}
     >
-      <IconButton
-        className="delete-form-field"
-        onClick={handleDeleteFormField}
-        sx={{
-          position: 'absolute',
-          top: '-25px',
-          right: '-12px',
-          backgroundColor: '#fff',
-          boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
-          opacity: 0,
-          transition: 'opacity 0.2s ease',
-          zIndex: 1000,
-          padding: '4px',
-          '&:hover': {
-            backgroundColor: '#fee',
-            color: '#f44336',
-          },
-        }}
-        size="small"
-      >
-        <DeleteForeverIcon fontSize="small" />
-      </IconButton>
-      <DragHandle />
       <Box
         sx={{
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           p: 2,
+          position: 'relative',
+          '&:hover .delete-form-field': {  // Add this hover effect
+            opacity: 1,
+          },
         }}
       >
+        <IconButton
+          className="delete-form-field"
+          onClick={handleDeleteFormField}
+          sx={{
+            position: 'absolute',
+            top: '8px',
+            right: '8px',
+            backgroundColor: '#fff',
+            boxShadow: '0px 2px 4px rgba(0,0,0,0.1)',
+            opacity: 0,  // Start with opacity 0
+            transition: 'opacity 0.2s ease',  // Smooth transition
+            zIndex: 1000,
+            padding: '4px',
+            '&:hover': {
+              backgroundColor: '#fee',
+              color: '#f44336',
+            },
+            width: '24px',
+            height: '24px',
+            minWidth: 'auto',
+          }}
+          size="small"
+        >
+          <DeleteForeverIcon fontSize="small" />
+        </IconButton>
+        <DragHandle />
         <Box sx={{ mb: 2 }}>
           <Box sx={{
             position: 'relative',
@@ -295,7 +341,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
               }}>
                 <ReactQuill
                   key={`editor-${option.formFieldsOptionId}`}
-                  value={option.option}
+                  value={pendingUpdates[option.formFieldsOptionId] || option.option}
                   onChange={(content) => handleOptionChange(option.formFieldsOptionId, content)}
                   modules={quillModules}
                   style={{

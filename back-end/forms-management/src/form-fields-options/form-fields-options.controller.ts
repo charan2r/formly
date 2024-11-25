@@ -3,12 +3,26 @@ import { Body, Controller, Delete, Get, Patch, Post, Query } from '@nestjs/commo
 import { FormFieldsOption } from '../model/form-fields-option.entity';
 import { CreateFormFieldsOptionDto } from './create-form-fields-option.dto';
 import { FormFieldsOptionsService } from './form-fields-options.service';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 interface MetaSchemaResponse<T = any> {
     success: boolean;
     message: string;
     data?: T;
   }
+
+// Create a DTO for update option
+export class UpdateOptionDto {
+  @ApiProperty({ description: 'ID of the option to update' })
+  optionId: string;
+
+  @ApiProperty({ description: 'New option content' })
+  option: string;
+
+  @ApiProperty({ description: 'ID of the form field this option belongs to' })
+  formFieldId: string;
+}
 
 @Controller('form-fields-options')
 export class FormFieldsOptionsController {
@@ -48,10 +62,13 @@ export class FormFieldsOptionsController {
     };
   }
 
-  // API Endpoint to update an option
+  @ApiOperation({ summary: 'Update an option' })
+  @ApiResponse({ status: 200, description: 'Option updated successfully' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiBody({ type: UpdateOptionDto })
   @Patch('update')
   async updateOption(
-    @Body() updateData: { optionId: string; option: string; formFieldId: string },
+    @Body() updateData: UpdateOptionDto,
   ): Promise<MetaSchemaResponse<FormFieldsOption>> {
     try {
       const option = await this.formFieldsOptionsService.updateOption(
