@@ -22,9 +22,10 @@ interface DraggableQuestionProps {
   selectedSize: string;
   pageSizes: { [key: string]: { width: number; height: number } };
   onQuestionChange: (itemId: string, newContent: string) => void;
-  onOptionChange: (itemId: string, optionId: number, newContent: string) => void;
-  onDeleteOption: (itemId: string, optionId: number) => void;
+  onOptionChange: (itemId: string, optionId: string, newContent: string) => void;
+  onDeleteOption: (itemId: string, optionId: string) => void;
   onAddOption: (itemId: string) => void;
+  viewMode?: boolean;
 }
 
 const calculateScale = (selectedSize: string, pageSizes: { [key: string]: { width: number; height: number } }) => {
@@ -43,6 +44,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   onOptionChange,
   onDeleteOption,
   onAddOption,
+  viewMode = false,
 }) => {
   const [formFields, setFormFields] = useState<QuestionItem[]>(items);
   const [isDragging, setIsDragging] = useState(false);
@@ -248,7 +250,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   };
 
   return (
-    <Droppable droppableId="rnd-container">
+    <Droppable droppableId="rnd-container" isDropDisabled={viewMode}>
       {(provided) => (
         <div
           ref={provided.innerRef}
@@ -257,6 +259,8 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
             width: '100%', 
             height: '100%', 
             position: 'relative',
+            pointerEvents: viewMode ? 'none' : 'auto',
+            userSelect: viewMode ? 'none' : 'auto',
           }}
         >
           {formFields.map((item) => (
@@ -268,6 +272,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 borderRadius: '12px',
                 border: '1px solid #e0e0e0',
                 overflow: 'hidden',
+                pointerEvents: viewMode ? 'none' : 'auto',
               }}
               className="draggable-question"
               size={{
@@ -278,45 +283,35 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 x: ((item.x / pageSizes[selectedSize].width) * gridSize.width) * calculateScale(selectedSize, pageSizes),
                 y: ((item.y / pageSizes[selectedSize].height) * gridSize.height) * calculateScale(selectedSize, pageSizes)
               }}
-              onDragStart={handleDragStart}
-              onDragStop={(e, data) => {
-                const scale = calculateScale(selectedSize, pageSizes);
-                const newX = (data.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newY = (data.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                handleDragStop(e, { x: newX, y: newY }, item);
-              }}
-              onResizeStop={(e, direction, ref, delta, position) => {
-                const scale = calculateScale(selectedSize, pageSizes);
-                const newWidth = (ref.offsetWidth / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newHeight = (ref.offsetHeight / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                const newX = (position.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newY = (position.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                handleResizeStop(e, direction, ref, { width: newWidth, height: newHeight }, { x: newX, y: newY }, item);
-              }}
+              enableResizing={!viewMode}
+              disableDragging={viewMode}
               bounds="parent"
-              dragHandleClassName="drag-handle"
+              dragHandleClassName={viewMode ? undefined : "drag-handle"}
             >
               <Box sx={{ 
                 width: '100%',
                 height: '100%',
+                pointerEvents: viewMode ? 'none' : 'auto',
               }}>
                 {item.type === 'title' ? (
                   <TitleContent
                     item={item}
                     formFieldId={item.id}
-                    onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
-                    onSubtitleChange={handleOptionChange}
-                    onDeleteSubtitle={handleDeleteOption}
-                    onAddSubtitle={handleAddOption}
+                    onTitleChange={viewMode ? () => {} : handleQuestionUpdate}
+                    onSubtitleChange={viewMode ? () => {} : handleOptionChange}
+                    onDeleteSubtitle={viewMode ? () => {} : handleDeleteOption}
+                    onAddSubtitle={viewMode ? () => {} : handleAddOption}
+                    viewMode={viewMode}
                   />
                 ) : (
                   <QuestionContent
                     item={item}
                     formFieldId={item.id}
-                    onQuestionChange={handleQuestionUpdate}
-                    onOptionChange={handleOptionChange}
-                    onDeleteOption={handleDeleteOption}
-                    onAddOption={handleAddOption}
+                    onQuestionChange={viewMode ? () => {} : handleQuestionUpdate}
+                    onOptionChange={viewMode ? () => {} : handleOptionChange}
+                    onDeleteOption={viewMode ? () => {} : handleDeleteOption}
+                    onAddOption={viewMode ? () => {} : handleAddOption}
+                    viewMode={viewMode}
                   />
                 )}
               </Box>

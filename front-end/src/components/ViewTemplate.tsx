@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
+import axios from 'axios';
 import {
   Paper,
   Box,
@@ -8,7 +10,7 @@ import {
 } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
 import ArrowForward from '@mui/icons-material/ArrowForward';
-import Radio from '@mui/material/Radio';
+import DraggableQuestion from './DraggableQuestion';
 
 const pageSizes = {
   A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
@@ -17,49 +19,52 @@ const pageSizes = {
 };
 
 const ViewTemplate: React.FC = () => {
-  const [selectedSize] = useState("A4");
-  const [orientation] = useState("Portrait");
-  const [backgroundColor] = useState('#ffffff');
+  const location = useLocation();
+  const { templateId } = useParams();
+  const [templateData, setTemplateData] = useState<any>(null);
+  const [formFields, setFormFields] = useState<any[]>([]);
+  const [selectedSize, setSelectedSize] = useState("A4");
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
   const [gridSize, setGridSize] = useState({ width: 210 * 3.7795, height: 297 * 3.7795 });
   const paperRef = useRef<HTMLDivElement>(null);
-  const [items] = useState([
-    {
-      id: "1",
-      x: 0,
-      y: 0,
-      width: 250,
-      height: 500,
-      question: "How satisfied are you with the company's professional development opportunities?",
-      options: [
-        { id: 1, text: 'Very Satisfied', value: 5 },
-        { id: 2, text: 'Satisfied', value: 4 },
-        { id: 3, text: 'Neutral', value: 3 },
-        { id: 4, text: 'Dissatisfied', value: 2 },
-        { id: 5, text: 'Very Dissatisfied', value: 1 }
-      ]
+
+  // Fetch template data
+  useEffect(() => {
+    const fetchTemplateData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3001/form-templates/details?id=${templateId}`);
+        if (response.data.status === 'success') {
+          const template = response.data.data;
+          setTemplateData(template);
+          setSelectedSize(template.pageSize || 'A4');
+          setBackgroundColor(template.backgroundColor || '#ffffff');
+        }
+      } catch (error) {
+        console.error('Error fetching template data:', error);
+      }
+    };
+
+    if (templateId) {
+      fetchTemplateData();
     }
-  ]);
+  }, [templateId]);
 
   const calculateGridSize = () => {
     if (paperRef.current) {
       const { width, height } = pageSizes[selectedSize];
-      const isPortrait = orientation === "Portrait";
-      const effectiveWidth = isPortrait ? width : height;
-      const effectiveHeight = isPortrait ? height : width;
-  
       const parentWidth = paperRef.current.offsetWidth;
-      const ratio = effectiveHeight / effectiveWidth;
-  
-      const gridWidth = Math.min(parentWidth, effectiveWidth);
+      const ratio = height / width;
+      const gridWidth = Math.min(parentWidth, width);
       const gridHeight = gridWidth * ratio;
-  
       setGridSize({ width: gridWidth, height: gridHeight });
     }
   };
 
   useEffect(() => {
     calculateGridSize();
-  }, [selectedSize, orientation]);
+    window.addEventListener('resize', calculateGridSize);
+    return () => window.removeEventListener('resize', calculateGridSize);
+  }, [selectedSize]);
 
   return (
     <Paper
@@ -82,16 +87,12 @@ const ViewTemplate: React.FC = () => {
               </IconButton>
               <ArrowForward style={{ color: 'black' }} />
               <Typography variant="body2" color="textSecondary">
-                Atlas Corp. 
-              </Typography>
-              <ArrowForward style={{ color: 'black' }} />
-              <Typography variant="body2" color="textSecondary">
-                View Template
+                {templateData?.name || 'Template'}
               </Typography>
             </Box>
-            <Typography variant="h5" fontWeight="bold">Employee Survey</Typography>
+            <Typography variant="h5" fontWeight="bold">{templateData?.name}</Typography>
             <Typography variant="body2" color="textSecondary" marginBottom="5px" marginTop="-10px">
-              Survey Description
+              {templateData?.description}
             </Typography>
           </Box>
 
@@ -109,57 +110,18 @@ const ViewTemplate: React.FC = () => {
               boxSizing: "border-box",
             }}
           >
-            {items.map((item) => (
-              <Box
-                key={item.id}
-                sx={{
-                  position: 'relative',
-                  width: (item.width / pageSizes[selectedSize].width) * gridSize.width,
-                  height: (item.height / pageSizes[selectedSize].height) * gridSize.height,
-                  left: (item.x / pageSizes[selectedSize].width) * gridSize.width,
-                  top: (item.y / pageSizes[selectedSize].height) * gridSize.height,
-                  backgroundColor: '#ffffff',
-                  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '12px',
-                  border: '1px solid #e0e0e0',
-                  padding: '16px',
-                }}
-              >
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1a1a1a', mb: 2 }}>
-                  Question {item.id}
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  {item.question}
-                </Typography>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-                  {item.options.map((option) => (
-                    <Box
-                      key={option.id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1.5,
-                        p: 1,
-                        borderRadius: '8px',
-                        border: '1px solid #e0e0e0',
-                        backgroundColor: '#ffffff',
-                      }}
-                    >
-                      <Radio
-                        size="small"
-                        disabled
-                        sx={{
-                          color: '#757575',
-                        }}
-                      />
-                      <Typography variant="body2">
-                        {option.text}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            ))}
+            <DraggableQuestion
+              formTemplateId={templateId || ''}
+              items={formFields}
+              gridSize={gridSize}
+              selectedSize={selectedSize}
+              pageSizes={pageSizes}
+              onQuestionChange={() => {}}
+              onOptionChange={() => {}}
+              onDeleteOption={() => {}}
+              onAddOption={() => {}}
+              viewMode={true}
+            />
           </div>
         </Grid>
       </Grid>

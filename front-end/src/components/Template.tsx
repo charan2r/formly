@@ -623,7 +623,7 @@ const Template: React.FC = () => {
                                             onClick={() => {
                                                 handleMenuClose();
                                                 setSelectedTemplate(row);
-                                                navigate('/viewtemplate', { 
+                                                navigate(`/viewtemplate/${row.formTemplateId}`, { 
                                                     state: { templateData: row } 
                                                 });
                                             }}

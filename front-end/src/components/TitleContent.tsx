@@ -14,6 +14,7 @@ interface TitleContentProps {
   onSubtitleChange: (itemId: string, optionId: string, newContent: string) => void;
   onDeleteSubtitle: (itemId: string, optionId: string) => void;
   onAddSubtitle: (itemId: string) => void;
+  viewMode?: boolean;
 }
 
 interface Subtitle {
@@ -47,6 +48,7 @@ const TitleContent: React.FC<TitleContentProps> = ({
   onSubtitleChange,
   onDeleteSubtitle,
   onAddSubtitle,
+  viewMode = false,
 }) => {
   const [subtitles, setSubtitles] = useState<Subtitle[]>([]);
 
@@ -144,6 +146,18 @@ const TitleContent: React.FC<TitleContentProps> = ({
         },
         '&:hover .delete-form-field': {
           opacity: 1,
+        },
+        '& .delete-icon, & .add-subtitle': {
+          display: viewMode ? 'none' : 'flex',
+        },
+        '& .ql-toolbar': {
+          display: viewMode ? 'none' : 'block',
+        },
+        '& .ql-container': {
+          border: viewMode ? 'none' : '1px solid #ccc',
+        },
+        '& .ql-editor': {
+          padding: viewMode ? '0' : '12px 15px',
         },
       }}
     >

@@ -50,7 +50,7 @@ const Background: React.FC = () => {
           <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
           <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
           <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
-          <Route path='/viewtemplate' element={<ViewTemplate />} />
+          <Route path='/viewtemplate/:templateId' element={<ViewTemplate />} />
         </Routes>
       </Box>
       </DragDropContext>
