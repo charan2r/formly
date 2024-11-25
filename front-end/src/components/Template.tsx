@@ -30,7 +30,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CircleIcon from '@mui/icons-material/Circle';
 import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
-import { ArrowForward, Delete } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -129,7 +129,7 @@ const Template: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/categories/organization/3f1b43a2-8add-4145-a4ec-6c560c7ac766');
+                const response = await axios.get('http://localhost:3001/categories/organization/8478937e-17cf-4936-97a8-0e92a33280f9');
                 // Filter categories where status is 'active'
                 const activeCategories = response.data.data.filter((cat: Category) => cat.status === 'active');
                 setCategories(activeCategories);
@@ -237,12 +237,12 @@ const Template: React.FC = () => {
             });
             setTemplates([...templates, response.data]);
             setCreateTemplateOpen(false);
-            
+
             toast.success("Template has been created successfully!", toastConfig);
-            
+
             // Navigate to edittemplate route with formTemplateId as parameter
-            navigate(`/edittemplate/${response.data.formTemplateId}`, { 
-                state: { templateData: response.data } 
+            navigate(`/edittemplate/${response.data.formTemplateId}`, {
+                state: { templateData: response.data }
             });
         } catch (error) {
             toast.error("Failed to create template. Please try again.", toastConfig);
@@ -254,14 +254,14 @@ const Template: React.FC = () => {
             await axios.delete('http://localhost:3001/form-templates/bulk-delete', {
                 data: { ids: Object.keys(selectedTemplates) },
             });
-            
+
             setTemplates((prevTemplates) =>
                 prevTemplates.filter(temp => !Object.keys(selectedTemplates).includes(temp.formTemplateId))
             );
-            
+
             setSelectedTemplates({});
             setConfirmationBulkOpen(false);
-            
+
             toast.success("Templates have been deleted successfully!", toastConfig);
         } catch (error) {
             toast.error("Failed to delete the Templates. Please try again.", toastConfig);
@@ -274,10 +274,10 @@ const Template: React.FC = () => {
         try {
             setLoading(true);
             console.log('Deleting template with ID:', templateToDelete);
-            
+
             const response = await axios.delete(`http://localhost:3001/form-templates/delete?id=${templateToDelete}`);
             console.log('Single Delete API Response:', response.data);
-            
+
             if (response.data.status === 'success') {
                 setTemplates(prev => prev.filter(template => template.formTemplateId !== templateToDelete));
                 toast.success("Template deleted successfully!", toastConfig);
@@ -295,6 +295,15 @@ const Template: React.FC = () => {
             setTemplateToDelete(null);
         }
     };
+
+    const StyledDialog = styled(Dialog)(({ theme }) => ({
+        '& .MuiDialog-paper': {
+          borderRadius: '16px',
+          padding: '32px',
+          maxWidth: '500px',
+          width: '100%'
+        }
+      }));
 
     const handleCloseDialog = () => {
         setDialogOpen(false);
@@ -319,7 +328,7 @@ const Template: React.FC = () => {
         })
         .sort((a, b) => {
             const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
-            
+
             switch (orderBy) {
                 case 'name':
                     return (a.name || "").localeCompare(b.name || "") * orderMultiplier;
@@ -341,18 +350,18 @@ const Template: React.FC = () => {
     const handleEditTemplate = async () => {
         try {
             const response = await axios.patch(
-                `http://localhost:3001/form-templates/edit?id=${selectedTemplate?.formTemplateId}`, 
+                `http://localhost:3001/form-templates/edit?id=${selectedTemplate?.formTemplateId}`,
                 editFormData
             );
-            
-            setTemplates(prevTemplates => 
-                prevTemplates.map(temp => 
-                    temp.formTemplateId === selectedTemplate?.formTemplateId 
+
+            setTemplates(prevTemplates =>
+                prevTemplates.map(temp =>
+                    temp.formTemplateId === selectedTemplate?.formTemplateId
                         ? { ...temp, ...response.data }
                         : temp
                 )
             );
-            
+
             setEditTemplateOpen(false);
             toast.success("Template has been updated successfully!", toastConfig);
         } catch (error) {
@@ -364,7 +373,7 @@ const Template: React.FC = () => {
         try {
             setLoading(true);
             const response = await axios.delete(`http://localhost:3001/form-templates/delete?id=${templateId}`);
-            
+
             if (response.data.status === 'success') {
                 toast.success('Template deleted successfully', toastConfig);
                 setTemplates(prev => prev.filter(template => template.formTemplateId !== templateId));
@@ -385,7 +394,7 @@ const Template: React.FC = () => {
         try {
             setLoading(true);
             console.log('Deleting templates with IDs:', selectedTemplates);
-            
+
             const response = await axios.delete('http://localhost:3001/form-templates/bulk-delete', {
                 data: { ids: selectedTemplates }
             });
@@ -521,54 +530,54 @@ const Template: React.FC = () => {
                                     }
                                 />
                             </TableCell>
-                            <TableCell sx={{ 
-                                backgroundColor: '#f9f9f9', 
-                                padding: '8px', 
+                            <TableCell sx={{
+                                backgroundColor: '#f9f9f9',
+                                padding: '8px',
                                 height: '48px',
                                 width: '30%'
                             }}>
                                 Template Name
                             </TableCell>
-                            <TableCell sx={{ 
-                                backgroundColor: '#f9f9f9', 
-                                padding: '8px', 
+                            <TableCell sx={{
+                                backgroundColor: '#f9f9f9',
+                                padding: '8px',
                                 height: '48px',
                                 width: '25%'
                             }}>
                                 Category
                             </TableCell>
-                            <TableCell sx={{ 
-                                backgroundColor: '#f9f9f9', 
-                                padding: '8px', 
+                            <TableCell sx={{
+                                backgroundColor: '#f9f9f9',
+                                padding: '8px',
                                 height: '48px',
                                 width: '20%'
                             }}>
                                 Created Date
                             </TableCell>
-                            <TableCell sx={{ 
-                                backgroundColor: '#f9f9f9', 
-                                padding: '8px', 
+                            <TableCell sx={{
+                                backgroundColor: '#f9f9f9',
+                                padding: '8px',
                                 height: '48px',
                                 width: '20%'
                             }}>
                                 Last Modified Date
                             </TableCell>
-                            <TableCell sx={{ 
-                                backgroundColor: '#f9f9f9', 
+                            <TableCell sx={{
+                                backgroundColor: '#f9f9f9',
                                 padding: '8px',
                                 width: '48px',
                                 height: '48px',
-                                borderStartEndRadius: '20px', 
-                                borderEndEndRadius: '20px' 
+                                borderStartEndRadius: '20px',
+                                borderEndEndRadius: '20px'
                             }} />
                         </TableRow>
                     </TableHead>
 
                     <TableBody>
                         {paginatedData.map((row) => (
-                            <TableRow 
-                                key={row.formTemplateId} 
-                                sx={{ 
+                            <TableRow
+                                key={row.formTemplateId}
+                                sx={{
                                     height: '48px',
                                     '&:hover': { backgroundColor: '#f5f5f5' }
                                 }}
@@ -644,8 +653,8 @@ const Template: React.FC = () => {
                                             onClick={() => {
                                                 handleMenuClose();
                                                 setSelectedTemplate(row);
-                                                navigate(`/edittemplate/${row.formTemplateId}`, { 
-                                                    state: { templateData: row } 
+                                                navigate(`/edittemplate/${row.formTemplateId}`, {
+                                                    state: { templateData: row }
                                                 });
                                             }}
                                             sx={{
@@ -695,46 +704,63 @@ const Template: React.FC = () => {
             </Box>
 
             {/* Single Delete Confirmation Dialog */}
-            <Dialog 
-                open={confirmationOpen} 
+            <StyledDialog 
+                open={confirmationOpen}
                 onClose={() => {
                     setConfirmationOpen(false);
                     setTemplateToDelete(null);
-                }}
-            >
-                <DialogTitle>Confirm Deletion</DialogTitle>
-                <DialogContent>
-                    <Typography>
+                }}>
+                <Box sx={{ textAlign: 'center', pb: 2 }}>
+                    <IconButton
+                        sx={{ position: 'absolute', left: 16, top: 16 }}
+                        onClick={() => setConfirmationOpen(false)}
+                    >
+                        <ArrowBack />
+                    </IconButton>
+                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+                        Delete Template
+                    </Typography>
+                    <Typography sx={{ mt: 2, mb: 3 }}>
                         Are you sure you want to delete this template?
                     </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button 
-                        onClick={() => {
-                            setConfirmationOpen(false);
-                            setTemplateToDelete(null);
-                        }}
-                    >
-                        Cancel
-                    </Button>
-                    <Button 
-                        onClick={handleDeleteTemplate}
-                        disabled={loading}
-                        sx={{ 
-                            color: 'white', 
-                            backgroundColor: 'black', 
-                            borderRadius: '10px',
-                            '&:hover': { backgroundColor: '#333' }
-                        }}
-                    >
-                        {loading ? 'Deleting...' : 'Delete'}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                    <Box sx={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => {
+                                setConfirmationOpen(false);
+                                setTemplateToDelete(null);
+                            }}
+                            sx={{
+                                bgcolor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                px: 4,
+                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+                            }}
+                        >
+                            No, Cancel
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={handleDeleteTemplate}
+                            disabled={loading}
+                            sx={{
+                                borderColor: 'black',
+                                color: 'black',
+                                borderRadius: '20px',
+                                px: 4,
+                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                            }}
+                        >
+                            {loading ? 'Deleting...' : 'Yes, Delete'}
+                        </Button>
+                    </Box>
+                </Box>
+            </StyledDialog>
 
             {/* Bulk Delete Confirmation Dialog */}
-            <Dialog 
-                open={confirmationBulkOpen} 
+            <Dialog
+                open={confirmationBulkOpen}
                 onClose={() => setConfirmationBulkOpen(false)}
             >
                 <DialogTitle>Confirm Bulk Deletion</DialogTitle>
@@ -747,12 +773,12 @@ const Template: React.FC = () => {
                     <Button onClick={() => setConfirmationBulkOpen(false)}>
                         Cancel
                     </Button>
-                    <Button 
+                    <Button
                         onClick={handleBulkDelete}
                         disabled={loading}
-                        sx={{ 
-                            color: 'white', 
-                            backgroundColor: 'black', 
+                        sx={{
+                            color: 'white',
+                            backgroundColor: 'black',
                             borderRadius: '10px',
                             '&:hover': { backgroundColor: '#333' }
                         }}
@@ -792,9 +818,9 @@ const Template: React.FC = () => {
                     </IconButton>
 
                     {/* Header section */}
-                    <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'left', 
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'left',
                         mb: 2,
                         mt: 1,
                         pl: 5
@@ -815,10 +841,10 @@ const Template: React.FC = () => {
                             <Grid container spacing={3}>
                                 {/* Template Name */}
                                 <Grid item xs={12}>
-                                    <Typography variant="subtitle2" gutterBottom sx={{ 
+                                    <Typography variant="subtitle2" gutterBottom sx={{
                                         mb: 0.5,
                                         color: '#555',
-                                        fontWeight: 500 
+                                        fontWeight: 500
                                     }}>
                                         Template Name
                                     </Typography>
@@ -829,7 +855,7 @@ const Template: React.FC = () => {
                                         variant="outlined"
                                         size="small"
                                         inputProps={{
-                                            sx: { 
+                                            sx: {
                                                 backgroundColor: '#ffffff',
                                                 borderRadius: '8px',
                                                 padding: '8px 12px',
@@ -844,10 +870,10 @@ const Template: React.FC = () => {
                                 {/* Category and Page Size */}
                                 <Grid item xs={12} container spacing={2}>
                                     <Grid item xs={6}>
-                                        <Typography variant="subtitle2" gutterBottom sx={{ 
+                                        <Typography variant="subtitle2" gutterBottom sx={{
                                             mb: 0.5,
                                             color: '#555',
-                                            fontWeight: 500 
+                                            fontWeight: 500
                                         }}>
                                             Category
                                         </Typography>
@@ -858,8 +884,8 @@ const Template: React.FC = () => {
                                             fullWidth
                                             size="small"
                                             InputProps={{
-                                                sx: { 
-                                                    backgroundColor: '#ffffff', 
+                                                sx: {
+                                                    backgroundColor: '#ffffff',
                                                     borderRadius: '8px',
                                                     height: '40px'
                                                 }
@@ -873,10 +899,10 @@ const Template: React.FC = () => {
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <Typography variant="subtitle2" gutterBottom sx={{ 
+                                        <Typography variant="subtitle2" gutterBottom sx={{
                                             mb: 0.5,
                                             color: '#555',
-                                            fontWeight: 500 
+                                            fontWeight: 500
                                         }}>
                                             Page Size
                                         </Typography>
@@ -887,8 +913,8 @@ const Template: React.FC = () => {
                                             fullWidth
                                             size="small"
                                             InputProps={{
-                                                sx: { 
-                                                    backgroundColor: '#ffffff', 
+                                                sx: {
+                                                    backgroundColor: '#ffffff',
                                                     borderRadius: '8px',
                                                     height: '40px'
                                                 }
@@ -903,10 +929,10 @@ const Template: React.FC = () => {
 
                                 {/* Description */}
                                 <Grid item xs={12}>
-                                    <Typography variant="subtitle2" gutterBottom sx={{ 
+                                    <Typography variant="subtitle2" gutterBottom sx={{
                                         mb: 0.5,
                                         color: '#555',
-                                        fontWeight: 500 
+                                        fontWeight: 500
                                     }}>
                                         Description
                                     </Typography>
@@ -917,8 +943,8 @@ const Template: React.FC = () => {
                                         value={newTemplate.description}
                                         onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
                                         InputProps={{
-                                            sx: { 
-                                                backgroundColor: '#ffffff', 
+                                            sx: {
+                                                backgroundColor: '#ffffff',
                                                 borderRadius: '8px',
                                                 '& .MuiOutlinedInput-input': {
                                                     padding: '8px 12px'
@@ -932,9 +958,9 @@ const Template: React.FC = () => {
                     </DialogContent>
 
                     {/* Actions */}
-                    <DialogActions sx={{ 
+                    <DialogActions sx={{
                         p: 2,
-                        justifyContent: 'right' 
+                        justifyContent: 'right'
                     }}>
                         <Button
                             variant="contained"
@@ -965,8 +991,8 @@ const Template: React.FC = () => {
             </Dialog>
 
             {/* Edit Dialog */}
-            <Dialog 
-                open={editTemplateOpen} 
+            <Dialog
+                open={editTemplateOpen}
                 onClose={() => setEditTemplateOpen(false)}
                 maxWidth="sm"
                 fullWidth
@@ -1012,10 +1038,10 @@ const Template: React.FC = () => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setEditTemplateOpen(false)}>Cancel</Button>
-                    <Button 
+                    <Button
                         onClick={handleEditTemplate}
-                        sx={{ 
-                            backgroundColor: 'black', 
+                        sx={{
+                            backgroundColor: 'black',
                             color: 'white',
                             '&:hover': { backgroundColor: '#333' }
                         }}
@@ -1045,6 +1071,8 @@ const Template: React.FC = () => {
                     <CircularProgress />
                 </Box>
             )}
+
+            
         </Paper >
     );
 };

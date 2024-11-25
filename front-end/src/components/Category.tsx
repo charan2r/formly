@@ -31,7 +31,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CircleIcon from '@mui/icons-material/Circle';
 import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
-import { ArrowForward, Delete } from '@mui/icons-material';
+import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -86,7 +86,7 @@ const Category: React.FC = () => {
     const [newCategory, setNewCategory] = useState({
         name: '',
         description: '',
-        createdById: 'f247546a-eea9-4678-ac24-5924e0a58250'
+        createdById: '8478937e-17cf-4936-97a8-0e92a33280f9'
     });
      // Adjust `createdById` as needed
      const [error, setError] = useState<string | null>(null); // Optional: To display errors
@@ -114,7 +114,7 @@ const Category: React.FC = () => {
             setNewCategory({ 
                 name: '', 
                 description: '', 
-                createdById: 'f247546a-eea9-4678-ac24-5924e0a58250' 
+                createdById: '8478937e-17cf-4936-97a8-0e92a33280f9' 
             });
 
             // Show success message
@@ -148,7 +148,7 @@ const Category: React.FC = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:3001/categories/organization/f247546a-eea9-4678-ac24-5924e0a58250`);
+            const response = await axios.get(`http://localhost:3001/categories/organization/8478937e-17cf-4936-97a8-0e92a33280f9`);
             const activeCategories = response.data.data.filter(cat => cat.status === 'active');
             setCategories(activeCategories);
         } catch (error) {
@@ -362,6 +362,15 @@ const Category: React.FC = () => {
         setDialogOpen(false);
         setCategoryDetails(null);
     };
+
+    const StyledDialog = styled(Dialog)(({ theme }) => ({
+        '& .MuiDialog-paper': {
+          borderRadius: '16px',
+          padding: '32px',
+          maxWidth: '500px',
+          width: '100%'
+        }
+      }));
 
     const handleEditCategory = async () => {
         try {
@@ -706,21 +715,60 @@ const Category: React.FC = () => {
                 />
             </Box>
 
-            {/* Confirmation Dialog */}
-            <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
-                <DialogContent>
-                    <Typography>Are you sure you want to delete this category?</Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setConfirmationOpen(false)} color="black">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteCategory} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            {/* Single Delete Confirmation Dialog */}
+            <StyledDialog 
+                open={confirmationOpen}
+                onClose={() => {
+                    setConfirmationOpen(false);
+                    setCategoryToDelete(null);
+                }}>
+                <Box sx={{ textAlign: 'center', pb: 2 }}>
+                    <IconButton
+                        sx={{ position: 'absolute', left: 16, top: 16 }}
+                        onClick={() => setConfirmationOpen(false)}
+                    >
+                        <ArrowBack />
+                    </IconButton>
+                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+                        Delete Category
+                    </Typography>
+                    <Typography sx={{ mt: 2, mb: 3 }}>
+                        Are you sure you want to delete this category?
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => {
+                                setConfirmationOpen(false);
+                                setCategoryToDelete(null);
+                            }}
+                            sx={{
+                                bgcolor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                px: 4,
+                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+                            }}
+                        >
+                            No, Cancel
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={handleDeleteCategory}
+                            disabled={loading}
+                            sx={{
+                                borderColor: 'black',
+                                color: 'black',
+                                borderRadius: '20px',
+                                px: 4,
+                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                            }}
+                        >
+                            {loading ? 'Deleting...' : 'Yes, Delete'}
+                        </Button>
+                    </Box>
+                </Box>
+            </StyledDialog>
 
             {/* Bulk Confirmation Dialog */}
             <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
