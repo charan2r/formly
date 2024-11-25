@@ -15,6 +15,8 @@ import Role from './Role';
 import AddRole from './AddRole';
 import ViewRole from './ViewRole';
 import EditRole from './EditRole';
+import Form from './Form';
+//import AddForm from './AddForm';
 
 
 
@@ -31,12 +33,15 @@ const Background: React.FC = () => {
         <Route path='/templates' element={<Template/>}/>
         <Route path='/categories' element={<Category/>}/>
         <Route path='/roles' element={<Role/>}/>
+        <Route path='/forms' element={<Form/>}/>
         <Route path="/create-organization" element={<CreateOrganization/>}/>
         <Route path="/add-role" element={<AddRole/>}/>
         <Route path="/view-organization/:orgId" element={<ViewOrganization></ViewOrganization>} />
         <Route path="/Edit-organization/:orgId" element={<EditOrganization/>}/>
         <Route path="/view-role/:roleId" element={<ViewRole/>}/>
         <Route path="/edit-role/:roleId" element={<EditRole/>}/>
+        
+
 
       </Routes>
     </Box>
