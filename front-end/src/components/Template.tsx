@@ -731,8 +731,8 @@ const Template: React.FC = () => {
                                             onClick={() => {
                                                 handleMenuClose();
                                                 setSelectedTemplate(row);
-                                                navigate('/viewtemplate', {
-                                                    state: { templateData: row }
+                                                navigate(`/viewtemplate/${row.formTemplateId}`, { 
+                                                    state: { templateData: row } 
                                                 });
                                             }}
                                             sx={{

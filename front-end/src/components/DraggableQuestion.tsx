@@ -25,6 +25,7 @@ interface DraggableQuestionProps {
   onOptionChange: (itemId: string, optionId: number, newContent: string) => void;
   onDeleteOption: (itemId: string, optionId: number) => void;
   onAddOption: (itemId: string) => void;
+  isViewMode?: boolean;
 }
 
 const calculateScale = (selectedSize: string, pageSizes: { [key: string]: { width: number; height: number } }) => {
@@ -43,6 +44,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   onOptionChange,
   onDeleteOption,
   onAddOption,
+  isViewMode,
 }) => {
   const [formFields, setFormFields] = useState<QuestionItem[]>(items);
   const [isDragging, setIsDragging] = useState(false);
@@ -268,6 +270,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 borderRadius: '12px',
                 border: '1px solid #e0e0e0',
                 overflow: 'hidden',
+                pointerEvents: isViewMode ? 'none' : 'auto',
               }}
               className="draggable-question"
               size={{
@@ -278,23 +281,18 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 x: ((item.x / pageSizes[selectedSize].width) * gridSize.width) * calculateScale(selectedSize, pageSizes),
                 y: ((item.y / pageSizes[selectedSize].height) * gridSize.height) * calculateScale(selectedSize, pageSizes)
               }}
-              onDragStart={handleDragStart}
-              onDragStop={(e, data) => {
+              enableResizing={!isViewMode}
+              disableDragging={isViewMode}
+              onDragStart={!isViewMode ? handleDragStart : undefined}
+              onDragStop={!isViewMode ? (e, data) => {
                 const scale = calculateScale(selectedSize, pageSizes);
                 const newX = (data.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
                 const newY = (data.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
                 handleDragStop(e, { x: newX, y: newY }, item);
-              }}
-              onResizeStop={(e, direction, ref, delta, position) => {
-                const scale = calculateScale(selectedSize, pageSizes);
-                const newWidth = (ref.offsetWidth / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newHeight = (ref.offsetHeight / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                const newX = (position.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newY = (position.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                handleResizeStop(e, direction, ref, { width: newWidth, height: newHeight }, { x: newX, y: newY }, item);
-              }}
+              } : undefined}
+              onResizeStop={!isViewMode ? handleResizeStop : undefined}
               bounds="parent"
-              dragHandleClassName="drag-handle"
+              dragHandleClassName={!isViewMode ? "drag-handle" : undefined}
             >
               <Box sx={{ 
                 width: '100%',
