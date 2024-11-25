@@ -15,6 +15,7 @@ import Category from './Category';
 import LeftSidebar from './LeftSidebar';
 import EditPageSettings from './RightSidebar';
 import ViewTemplate from './ViewTemplate';
+import AuditTrail from './AuditTrail';
 
 const Background: React.FC = () => {
   const location = useLocation(); // Get the current route
@@ -41,6 +42,7 @@ const Background: React.FC = () => {
         <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
         <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
         <Route path='/viewtemplate' element={<ViewTemplate />} />
+        <Route path='/audit-logs' element={<AuditTrail/>} />
       </Routes>
     </Box>
   );
