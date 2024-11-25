@@ -100,33 +100,38 @@ const DraggableItem = memo(({ item, index }) => {
           {...provided.dragHandleProps}
           onClick={handleClick}
           sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minWidth: '40px',
+            width: '100%',
             cursor: 'pointer',
           }}
         >
           <ListItemButton
             sx={{
               display: 'flex',
-              justifyContent: 'center',
               alignItems: 'center',
-              borderRadius: '4px',
-              p: 0.5,
+              borderRadius: '8px',
+              p: 1,
               backgroundColor: '#fff',
               boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.1)',
-              height: '35px',
+              height: '40px',
+              '&:hover': {
+                backgroundColor: '#f5f5f5',
+                boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+              },
+              transition: 'all 0.2s ease',
             }}
           >
-            {React.cloneElement(item.icon, { fontSize: 'small' })}
+            <Box sx={{ mr: 2 }}>
+              {React.cloneElement(item.icon, { 
+                fontSize: 'small',
+                sx: { color: '#666' }
+              })}
+            </Box>
             <ListItemText
               primary={item.label}
               primaryTypographyProps={{
-                fontWeight: 'bold',
-                textAlign: 'center',
-                fontSize: '0.75rem',
+                fontWeight: '500',
+                fontSize: '0.85rem',
+                color: '#333',
               }}
             />
           </ListItemButton>
@@ -138,18 +143,42 @@ const DraggableItem = memo(({ item, index }) => {
 
 // Category Component
 const Category = memo(({ category, filteredItems }) => (
-  <Box key={category.id} sx={{ mb: 1 }}>
-    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+  <Box 
+    key={category.id} 
+    sx={{ 
+      mb: 3,
+      width: '100%'
+    }}
+  >
+    <Typography 
+      variant="caption" 
+      color="text.secondary" 
+      sx={{ 
+        ml: 1,
+        textTransform: 'uppercase',
+        fontWeight: 'bold',
+        fontSize: '0.7rem',
+        display: 'block',
+        mb: 1
+      }}
+    >
       {category.category}
     </Typography>
-    <Droppable droppableId={category.id} direction="horizontal">
+    <Droppable droppableId={category.id} direction="vertical">
       {(provided) => (
-        <List ref={provided.innerRef} {...provided.droppableProps} sx={{ mt: 0.5, padding: 0 }}>
-          <Stack direction="row" spacing={1} flexWrap="wrap">
-            {filteredItems.map((item, index) => (
-              <DraggableItem key={item.label} item={item} index={index} />
-            ))}
-          </Stack>
+        <List 
+          ref={provided.innerRef} 
+          {...provided.droppableProps} 
+          sx={{ 
+            padding: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+          }}
+        >
+          {filteredItems.map((item, index) => (
+            <DraggableItem key={item.label} item={item} index={index} />
+          ))}
           {provided.placeholder}
         </List>
       )}
@@ -246,14 +275,15 @@ const LeftSidebar: React.FC = () => {
   return (
     <Box
       sx={{
-        width: { xs: '100%', sm: '20%' },
+        width: { xs: '100%', sm: '250px' },
         backgroundColor: '#F9F9F9',
         color: '#333',
-        p: 4,
+        p: 2,
         display: 'flex',
         flexDirection: 'column',
         height: '100vh',
         boxSizing: 'border-box',
+        // borderRight: '1px solid #e0e0e0',
       }}
     >
       <Stack direction="row" alignItems="center" spacing={1} mb={1} marginTop={'15%'}>
@@ -276,7 +306,7 @@ const LeftSidebar: React.FC = () => {
             height: '30px',
             fontSize: '0.75rem',
           },
-          width: '80%',
+          width: '100%',
           maxWidth: '300px',
         }}
         fullWidth

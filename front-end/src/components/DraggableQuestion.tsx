@@ -27,6 +27,12 @@ interface DraggableQuestionProps {
   onAddOption: (itemId: string) => void;
 }
 
+const calculateScale = (selectedSize: string, pageSizes: { [key: string]: { width: number; height: number } }) => {
+  const baseSize = pageSizes['A4']; // Use A4 as reference size
+  const currentSize = pageSizes[selectedSize];
+  return Math.max(baseSize.width / currentSize.width, baseSize.height / currentSize.height);
+};
+
 const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   formTemplateId,
   items,
@@ -262,54 +268,58 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 borderRadius: '12px',
                 border: '1px solid #e0e0e0',
                 overflow: 'hidden',
-                '&:hover': {
-                  overflow: 'auto',
-                },
               }}
               className="draggable-question"
               size={{
-                width: (item.width / pageSizes[selectedSize].width) * gridSize.width,
-                height: (item.height / pageSizes[selectedSize].height) * gridSize.height
+                width: ((item.width / pageSizes[selectedSize].width) * gridSize.width) * calculateScale(selectedSize, pageSizes),
+                height: ((item.height / pageSizes[selectedSize].height) * gridSize.height) * calculateScale(selectedSize, pageSizes)
               }}
               position={{
-                x: (item.x / pageSizes[selectedSize].width) * gridSize.width,
-                y: (item.y / pageSizes[selectedSize].height) * gridSize.height
+                x: ((item.x / pageSizes[selectedSize].width) * gridSize.width) * calculateScale(selectedSize, pageSizes),
+                y: ((item.y / pageSizes[selectedSize].height) * gridSize.height) * calculateScale(selectedSize, pageSizes)
               }}
               onDragStart={handleDragStart}
               onDragStop={(e, data) => {
-                const newX = (data.x / gridSize.width) * pageSizes[selectedSize].width;
-                const newY = (data.y / gridSize.height) * pageSizes[selectedSize].height;
+                const scale = calculateScale(selectedSize, pageSizes);
+                const newX = (data.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
+                const newY = (data.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
                 handleDragStop(e, { x: newX, y: newY }, item);
               }}
               onResizeStop={(e, direction, ref, delta, position) => {
-                const newWidth = (ref.offsetWidth / gridSize.width) * pageSizes[selectedSize].width;
-                const newHeight = (ref.offsetHeight / gridSize.height) * pageSizes[selectedSize].height;
-                const newX = (position.x / gridSize.width) * pageSizes[selectedSize].width;
-                const newY = (position.y / gridSize.height) * pageSizes[selectedSize].height;
+                const scale = calculateScale(selectedSize, pageSizes);
+                const newWidth = (ref.offsetWidth / (gridSize.width * scale)) * pageSizes[selectedSize].width;
+                const newHeight = (ref.offsetHeight / (gridSize.height * scale)) * pageSizes[selectedSize].height;
+                const newX = (position.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
+                const newY = (position.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
                 handleResizeStop(e, direction, ref, { width: newWidth, height: newHeight }, { x: newX, y: newY }, item);
               }}
               bounds="parent"
               dragHandleClassName="drag-handle"
             >
-              {item.type === 'title' ? (
-                <TitleContent
-                  item={item}
-                  formFieldId={item.id}
-                  onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
-                  onSubtitleChange={handleOptionChange}
-                  onDeleteSubtitle={handleDeleteOption}
-                  onAddSubtitle={handleAddOption}
-                />
-              ) : (
-                <QuestionContent
-                  item={item}
-                  formFieldId={item.id}
-                  onQuestionChange={handleQuestionUpdate}
-                  onOptionChange={handleOptionChange}
-                  onDeleteOption={handleDeleteOption}
-                  onAddOption={handleAddOption}
-                />
-              )}
+              <Box sx={{ 
+                width: '100%',
+                height: '100%',
+              }}>
+                {item.type === 'title' ? (
+                  <TitleContent
+                    item={item}
+                    formFieldId={item.id}
+                    onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
+                    onSubtitleChange={handleOptionChange}
+                    onDeleteSubtitle={handleDeleteOption}
+                    onAddSubtitle={handleAddOption}
+                  />
+                ) : (
+                  <QuestionContent
+                    item={item}
+                    formFieldId={item.id}
+                    onQuestionChange={handleQuestionUpdate}
+                    onOptionChange={handleOptionChange}
+                    onDeleteOption={handleDeleteOption}
+                    onAddOption={handleAddOption}
+                  />
+                )}
+              </Box>
             </Rnd>
           ))}
           {provided.placeholder}

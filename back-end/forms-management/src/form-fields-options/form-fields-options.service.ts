@@ -30,7 +30,7 @@ export class FormFieldsOptionsService {
     // Service method to get all options of a form field
     async getOptions(formFieldId: string): Promise<FormFieldsOption[]> {
         return await this.formFieldsOptionRepository.find({
-            where: { formField: { fieldId: formFieldId },status: Not('deleted')},
+            where: { formField: { fieldId: formFieldId }, status: 'active'},
             order: { option: 'ASC' },
         });
     }

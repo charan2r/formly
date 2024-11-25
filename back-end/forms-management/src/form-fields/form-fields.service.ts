@@ -20,12 +20,11 @@ export class FormFieldsService {
     // Method to get all form fields by template ID
     async getFields(formTemplateId: string): Promise<FormField[]> {
         console.log("formTemplateId", formTemplateId);
-        console.log(this.formFieldsRepository.find({ where: { formTemplateId:formTemplateId,status: 'active'  }}));
         return this.formFieldsRepository.find({ 
             where: { 
-                formTemplateId:formTemplateId,
-                status: 'active'  // Only get fields with active status
-            },
+                formTemplateId,
+                status: 'active'
+            } 
         });
     }
 
@@ -44,8 +43,8 @@ export class FormFieldsService {
         if (!field) {
           throw new Error('Form Field not found');
         }
-        // field.status = 'deleted';
-        await this.formFieldsRepository.delete(field);
+        field.status = 'deleted';
+        await this.formFieldsRepository.save(field);
     }
 
     // Method to bulk delete form fields
