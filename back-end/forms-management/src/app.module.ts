@@ -29,6 +29,7 @@ import { FormFieldsOptionsService } from './form-fields-options/form-fields-opti
 import { FormFieldsOptionsModule } from './form-fields-options/form-fields-options.module';
 import { FormFieldsOptionsRepository } from './form-fields-options/form-fields-options.repository';
 import { FormFieldsOption } from './model/form-fields-option.entity';
+import { FormsModule } from './form/form.module';
 
 @Module({
   imports: [
@@ -49,7 +50,8 @@ import { FormFieldsOption } from './model/form-fields-option.entity';
     FormTemplateModule,
     CategoryModule,
     FormFieldsModule,
-    FormFieldsOptionsModule
+    FormFieldsOptionsModule,
+    FormsModule
   ],
   controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController, FormFieldsOptionsController],
   providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository],
