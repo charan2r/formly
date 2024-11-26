@@ -15,9 +15,12 @@ import {
   Select,
   MenuItem,
   IconButton,
+  Radio,
 } from '@mui/material';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import CircleIcon from '@mui/icons-material/Circle';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddIcon from '@mui/icons-material/Add';
 
 const pageSizes = {
   A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
@@ -27,8 +30,14 @@ const pageSizes = {
 
 const initialItems = [
   { id: "1", x: 0, y: 0, width: 150, height: 150, color: "#a8d8ea" },
-  { id: "2", x: 0, y: 0, width: 150, height: 150, color: "#a8d8ea" },
 ];
+
+const getRandomPosition = (maxWidth: number, maxHeight: number, itemWidth: number, itemHeight: number) => {
+  return {
+    x: Math.random() * (maxWidth - itemWidth),
+    y: Math.random() * (maxHeight - itemHeight)
+  };
+};
 
 const EditPageSettings: React.FC = () => {
   const [pageSize, setPageSize] = useState<string>('Letter');
@@ -40,7 +49,17 @@ const EditPageSettings: React.FC = () => {
   const [gridPadding, setGridPadding] = useState({ top: 10, bottom: 10, left: 10, right: 10 });
 
 
-  const [items, setItems] = useState(initialItems);
+  const [items, setItems] = useState(initialItems.map(item => ({
+    ...item,
+    question: "How satisfied are you with the company's professional development opportunities?",
+    options: [
+      { id: 1, text: 'Very Satisfied', value: 5 },
+      { id: 2, text: 'Satisfied', value: 4 },
+      { id: 3, text: 'Neutral', value: 3 },
+      { id: 4, text: 'Dissatisfied', value: 2 },
+      { id: 5, text: 'Very Dissatisfied', value: 1 }
+    ]
+  })));
   const rndContainerRef = useRef(null);
   const paperRef = useRef<HTMLDivElement>(null);
   const [gridSize, setGridSize] = useState({ width: 210 * 3.7795, height: 297 * 3.7795 });
@@ -50,6 +69,9 @@ const EditPageSettings: React.FC = () => {
     Footer: '',
     Header: ''
   });
+
+  // Add new state to track initial page size for scaling
+  const [initialPageSize] = useState(selectedSize);
 
   useEffect(() => {
     const savedSettings = JSON.parse(localStorage.getItem('pageSettings') || '{}');
@@ -73,7 +95,34 @@ const EditPageSettings: React.FC = () => {
   };
 
   const handleSizeChange = (event) => {
-    setSelectedSize(event.target.value);
+    const newSize = event.target.value;
+    const oldSize = selectedSize;
+    
+    setItems(prevItems => prevItems.map(item => {
+      // Calculate distances from right and bottom edges
+      const distanceFromRight = pageSizes[oldSize].width - (item.x + item.width);
+      const distanceFromBottom = pageSizes[oldSize].height - (item.y + item.height);
+      
+      // If item is closer to right edge than left, maintain right distance
+      const newX = distanceFromRight < item.x
+        ? pageSizes[newSize].width - distanceFromRight - item.width
+        : (item.x / pageSizes[oldSize].width) * pageSizes[newSize].width;
+
+      // If item is closer to bottom edge than top, maintain bottom distance
+      const newY = distanceFromBottom < item.y
+        ? pageSizes[newSize].height - distanceFromBottom - item.height
+        : (item.y / pageSizes[oldSize].height) * pageSizes[newSize].height;
+      
+      return {
+        ...item,
+        x: newX,
+        y: newY,
+        width: (item.width / pageSizes[oldSize].width) * pageSizes[newSize].width,
+        height: (item.height / pageSizes[oldSize].height) * pageSizes[newSize].height,
+      };
+    }));
+    
+    setSelectedSize(newSize);
   };
 
   const calculateGridSize = () => {
@@ -105,8 +154,8 @@ const EditPageSettings: React.FC = () => {
         item.id === id
           ? {
               ...item,
-              x: (data.x / gridSize.width) * 100,
-              y: (data.y / gridSize.height) * 100,
+              x: (data.x / gridSize.width) * pageSizes[selectedSize].width,
+              y: (data.y / gridSize.height) * pageSizes[selectedSize].height,
             }
           : item
       )
@@ -119,10 +168,10 @@ const EditPageSettings: React.FC = () => {
         item.id === id
           ? {
               ...item,
-              width: ref.offsetWidth,
-              height: ref.offsetHeight,
-              x: (position.x / gridSize.width) * 100,
-              y: (position.y / gridSize.height) * 100,
+              width: (ref.offsetWidth / gridSize.width) * pageSizes[selectedSize].width,
+              height: (ref.offsetHeight / gridSize.height) * pageSizes[selectedSize].height,
+              x: (position.x / gridSize.width) * pageSizes[selectedSize].width,
+              y: (position.y / gridSize.height) * pageSizes[selectedSize].height,
             }
           : item
       )
@@ -190,6 +239,65 @@ const EditPageSettings: React.FC = () => {
     }));
   };
 
+  const getContainerWidth = () => {
+    return showSidebar ? '55vw' : '70vw';
+  };
+
+  const handleQuestionChange = (itemId: string, newQuestion: string) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId ? { ...item, question: newQuestion } : item
+      )
+    );
+  };
+
+  const handleOptionChange = (itemId: string, optionId: number, newText: string) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId
+          ? {
+              ...item,
+              options: item.options.map(opt =>
+                opt.id === optionId ? { ...opt, text: newText } : opt
+              )
+            }
+          : item
+      )
+    );
+  };
+
+  const handleAddOption = (itemId: string) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId
+          ? {
+              ...item,
+              options: [
+                ...item.options,
+                {
+                  id: item.options.length + 1,
+                  text: 'New Option',
+                  value: item.options.length + 1
+                }
+              ]
+            }
+          : item
+      )
+    );
+  };
+
+  const handleDeleteOption = (itemId: string, optionId: number) => {
+    setItems(prevItems =>
+      prevItems.map(item =>
+        item.id === itemId
+          ? {
+              ...item,
+              options: item.options.filter(opt => opt.id !== optionId)
+            }
+          : item
+      )
+    );
+  };
 
   return (
       <>
@@ -266,8 +374,8 @@ const EditPageSettings: React.FC = () => {
 
              <div
   style={{
-    width: `${70}vw`,
-    height: `${70*(gridSize.height/gridSize.width)}vw`,
+    width: getContainerWidth(),
+    height: `${(getContainerWidth().replace('vw', '') as any) * (gridSize.height/gridSize.width)}vw`,
     position: "relative",
     border: "1px solid #ccc",
     borderRadius: '15px',
@@ -278,33 +386,148 @@ const EditPageSettings: React.FC = () => {
     paddingBottom: gridPadding.bottom,
     paddingLeft: gridPadding.left,
     paddingRight: gridPadding.right,
-    boxSizing: "border-box", // Ensure padding does not affect overall size
+    boxSizing: "border-box",
   }}
 >
-  <div ref={rndContainerRef} style={{ position: "relative", width: "100%", height: "100%" }}>
+  <div 
+    ref={rndContainerRef} 
+    style={{ 
+      position: "relative", 
+      width: "100%", 
+      height: "100%",
+      transition: "all 0.3s ease"
+    }}
+  >
     {items.map((item) => (
       <Rnd
         key={item.id}
-        size={{ width: item.width, height: item.height }}
+        size={{
+          width: (item.width / pageSizes[selectedSize].width) * gridSize.width,
+          height: (item.height / pageSizes[selectedSize].height) * gridSize.height,
+        }}
         position={{
-          x: (item.x / 100) * gridSize.width,
-          y: (item.y / 100) * gridSize.height,
+          x: (item.x / pageSizes[selectedSize].width) * gridSize.width,
+          y: (item.y / pageSizes[selectedSize].height) * gridSize.height,
         }}
         onDragStop={(e, data) => handleDragStop(item.id, e, data)}
         onResizeStop={(e, direction, ref, delta, position) =>
           handleResizeStop(item.id, e, direction, ref, delta, position)
         }
-        minWidth={50}
-        minHeight={50}
+        minWidth={300}
+        minHeight={200}
         bounds="parent"
         style={{
-          backgroundColor: item.color,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          backgroundColor: '#ffffff',
+          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+          borderRadius: '12px',
+          border: '1px solid #e0e0e0',
+          overflow: 'hidden',
         }}
       >
-        {item.id}
+        <Box
+          sx={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            p: 2,
+          }}
+        >
+          {/* Question Header */}
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{
+                fontWeight: 600,
+                color: '#1a1a1a',
+                mb: 1,
+              }}
+            >
+              Question {item.id}
+            </Typography>
+            <TextField
+              fullWidth
+              multiline
+              value={item.question}
+              onChange={(e) => handleQuestionChange(item.id, e.target.value)}
+              variant="outlined"
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: '#ffffff',
+                  '&:hover': {
+                    '& > fieldset': {
+                      borderColor: '#2196f3',
+                    }
+                  }
+                }
+              }}
+            />
+          </Box>
+
+          {/* Rating Options */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            {item.options.map((option) => (
+              <Box
+                key={option.id}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  p: 1,
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0',
+                  backgroundColor: '#ffffff',
+                }}
+              >
+                <Radio
+                  size="small"
+                  sx={{
+                    color: '#757575',
+                    '&.Mui-checked': {
+                      color: '#2196f3',
+                    },
+                  }}
+                />
+                <TextField
+                  value={option.text}
+                  onChange={(e) => handleOptionChange(item.id, option.id, e.target.value)}
+                  variant="standard"
+                  fullWidth
+                  sx={{
+                    '& .MuiInput-root': {
+                      fontSize: '0.875rem',
+                      color: '#424242',
+                    }
+                  }}
+                />
+                <IconButton 
+                  size="small" 
+                  onClick={() => handleDeleteOption(item.id, option.id)}
+                  sx={{ 
+                    color: '#757575',
+                    '&:hover': { color: '#f44336' }
+                  }}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            ))}
+            
+            <Button
+              startIcon={<AddIcon />}
+              onClick={() => handleAddOption(item.id)}
+              sx={{
+                mt: 1,
+                color: '#2196f3',
+                borderColor: '#2196f3',
+                '&:hover': {
+                  backgroundColor: 'rgba(33, 150, 243, 0.04)',
+                }
+              }}
+            >
+              Add Option
+            </Button>
+          </Box>
+        </Box>
       </Rnd>
     ))}
   </div>

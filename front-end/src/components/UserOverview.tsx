@@ -148,7 +148,7 @@ const UserOverview: React.FC = () => {
   }), []);
 
   return (
-    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden'  }}>
+    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'auto'  }}>
   <Box display="flex" flexDirection="column" gap={2}>
         {/* Header Section */}
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">

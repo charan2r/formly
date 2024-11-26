@@ -40,10 +40,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface Category {
-    categoryId: number;
+    categoryId: string;
     name: string;
-    createdDate: string;
-    description: string
+    description: string;
+    createdAt: string;
+    status: string;
+    createdById: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -81,7 +83,11 @@ const Category: React.FC = () => {
     const [categoryDetails, setCategoryDetails] = useState<Categories | null>(null);
     const [isDialogOpen, setDialogOpen] = useState(false);
     const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
-    const [newCategory, setNewCategory] = useState({ name: '', description: '', createdById: 'ff83587c-0470-45ef-b771-ed21e11c12ee' });
+    const [newCategory, setNewCategory] = useState({
+        name: '',
+        description: '',
+        createdById: 'f247546a-eea9-4678-ac24-5924e0a58250'
+    });
      // Adjust `createdById` as needed
      const [error, setError] = useState<string | null>(null); // Optional: To display errors
 
@@ -92,45 +98,70 @@ const Category: React.FC = () => {
     const [editFormData, setEditFormData] = useState({ name: '', description: '' });
 
     const handleCreateCategory = async () => {
-        setLoading(true); // Start loading state
-        setError(null); // Reset error state
+        setLoading(true);
+        setError(null);
       
         try {
-          const response = await axios.post('http://localhost:3001/categories/create', newCategory);
-          console.log('Category created successfully:', response.data);
-          // Optionally reset the form or close the dialog
-          setNewCategory({ name: '', description: '', createdById: 'ff83587c-0470-45ef-b771-ed21e11c12ee' });
-        } catch (err: any) {
-          setError(err.response?.data?.message || 'Something went wrong');
-          console.error('Error creating category:', err);
-        } finally {
-          setLoading(false); // End loading state
-        }
-      };    
+            const response = await axios.post('http://localhost:3001/categories/create', newCategory);
+            
+            // Add the new category to the existing categories
+            setCategories(prevCategories => [...prevCategories, response.data]);
+            
+            // Close the dialog
+            setCreateCategoryOpen(false);
+            
+            // Reset the form
+            setNewCategory({ 
+                name: '', 
+                description: '', 
+                createdById: 'f247546a-eea9-4678-ac24-5924e0a58250' 
+            });
 
-      useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                setLoading(true);
-                // Make the API call to fetch categories by organization ID
-                const response = await axios.get(`http://localhost:3001/categories/organization/ff83587c-0470-45ef-b771-ed21e11c12ee`);
-                console.log(response)
-                // Filter categories with status 'active'
-                const activeCategories = response.data.data.filter(cat => cat.status === 'active');
-                setCategories(activeCategories);
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-                setError('Unable to fetch categories. Please try again later.');
-            } finally {
-                setLoading(false);
-            }
-        };
+            // Show success message
+            toast.success("Category created successfully!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                style: {
+                    backgroundColor: 'black',
+                    color: 'white',
+                    borderRadius: '10px',
+                    fontWeight: 'bold',
+                },
+            });
 
-        // if (organizationId) {
+            // Refresh the categories list
             fetchCategories();
-        // }
-    }, []); 
 
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Something went wrong');
+            toast.error(err.response?.data?.message || "Failed to create category");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.get(`http://localhost:3001/categories/organization/f247546a-eea9-4678-ac24-5924e0a58250`);
+            const activeCategories = response.data.data.filter(cat => cat.status === 'active');
+            setCategories(activeCategories);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            setError('Unable to fetch categories. Please try again later.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
         setMenuAnchor(event.currentTarget);
@@ -290,18 +321,22 @@ const Category: React.FC = () => {
 
     const filteredData = categories
         .filter((cat) => {
-            const nameMatches = cat.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-                cat.name.toLowerCase().includes(filters.name.toLowerCase());
+            // Name filter
+            const nameMatches = cat.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                cat.name?.toLowerCase().includes(filters.name.toLowerCase());
 
+            // Description filter
             const descriptionMatches = cat.description
                 ? cat.description.toLowerCase().includes(filters.createdBy.toLowerCase())
                 : !filters.createdBy;
 
-            const createdDateMatches = cat.createdDate
-                ? cat.createdDate.toLowerCase().includes(filters.createdAt.toLowerCase())
+            // Created date filter - using createdAt instead of createdDate
+            const createdAtMatches = cat.createdAt
+                ? new Date(cat.createdAt).toLocaleDateString().toLowerCase()
+                    .includes(filters.createdAt.toLowerCase())
                 : !filters.createdAt;
 
-            return nameMatches && descriptionMatches && createdDateMatches;
+            return nameMatches && descriptionMatches && createdAtMatches;
         })
         .sort((a, b) => {
             const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
@@ -309,10 +344,11 @@ const Category: React.FC = () => {
             // Handle different field types appropriately
             switch (orderBy) {
                 case 'name':
+                    return (a.name || "").localeCompare(b.name || "") * orderMultiplier;
                 case 'description':
-                    return (a[orderBy] || "").localeCompare(b[orderBy] || "") * orderMultiplier;
-                case 'createdDate':
-                    return ((new Date(a.createdDate)).getTime() - (new Date(b.createdDate)).getTime()) * orderMultiplier;
+                    return (a.description || "").localeCompare(b.description || "") * orderMultiplier;
+                case 'createdAt': // Changed from createdDate to createdAt
+                    return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * orderMultiplier;
                 default:
                     return 0;
             }
@@ -526,9 +562,9 @@ const Category: React.FC = () => {
                             </TableCell>
                             <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
                                 <TableSortLabel
-                                    active={orderBy === 'createdDate'}
+                                    active={orderBy === 'createdAt'}
                                     direction={orderDirection}
-                                    onClick={() => handleRequestSort('createdDate')}
+                                    onClick={() => handleRequestSort('createdAt')}
                                 >
                                     Created at
                                 </TableSortLabel>
@@ -711,8 +747,8 @@ const Category: React.FC = () => {
                 PaperProps={{
                     sx: {
                         borderRadius: '20px',
-                        padding: '16px 28px 40px',
-                        maxWidth: '650px',
+                        padding: '16px',
+                        maxWidth: '550px',
                         backgroundColor: '#f9f9f9',
                         boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
                     }
@@ -732,137 +768,122 @@ const Category: React.FC = () => {
                     </IconButton>
 
                     {/* Header section */}
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        alignItems: 'left', 
+                        mb: 2,
+                        mt: 1,
+                        pl: 5
+                    }}>
+                        <Box sx={{ textAlign: 'left' }}>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                                 Create a Category
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 Boost your employee's productivity with digital forms.
                             </Typography>
                         </Box>
-
-
                     </Box>
 
-                {/* Form Content */}
-      <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
-        <Box display="flex" flexDirection="column" gap={3.5}>
-          <Grid item xs={12} sm={6} mt={-3}>
-            <Typography variant="subtitle2" gutterBottom sx={{ 
-              marginBottom: '8px',
-              color: '#555',
-              fontWeight: 500 
-            }}>
-              Name
-            </Typography>
-            <TextField
-              value={newCategory.name}
-              onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-              fullWidth
-              variant="outlined"
-              size="small"
-              inputProps={{
-                sx: { 
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  width: '100%',
-                  padding: '12px 15px',
-                  '&:focus': {
-                    boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
-                  }
-                },
-              }}
-            />
-          </Grid>
+                    {/* Form Content */}
+                    <DialogContent sx={{ px: 2, py: 1 }}>
+                        <Box display="flex" flexDirection="column" gap={2}>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" gutterBottom sx={{ 
+                                    mb: 0.5,
+                                    color: '#555',
+                                    fontWeight: 500 
+                                }}>
+                                    Name
+                                </Typography>
+                                <TextField
+                                    value={newCategory.name}
+                                    onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                    inputProps={{
+                                        sx: { 
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            padding: '8px 12px',
+                                            '&:focus': {
+                                                boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                            }
+                                        },
+                                    }}
+                                />
+                            </Grid>
 
-          <Grid item xs={12} sm={6} mt={-1}>
-            <Typography variant="subtitle2" gutterBottom sx={{
-              marginBottom: '8px', 
-              color: '#555',
-              fontWeight: 500
-            }}>
-              Description
-            </Typography>
-            <TextField
-              fullWidth
-              multiline
-              rows={4}
-              value={newCategory.description}
-              onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-              InputProps={{
-                sx: {
-                  backgroundColor: '#ffffff',
-                  borderRadius: '8px',
-                  width: '100%',
-                  '& .MuiOutlinedInput-input': {
-                    padding: '12px 15px'
-                  },
-                  '&:focus-within': {
-                    boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
-                  }
-                },
-              }}
-            />
-          </Grid>
-        </Box>
-      </DialogContent>
+                            <Grid item xs={12}>
+                                <Typography variant="subtitle2" gutterBottom sx={{
+                                    mb: 0.5,
+                                    color: '#555',
+                                    fontWeight: 500
+                                }}>
+                                    Description
+                                </Typography>
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={3}
+                                    value={newCategory.description}
+                                    onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                                    InputProps={{
+                                        sx: {
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            '& .MuiOutlinedInput-input': {
+                                                padding: '8px 12px'
+                                            },
+                                            '&:focus-within': {
+                                                boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                            }
+                                        },
+                                    }}
+                                />
+                            </Grid>
+                        </Box>
+                    </DialogContent>
 
-      {/* Actions */}
-      <DialogActions sx={{ p: 3, justifyContent: 'right' }}>
-        <Button
-          variant="contained"
-          onClick={handleCreateCategory}
-          disabled={loading}
-          sx={{
-            backgroundColor: '#1a1a1a',
-            color: 'white',
-            borderRadius: '25px',
-            width: '35%',
-            padding: '10px 25px',
-            marginTop: '-15px',
-            marginBottom: '-20px', 
-            marginRight: '80px',
-            fontSize: '0.95rem',
-            fontWeight: 500,
-            textTransform: 'none',
-            transition: 'all 0.2s ease-in-out',
-            '&:hover': {
-              backgroundColor: '#333',
-              transform: 'translateY(-2px)',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
-            },
-            '&:disabled': {
-              backgroundColor: '#555',
-              opacity: 0.7
-            },
-          }}
-        >
-          {loading ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CircularProgress size={16} sx={{ color: 'white' }} />
-              Creating...
-            </Box>
-          ) : 'Create'}
-        </Button>
-      </DialogActions>
-      {error && (
-        <Typography 
-          color="error" 
-          variant="caption" 
-          sx={{ 
-            px: 3, 
-            mt: 2,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            fontWeight: 500
-          }}
-        >
-          <ErrorOutlineIcon sx={{ fontSize: 16 }} />
-          {error}
-        </Typography>
-      )}
+                    {/* Actions */}
+                    <DialogActions sx={{ 
+                        p: 2,
+                        justifyContent: 'right' 
+                    }}>
+                        <Button
+                            variant="contained"
+                            onClick={handleCreateCategory}
+                            disabled={loading}
+                            sx={{
+                                backgroundColor: '#1a1a1a',
+                                color: 'white',
+                                borderRadius: '25px',
+                                width: '120px',
+                                padding: '8px 16px',
+                                fontSize: '0.95rem',
+                                fontWeight: 500,
+                                textTransform: 'none',
+                                transition: 'all 0.2s ease-in-out',
+                                '&:hover': {
+                                    backgroundColor: '#333',
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
+                                },
+                                '&:disabled': {
+                                    backgroundColor: '#555',
+                                    opacity: 0.7
+                                },
+                            }}
+                        >
+                            {loading ? (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <CircularProgress size={16} sx={{ color: 'white' }} />
+                                    Creating...
+                                </Box>
+                            ) : 'Create'}
+                        </Button>
+                    </DialogActions>
                 </Box>
             </Dialog>
 
