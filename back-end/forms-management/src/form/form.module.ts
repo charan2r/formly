@@ -2,11 +2,11 @@
 // src/forms/forms.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Form } from '../model/form.entity'; // Adjust the path as necessary
+import { Form } from '../model/form.entity'; 
 import { FormsService } from './form.service';
 import { FormsController } from './form.controller';
-import { FormsRepository } from './form.repository'; // Create this repository
-import { CategoryModule } from 'src/category/category.module'; // If needed
+import { FormsRepository } from './form.repository'; 
+import { CategoryModule } from 'src/category/category.module'; 
 
 @Module({
   imports: [TypeOrmModule.forFeature([Form, FormsRepository]), CategoryModule],

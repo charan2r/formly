@@ -1,30 +1,44 @@
 /* eslint-disable prettier/prettier */
-import { IsOptional, IsString, IsNotEmpty, IsUUID, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNotEmpty, IsUUID } from 'class-validator';
 
 export class UpdateFormDto {
   @IsOptional()
   @IsString()
-  title?: string; // Optional title of the form
+  name?: string; // Form name
 
   @IsOptional()
   @IsString()
-  description?: string; // Optional description of the form
+  description?: string; // Form description
+
+  @IsOptional()
+  @IsString()
+  templateName?: string; // Template name
+
+  @IsOptional()
+  @IsString()
+  templateType?: string; // Template type (e.g., "standard", "custom")
 
   @IsOptional()
   @IsUUID()
-  categoryId?: string; // Optional ID of the category the form belongs to
+  categoryId?: string; // Category ID
+
+  @IsNotEmpty()
+  @IsUUID()
+  formTemplateId: string; 
 
   @IsOptional()
   @IsString()
-  backgroundColor?: string; // Optional background color for the form
+  status?: string; // Optional status for the form
 
   @IsOptional()
   @IsString()
-  headerText?: string; // Optional header text for the form
+  backgroundColor?: string; // Optional background color
 
   @IsOptional()
   @IsString()
-  headerImageUrl?: string; // Optional URL for a header image
+  headerText?: string; // Optional header text
 
-  // Additional fields can be added as necessary
+  @IsOptional()
+  @IsString()
+  headerImageUrl?: string; // Optional header image URL
 }

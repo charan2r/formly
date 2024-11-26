@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { FormTemplate } from './form-template.entity'; // Adjust the path as necessary
-import { Category } from './category.entity'; // Adjust the path as necessary
+import { FormTemplate } from './form-template.entity'; 
+
 
 @Entity('form')
 export class Form {
@@ -26,11 +26,11 @@ export class Form {
   @Column('uuid', { nullable: true })
   categoryId: string; // Foreign key to the Category
 
-  
-
   @CreateDateColumn()
   createdAt: Date; // Timestamp for when the form was created
 
   @UpdateDateColumn()
   updatedAt: Date; // Timestamp for when the form was last updated
+
 }
+

@@ -1,8 +1,8 @@
 // src/form/forms.repository.ts
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { Form } from '../model/form.entity'; // Adjust the path as necessary
-import { CreateFormDto } from './create-form.dto'; // Adjust the path as necessary
+import { Form } from '../model/form.entity';
+import { CreateFormDto } from './create-form.dto'; 
 
 @Injectable()
 export class FormsRepository extends Repository<Form> {
@@ -12,7 +12,7 @@ export class FormsRepository extends Repository<Form> {
 
   // Method to create forms
   async createForm(dto: CreateFormDto): Promise<Form> {
-    const form = this.create(dto); // Ensure dto matches Form structure
+    const form = this.create(dto); 
     return this.save(form);
   }
 }

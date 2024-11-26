@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FormsRepository } from './form.repository';
-import { CreateFormDto } from './create-form.dto'; // Adjust the path as necessary
-import { Form } from '../model/form.entity'; // Adjust the path as necessary
+import { CreateFormDto } from './create-form.dto'; 
+import { Form } from '../model/form.entity'; 
 import { UpdateFormDto } from './update-form.dto';
-import { In } from 'typeorm'; // Import the In operator
+import { In } from 'typeorm'; 
 
 @Injectable()
 export class FormsService {
@@ -13,8 +13,13 @@ export class FormsService {
   async create(createFormDto: CreateFormDto): Promise<Form> {
     const form = this.formsRepository.create({
       name: createFormDto.name,
-      status: createFormDto.status || 'active', // Default status if not provided
-      formTemplate: { formId: createFormDto.formTemplateId } as any, // Assuming formTemplate is a relation
+      description: createFormDto.description, 
+      templateName: createFormDto.templateName, 
+      templateType: createFormDto.templateType, 
+      status: createFormDto.status || 'active', 
+      categoryId: createFormDto.categoryId, 
+      
+      formTemplate: { formId: createFormDto.formTemplateId } as any,
     });
     return this.formsRepository.save(form);
   }
@@ -26,22 +31,23 @@ export class FormsService {
 
   // Method to get a form by ID
   async findOne(id: string): Promise<Form | undefined> {
-    return this.formsRepository.findOne({ where: { formId: id } }); // Adjust the field name as necessary
+    return this.formsRepository.findOne({ where: { formId: id } });
   }
 
   // Method to update a form
   async update(id: string, updateFormDto: UpdateFormDto): Promise<Form | null> {
-    const form = await this.formsRepository.findOne({ where: { formId: id } }); // Adjust the field name as necessary
+    const form = await this.formsRepository.findOne({ where: { formId: id } });
     if (!form) {
       throw new NotFoundException(`Form not found`);
     }
+    // Update the form with the new values from updateFormDto
     Object.assign(form, updateFormDto);
     return this.formsRepository.save(form);
   }
 
   // Method to delete a form
   async softDelete(id: string): Promise<Form | null> {
-    const form = await this.formsRepository.findOne({ where: { formId: id } }); // Adjust the field name as necessary
+    const form = await this.formsRepository.findOne({ where: { formId: id } });
     if (!form) {
       throw new NotFoundException(`Form not found`);
     }
@@ -51,12 +57,12 @@ export class FormsService {
 
   // Method to bulk delete forms
   async bulkDelete(ids: string[]): Promise<Form[]> {
-    const forms = await this.formsRepository.find({ where: { formId: In(ids) } }); // Adjust the field name as necessary
+    const forms = await this.formsRepository.find({ where: { formId: In(ids) } });
     if (!forms.length) {
       throw new NotFoundException(`Forms not found`);
     }
     forms.forEach((form) => {
-      form.status = 'deleted'; // Assuming you have a status field
+      form.status = 'deleted'; 
     });
     return this.formsRepository.save(forms);
   }
