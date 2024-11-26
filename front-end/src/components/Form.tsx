@@ -1049,7 +1049,7 @@ const FormTable: React.FC = () => {
                     </IconButton>
 
                     {/* Header section */}
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 3, mt: 2 }}>
                         <Box sx={{ textAlign: 'left' }}>
                             <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                                 Create Form
@@ -1203,7 +1203,7 @@ const FormTable: React.FC = () => {
                     </IconButton>
 
                     {/* Header section */}
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 3, mt: 2 }}>
                         <Box sx={{ textAlign: 'left' }}>
                             <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                                 Update a Form
