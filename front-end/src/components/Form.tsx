@@ -1084,7 +1084,7 @@ const FormTable: React.FC = () => {
                                 }
                             }}
                         >
-                            Cancel
+                            Preview
                         </Button>
                         <Button
                             variant="contained"
