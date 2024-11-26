@@ -13,6 +13,7 @@ import { OrganizationModule } from 'src/organization/organization.module';
   imports: [TypeOrmModule.forFeature([Role ,RoleRepository, Organization]),OrganizationModule],
   controllers: [RoleController],
   providers: [RoleService,RoleRepository,OrganizationRepository],
+  exports:[RoleService],
 })
 export class RoleModule {}
   

@@ -44,7 +44,18 @@ export class RoleService {
       ...role,
     };
   }// excluding/including deleted ones - {where: { status: 'deleted' },}, {where: { status: 'active' },}  
-  
+
+
+  // Get a single role
+  async getOne(roleId: string) {
+    const role = await this.roleRepository.findOne({
+      where: { roleId },
+    });
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+    return {...role,};
+  }
   
     //Soft delete a role
     async deleteRole(roleId: string): Promise<boolean> {

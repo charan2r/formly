@@ -18,5 +18,6 @@ import { OrganizationRepository } from 'src/organization/organization.repository
   ], 
   controllers: [RolePermissionController],
   providers: [RolePermissionService,RolePermissionRepository,RoleService,OrganizationRepository,RoleRepository,PermissionRepository],
+  exports:[RolePermissionService]
 })
 export class RolePermissionModule {}

@@ -17,6 +17,7 @@ export class AuditTrail {
   @Column({ nullable: true })
   createdById: string;
 
-  @Column()
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
 }

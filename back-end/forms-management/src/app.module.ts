@@ -26,8 +26,15 @@ import { PermissionModule } from '../src/permission/permission.module'
 import { Permission } from './model/permission.entity';
 import { PermissionRepository } from './permission/permission.repository';
 import { RolePermissionModule } from './role-permission/role-permission.module';
-import { RolePermission } from '../src/model/role-permission.entity';
+import { RolePermission } from '../src/model/role-permission.entity'
 import { RolePermissionRepository } from '../src/role-permission/role-permission.repository';
+import { AuditTrailSubscriber } from './audit-trails/AuditTrailSubscriber';
+import { AuditTrail} from './model/Audittrail.entity';
+import { ClsModule } from 'nestjs-cls';
+import { AuditTrailModule } from './audit-trails/AuditTrail.module';
+import { AuditTrailRepository } from './audit-trails/AuditTrail.repository';
+
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -39,18 +46,29 @@ import { RolePermissionRepository } from '../src/role-permission/role-permission
       database: 'postgres',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      subscribers: [AuditTrailSubscriber],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, Role, Permission,RolePermission]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, Role, Permission,RolePermission,AuditTrail]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
     CategoryModule,
     RoleModule,
     PermissionModule,
-    RolePermissionModule
+    RolePermissionModule,
+    AuditTrailModule,
+
+    ClsModule.forRoot({
+      global: true,
+       //middleware: {
+        //mount: true
+      //}
+    })
   ],
   controllers: [AppController, OrganizationController, FormTemplateController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository,RoleRepository,PermissionRepository, RolePermissionRepository],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository,RoleRepository,PermissionRepository, RolePermissionRepository,AuditTrailSubscriber,
+ AuditTrailRepository
+  ],
 })
 export class AppModule { }
