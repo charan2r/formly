@@ -170,6 +170,13 @@ const FormTable: React.FC = () => {
     setEditDialogOpen(true);
   };
 
+  const handleViewClick = (form: form | undefined) => {
+    if (!form) return;
+    setViewFormData(form);
+    setViewDialogOpen(true);
+    handleMenuClose();
+  };
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     event.stopPropagation(); // Prevent event bubbling
     setMenuAnchor(event.currentTarget);
@@ -183,8 +190,8 @@ const FormTable: React.FC = () => {
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
-    const newSelectedForms = forms.reduce((acc, frm) => {
-      acc[frm.formId] = checked;  // Apply the same checked state to all forms
+    const newSelectedForms = forms.reduce((acc, form) => {
+      acc[form.templateId] = checked;
       return acc;
     }, {} as Record<number, boolean>);
 
@@ -342,23 +349,22 @@ const FormTable: React.FC = () => {
   };
 
   const filteredData = forms
-    .filter((frm) => {
+    .filter((form) => {
       const searchLower = searchTerm.toLowerCase();
       
       // Search across multiple fields
-      const nameMatch = frm.name.toLowerCase().includes(searchLower);
-      const categoryMatch = frm.category.toLowerCase().includes(searchLower);
-      const createdByMatch = frm.createdBy.toLowerCase().includes(searchLower);
-      const lastModifiedByMatch = frm.lastModifiedBy.toLowerCase().includes(searchLower);
-
-      // Return true if any field matches the search term
-      return nameMatch || categoryMatch || createdByMatch || lastModifiedByMatch;
+      return (
+        form.name.toLowerCase().includes(searchLower) ||
+        form.category.toLowerCase().includes(searchLower) ||
+        form.createdBy.toLowerCase().includes(searchLower) ||
+        form.lastModifiedBy.toLowerCase().includes(searchLower)
+      );
     })
-    .filter((frm) => {
+    .filter((form) => {
       // Apply additional filters if they exist
-      const nameMatches = filters.name ? frm.name.toLowerCase().includes(filters.name.toLowerCase()) : true;
-      const categoryMatches = filters.category ? frm.category.toLowerCase().includes(filters.category.toLowerCase()) : true;
-      const lastActiveMatches = filters.lastActive ? frm.lastModifiedDate.toLowerCase().includes(filters.lastActive.toLowerCase()) : true;
+      const nameMatches = filters.name ? form.name.toLowerCase().includes(filters.name.toLowerCase()) : true;
+      const categoryMatches = filters.category ? form.category.toLowerCase().includes(filters.category.toLowerCase()) : true;
+      const lastActiveMatches = filters.lastActive ? form.lastModifiedDate.toLowerCase().includes(filters.lastActive.toLowerCase()) : true;
 
       return nameMatches && categoryMatches && lastActiveMatches;
     })
@@ -730,19 +736,11 @@ const FormTable: React.FC = () => {
                                 <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.name}</TableCell>
                                 <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.category}</TableCell>
                                 <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>
-                                    {new Date(row.createdDate).toLocaleString("en-GB", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric"
-                                    })}
+                                    {row.createdDate}
                                 </TableCell>
                                 <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.createdBy}</TableCell>
                                 <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>
-                                    {new Date(row.lastModifiedDate).toLocaleString("en-GB", {
-                                        day: "2-digit",
-                                        month: "short",
-                                        year: "numeric"
-                                    })}
+                                    {row.lastModifiedDate}
                                 </TableCell>
                                 <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.lastModifiedBy}</TableCell>
                                 <TableCell padding="checkbox">
@@ -771,7 +769,7 @@ const FormTable: React.FC = () => {
                                     >
                                         <MenuItem
                                             onClick={() => {
-                                                handleEditClick(forms.find(form => form.templateId === selectedRowId));
+                                                handleEditClick(forms.find(form => form.templateId === selectedRowId)!);
                                                 handleMenuClose();
                                             }}
                                             sx={{
@@ -786,6 +784,23 @@ const FormTable: React.FC = () => {
                                             }}
                                         >
                                             Edit
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={() => {
+                                                handleViewClick(forms.find(form => form.templateId === selectedRowId));
+                                            }}
+                                            sx={{
+                                                backgroundColor: 'white',
+                                                borderRadius: '10px',
+                                                margin: '5px',
+                                                justifyContent: 'center',
+                                                fontSize: '0.875rem',
+                                                minHeight: '30px',
+                                                minWidth: '100px',
+                                                '&:hover': { backgroundColor: '#f0f0f0' },
+                                            }}
+                                        >
+                                            View
                                         </MenuItem>
                                         <MenuItem
                                             onClick={handleShareClick}
