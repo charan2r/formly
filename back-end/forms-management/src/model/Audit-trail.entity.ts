@@ -1,25 +1,22 @@
-import { Entity, Column, PrimaryGeneratedColumn,ManyToMany, ManyToOne, JoinColumn } from 'typeorm';
-import { User } from './user.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity('audit_logs')
-export class AuditLog {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
-  user: string;
+@Entity()
+export class AuditTrail {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
-  action: string;
+  tableName: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-  timestamp: Date;
+  @Column()
+  action: string; 
 
   @Column('jsonb')
   data: Record<string, any>;
 
-  @ManyToOne(() => User, { nullable: true })
-    @JoinColumn({ name: 'createdById' })
-    createdBy: User;
+  @Column({ nullable: true })
+  createdById: string;
 
+  @Column()
+  createdAt: Date;
 }
