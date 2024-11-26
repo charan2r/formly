@@ -3,6 +3,7 @@ import { RoleRepository } from './role.repository';
 import { OrganizationRepository } from 'src/organization/organization.repository';
 import { In } from 'typeorm';
 import { CreateRoleDto } from '../dto/create-role.dto';
+import { UpdateRoleDto } from 'src/dto/updateRole.dto';
 
 @Injectable()
 export class RoleService {                
@@ -74,6 +75,27 @@ export class RoleService {
       await this.roleRepository.save(roles);
     
       return true;
-    }   
+    } 
+    
+    // Update
+  async updateRole(roleId: string, updateRoleDto: UpdateRoleDto) {
+    const { role, description} = updateRoleDto;
+  
+    const existingRole = await this.roleRepository.findOne({
+      where: { roleId },
+    });
+  
+    if (!existingRole) {
+      throw new NotFoundException('Role not found');
+    }
+  
+    existingRole.role = role || existingRole.role;
+    existingRole.description = description || existingRole.description;
+  
+    const updatedRole = await this.roleRepository.save(existingRole);
+  
+    return updatedRole;
+  }
+  
 
 }
