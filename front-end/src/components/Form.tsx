@@ -39,6 +39,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import sampleFormData from './formData';
+import CloseIcon from '@mui/icons-material/Close';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import DescriptionIcon from '@mui/icons-material/Description';
+import PrintIcon from '@mui/icons-material/Print';
+import EmailIcon from '@mui/icons-material/Email';
 
 interface form {
   templateId: number;
@@ -105,6 +110,8 @@ const FormTable: React.FC = () => {
         formName: '',
         description: ''
   });
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
 
   const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -385,6 +392,13 @@ const FormTable: React.FC = () => {
       formName: '',
       description: ''
     });
+  };
+
+  const handleShareClick = () => {
+    // Generate or get your share URL here
+    setShareUrl('https://www.example.com/share/form/' + selectedRowId);
+    setShareDialogOpen(true);
+    handleMenuClose();
   };
 
   return (
@@ -774,10 +788,7 @@ const FormTable: React.FC = () => {
                                             Edit
                                         </MenuItem>
                                         <MenuItem
-                                            onClick={() => {
-                                                handleMenuClose();
-                                                navigate(`/share-form/${selectedRowId}`);
-                                            }}
+                                            onClick={handleShareClick}
                                             sx={{
                                                 backgroundColor: 'white',
                                                 borderRadius: '10px',
@@ -831,35 +842,166 @@ const FormTable: React.FC = () => {
       </Box>
 
       {/* Confirmation Dialog */}
-      <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this form?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteForm} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
+      <Dialog 
+        open={confirmationOpen} 
+        onClose={() => setConfirmationOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '100%'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          {/* Back arrow */}
+          <IconButton
+            onClick={() => setConfirmationOpen(false)}
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+
+          {/* Content */}
+          <Box sx={{ 
+            textAlign: 'center', 
+            mt: 3 
+          }}>
+            <Typography variant="h6" sx={{ 
+              fontWeight: 'bold',
+              mb: 2
+            }}>
+              Delete Form
+            </Typography>
+            
+            <Typography variant="body1" sx={{ mb: 4 }}>
+              Are you sure you want to delete?
+            </Typography>
+
+            {/* Buttons */}
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center',
+              gap: 2
+            }}>
+              <Button
+                onClick={() => setConfirmationOpen(false)}
+                sx={{
+                  backgroundColor: 'black',
+                  color: 'white',
+                  borderRadius: '20px',
+                  padding: '8px 24px',
+                  '&:hover': {
+                    backgroundColor: '#333'
+                  }
+                }}
+              >
+                No, Cancel
+              </Button>
+              
+              <Button
+                onClick={handleDeleteForm}
+                sx={{
+                  backgroundColor: 'white',
+                  color: 'black',
+                  border: '1px solid black',
+                  borderRadius: '20px',
+                  padding: '8px 24px',
+                  '&:hover': {
+                    backgroundColor: '#f5f5f5'
+                  }
+                }}
+              >
+                Yes, Delete
+              </Button>
+            </Box>
+          </Box>
+        </Box>
       </Dialog>
 
       {/* Confirmation Dialog */}
-      <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete these forms?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationBulkOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteForms} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
+      <Dialog 
+        open={confirmationBulkOpen} 
+        onClose={() => setConfirmationBulkOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '100%'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          <IconButton
+            onClick={() => setConfirmationBulkOpen(false)}
+            sx={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+
+          <Box sx={{ 
+            textAlign: 'center', 
+            mt: 3 
+          }}>
+            <Typography variant="h6" sx={{ 
+              fontWeight: 'bold',
+              mb: 2
+            }}>
+              Delete Forms
+            </Typography>
+            
+            <Typography variant="body1" sx={{ mb: 4 }}>
+              Are you sure you want to delete selected forms?
+            </Typography>
+
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'center',
+              gap: 2
+            }}>
+              <Button
+                onClick={() => setConfirmationBulkOpen(false)}
+                sx={{
+                  backgroundColor: 'black',
+                  color: 'white',
+                  borderRadius: '20px',
+                  padding: '8px 24px',
+                  '&:hover': {
+                    backgroundColor: '#333'
+                  }
+                }}
+              >
+                No, Cancel
+              </Button>
+              
+              <Button
+                onClick={handleDeleteForms}
+                sx={{
+                  backgroundColor: 'white',
+                  color: 'black',
+                  border: '1px solid black',
+                  borderRadius: '20px',
+                  padding: '8px 24px',
+                  '&:hover': {
+                    backgroundColor: '#f5f5f5'
+                  }
+                }}
+              >
+                Yes, Delete
+              </Button>
+            </Box>
+          </Box>
+        </Box>
       </Dialog>
 
       {/* Create Form Dialog */}
@@ -1175,6 +1317,117 @@ const FormTable: React.FC = () => {
                         </Button>
                     </DialogActions>
                 </Box>
+      </Dialog>
+
+      <Dialog
+        open={shareDialogOpen}
+        onClose={() => setShareDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '100%'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          {/* Close button */}
+          <IconButton
+            onClick={() => setShareDialogOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: -12,
+              top: -12,
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+
+          {/* Dialog title */}
+          <Typography variant="h6" sx={{ mb: 3 }}>
+            Share with
+          </Typography>
+
+          {/* Share options */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-around', 
+            mb: 4 
+          }}>
+            <IconButton
+              onClick={() => {
+                const subject = encodeURIComponent('Shared Form');
+                const body = encodeURIComponent(`I'd like to share this form with you: ${shareUrl}`);
+                window.location.href = `mailto:?subject=${subject}&body=${body}`;
+              }}
+              sx={{
+                backgroundColor: '#FFF0F0',
+                width: 56,
+                height: 56,
+                '&:hover': { backgroundColor: '#FFE0E0' }
+              }}
+            >
+              <EmailIcon />
+            </IconButton>
+            
+            <IconButton
+              sx={{
+                backgroundColor: '#FFF0F0',
+                width: 56,
+                height: 56,
+                '&:hover': { backgroundColor: '#FFE0E0' }
+              }}
+            >
+              <DescriptionIcon />
+            </IconButton>
+            
+            <IconButton
+              sx={{
+                backgroundColor: '#FFF0F0',
+                width: 56,
+                height: 56,
+                '&:hover': { backgroundColor: '#FFE0E0' }
+              }}
+            >
+              <PrintIcon />
+            </IconButton>
+          </Box>
+
+          {/* Share link */}
+          <Typography variant="caption" color="textSecondary" sx={{ mb: 1 }}>
+            Or share with link
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: '#F5F5F5',
+            borderRadius: '8px',
+            padding: '8px 12px',
+          }}>
+            <Typography
+              variant="body2"
+              sx={{
+                flex: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {shareUrl}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={() => {
+                navigator.clipboard.writeText(shareUrl);
+                toast.success("Link copied to clipboard!");
+              }}
+            >
+              <ContentCopyIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        </Box>
       </Dialog>
 
       <ToastContainer></ToastContainer>
