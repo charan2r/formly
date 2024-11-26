@@ -38,15 +38,23 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
+import sampleFormData from './formData';
 
 interface form {
-  formId: string;
+  templateId: number;
   name: string;
-  category?: string | null;
+  category: string;
+  createdDate: string;
   createdBy: string;
   lastModifiedDate: string;
-  lastActive?: string | null;
+  lastModifiedBy: string;
+}
+
+interface EditFormData {
+  name: string; 
+  type: string;
+  formName: string;
+  description: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -67,7 +75,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const FormTable: React.FC = () => {
   const navigate = useNavigate();
-  const [forms, setForms] = useState<Form[]>([]);
+  const [forms, setForms] = useState<form[]>(sampleFormData);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedForms, setSelectedForms] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
@@ -76,7 +84,7 @@ const FormTable: React.FC = () => {
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({ name: '', type: '', category: '', lastActive: '' });
-  const [orderBy, setOrderBy] = useState<keyof Form>('name');
+  const [orderBy, setOrderBy] = useState<keyof form>('name');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
@@ -85,55 +93,73 @@ const FormTable: React.FC = () => {
   const [formDetails, setFormDetails] = useState<Forms | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState<EditFormForm | null>(null);
-  const [newForm, setNewForm] = useState({
-        name: 'Google',
-        type: 'Employees',
-        formName: 'Staff',
-        description: 'for office'
+  const [editFormData, setEditFormData] = useState<EditFormData>({
+    name: 'Survey',
+    type: 'Survey',
+    formName: 'Staff',
+    description: 'for office'
   });
-
-
-  useEffect(() => {
-    const fetchForms = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/form');
-        // Filter form where the status is 'active'
-        const activeForms = response.data.data.filter(frm => frm.status === 'active');
-        console.log(activeForms);
-        setForms(activeForms);
-      } catch (error) {
-        console.error('Error fetching form data:', error);
-      }
-    };
-
-    fetchForms();
-  }, []);
+  const [newForm, setNewForm] = useState({
+        name: '',
+        type: '',
+        formName: '',
+        description: ''
+  });
 
   const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setEditFormData(prev => prev ? {
+    setEditFormData(prev => ({
       ...prev,
       [name]: value
-    } : null);
+    }));
   };
 
    // Handler for form submission
    const handleUpdateForm = async () => {
-    if (!editFormData) return;
-
     try {
-      await axios.put(`http://localhost:3001/forms/${editFormData.id}`, editFormData);
-      // Refresh the users list
-      const response = await axios.get('http://localhost:3001/forms?organizationId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
-      setOrganizations(response.data.data);
+      // Update the form in your forms array
+      setForms(prevForms => prevForms.map(form => 
+        form.templateId === selectedRowId
+          ? {
+              ...form,
+              name: editFormData.name,
+              category: editFormData.type,
+              lastModifiedDate: new Date().toISOString(),
+              lastModifiedBy: 'Current User' // Replace with actual user name
+            }
+          : form
+      ));
+
       setEditDialogOpen(false);
-      setEditFormData(null);
+      toast.success("Form updated successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     } catch (error) {
-      console.error('Error updating form:', error);
+      toast.error("Failed to update form");
     }
   };
 
+  const handleEditClick = (form: form) => {
+    setEditFormData({
+      name: form.name,
+      type: form.category,
+      formName: form.name,
+      description: 'for office' // You might want to add description to your form interface if needed
+    });
+    setEditDialogOpen(true);
+  };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchor(event.currentTarget);
@@ -329,7 +355,25 @@ const FormTable: React.FC = () => {
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
+  const handleCloseCreateDialog = () => {
+    setCreateFormOpen(false);
+    setNewForm({
+      name: '',
+      type: '',
+      formName: '',
+      description: ''
+    });
+  };
 
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditFormData({
+      name: '',
+      type: '',
+      formName: '',
+      description: ''
+    });
+  };
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -403,7 +447,7 @@ const FormTable: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                onClick={() => setEditDialogOpen(true)}
+                onClick={() => setCreateFormOpen(true)}
               >
                 <AddIcon sx={{ marginRight: 1 }} />
                 Add Form
@@ -647,18 +691,15 @@ const FormTable: React.FC = () => {
                                         }}
                                     >
                     <MenuItem
-                      onClick={() => {
-                        handleMenuClose();
-                        navigate(`/edit-form/${row.formId}`);
-                      }}
+                       onClick={() => setEditDialogOpen(true)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '10px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
@@ -673,10 +714,10 @@ const FormTable: React.FC = () => {
                         backgroundColor: 'white',
                         borderRadius: '10px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
@@ -688,11 +729,11 @@ const FormTable: React.FC = () => {
                         backgroundColor: 'white',
                         borderRadius: '10px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        color: 'red', // Red text color for "Delete"
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        color: 'red',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
@@ -754,7 +795,7 @@ const FormTable: React.FC = () => {
       {/* Create Form Dialog */}
       <Dialog
                 open={createFormOpen}
-                onClose={() => setCreateFormOpen(false)}
+                onClose={handleCloseCreateDialog}
                 fullWidth
                 maxWidth="sm"
                 PaperProps={{
@@ -770,7 +811,7 @@ const FormTable: React.FC = () => {
                 <Box sx={{ position: 'relative' }}>
                     {/* Back button */}
                     <IconButton
-                        onClick={handleCloseDialog}
+                        onClick={handleCloseCreateDialog}
                         sx={{
                             position: 'absolute',
                             left: 8,
@@ -814,162 +855,6 @@ const FormTable: React.FC = () => {
                                         }}
                                     >
                                         <MenuItem value="Employees">Employees</MenuItem>
-                                        {/* Add more options as needed */}
-                                    </TextField>
-                                </Box>
-
-                                {/* Page Size Field */}
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
-                                        Template Type
-                                    </Typography>
-                                    <TextField
-                                        value={newForm.formName}
-                                        size="small"
-                                        onChange={(e) => setNewForm({ ...newForm, formName: e.target.value })}
-                                        fullWidth
-                                        InputProps={{
-                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-
-                            {/* Second Row: Form Name */}
-                            <Grid item xs={12} sm={6}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Form Name</Typography>
-                                <TextField
-                                    value={newForm.name}
-                                    InputProps={{ 
-                                        readOnly: true,
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                                    }}
-                                    fullWidth
-                                    variant="outlined"
-                                    size="small"
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} sm={6} mt={-2}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
-
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    value={newForm.description}
-                                    onChange={(e) => setNewForm({ ...newForm, description: e.target.value })}
-                                    InputProps={{
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                    }}
-                                />
-                            </Grid>
-                        </Box>
-                    </DialogContent>
-
-                    <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 5 }}>
-                        <Button
-                            variant="contained"
-                            onClick={() => console.log('Preview clicked')} // Add your preview logic here
-                            sx={{
-                                backgroundColor: 'black',
-                                color: 'white',
-                                borderRadius: '20px',
-                                width: '30%',
-                                marginTop: '-20px',
-                                marginBottom: '-25px',
-                                '&:hover': {
-                                    backgroundColor: '#333'
-                                }
-                            }}
-                        >
-                            Preview
-                        </Button>
-                        <Button
-                            variant="contained"
-                            onClick={handleCreateForm}
-                            sx={{
-                                backgroundColor: 'black',
-                                color: 'white',
-                                borderRadius: '20px',
-                                width: '30%',
-                                marginTop: '-20px',
-                                marginBottom: '-25px',
-                                '&:hover': {
-                                    backgroundColor: '#333'
-                                }
-                            }}
-                        >
-                            Create
-                        </Button>
-                    </DialogActions>
-                </Box>
-            </Dialog>
-             {/* Add Edit User Dialog */}
-      <Dialog
-        open={isEditDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: '20px',
-            padding: '16px 28px 40px',
-            maxWidth: '650px',
-            backgroundColor: '#f9f9f9',
-            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
-          }
-        }}
-      >
-        <Box sx={{ position: 'relative' }}>
-                    {/* Back button */}
-                    <IconButton
-                        onClick={handleCloseDialog}
-                        sx={{
-                            position: 'absolute',
-                            left: 8,
-                            top: 8,
-                        }}
-                    >
-                        <ArrowBackIcon />
-                    </IconButton>
-
-                    {/* Header section */}
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                                Update a Form
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                            Boost your employee’s productivity
-                            with digital forms.
-                            </Typography>
-                        </Box>
-
-
-                    </Box>
-
-                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
-                        <Box display="flex" flexDirection="column" gap={2.5}>
-                            {/* First Row: Form Type and Page Size */}
-                            <Box display="flex" gap={2} width="100%">
-                                {/* Form Type Field */}
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
-                                     Template
-                                    </Typography>
-                                    <TextField
-                                        select
-                                        value={newForm.type}
-                                        size="small"
-                                        onChange={(e) => setNewForm({ ...newForm, type: e.target.value })}
-                                        fullWidth
-                                        InputProps={{
-                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                        }}
-                                    >
-                                        <MenuItem value="Employees">Employees</MenuItem>
-                                        <MenuItem value="Employees">Survey</MenuItem>
                                         {/* Add more options as needed */}
                                     </TextField>
                                 </Box>
@@ -1044,6 +929,166 @@ const FormTable: React.FC = () => {
                         <Button
                             variant="contained"
                             onClick={handleCreateForm}
+                            sx={{
+                                backgroundColor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                width: '30%',
+                                marginTop: '-20px',
+                                marginBottom: '-25px',
+                                '&:hover': {
+                                    backgroundColor: '#333'
+                                }
+                            }}
+                        >
+                            Create
+                        </Button>
+                    </DialogActions>
+                </Box>
+            </Dialog>
+             {/* Add Edit User Dialog */}
+      <Dialog
+        open={isEditDialogOpen}
+        onClose={handleCloseEditDialog}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '16px 28px 40px',
+            maxWidth: '650px',
+            backgroundColor: '#f9f9f9',
+            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+                    {/* Back button */}
+                    <IconButton
+                        onClick={handleCloseEditDialog}
+                        sx={{
+                            position: 'absolute',
+                            left: 8,
+                            top: 8,
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+
+                    {/* Header section */}
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                        <Box sx={{ textAlign: 'left' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                Update a Form
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                            Boost your employee’s productivity
+                            with digital forms.
+                            </Typography>
+                        </Box>
+
+
+                    </Box>
+
+                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                        <Box display="flex" flexDirection="column" gap={2.5}>
+                            {/* First Row: Form Type and Page Size */}
+                            <Box display="flex" gap={2} width="100%">
+                                {/* Form Type Field */}
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
+                                     Template
+                                    </Typography>
+                                    <TextField
+                                        select
+                                        name="type"
+                                        value={editFormData.type}
+                                        size="small"
+                                        onChange={handleEditFormChange}
+                                        fullWidth
+                                        InputProps={{
+                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                        }}
+                                    >
+                                        <MenuItem value="Employees">Employees</MenuItem>
+                                        <MenuItem value="Survey">Survey</MenuItem>
+                                        {/* Add more options as needed */}
+                                    </TextField>
+                                </Box>
+
+                                {/* Page Size Field */}
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
+                                        Template Type
+                                    </Typography>
+                                    <TextField
+                                        name="formName"
+                                        value={editFormData.formName}
+                                        size="small"
+                                        onChange={handleEditFormChange}
+                                        fullWidth
+                                        InputProps={{
+                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+
+                            {/* Second Row: Form Name */}
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Form Name</Typography>
+                                <TextField
+                                    name="name"
+                                    value={editFormData.name}
+                                    onChange={handleEditFormChange}
+                                    InputProps={{ 
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                                    }}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} mt={-2}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
+
+                                <TextField
+                                    name="description"
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={editFormData.description}
+                                    onChange={handleEditFormChange}
+                                    InputProps={{
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                    }}
+                                />
+                            </Grid>
+                        </Box>
+                    </DialogContent>
+
+                    <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 5 }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => setEditDialogOpen(false)}
+                            sx={{
+                                backgroundColor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                width: '30%',
+                                marginTop: '-20px',
+                                marginBottom: '-25px',
+                                '&:hover': {
+                                    backgroundColor: '#333'
+                                }
+                            }}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={handleUpdateForm}
                             sx={{
                                 backgroundColor: 'black',
                                 color: 'white',
