@@ -24,6 +24,7 @@ import {
   DialogContent,
   Dialog,
   DialogTitle,
+  Grid,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
@@ -36,6 +37,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+
 
 interface form {
   formId: string;
@@ -78,6 +81,15 @@ const FormTable: React.FC = () => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
   const [formToDelete, setFormToDelete] = useState<string | null>(null);
+  const [createFormOpen, setCreateFormOpen] = useState(false);
+  const [formDetails, setFormDetails] = useState<Forms | null>(null);
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [newForm, setNewForm] = useState({
+        name: '',
+        type: 'Employees',
+        formName: '',
+        description: ''
+  });
 
 
   useEffect(() => {
@@ -210,6 +222,22 @@ const FormTable: React.FC = () => {
       });
     };
   }
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setFormDetails(null);
+  };
+
+  const handleCreateForm = async () => {
+    try {
+        const response = await axios.post('http://localhost:3001/form', newForm);
+        setForms([...forms, response.data]);
+        setCreateFormOpen(false);
+        toast.success("Form created successfully!");
+    } catch (error) {
+        toast.error("Failed to create form");
+    }
+  };
 
   // Method to handle deletion of an organization
   const handleDeleteForm = async () => {
@@ -349,7 +377,7 @@ const FormTable: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                onClick={() => navigate('/add-form')}
+                onClick={() => setCreateFormOpen(true)}
               >
                 <AddIcon sx={{ marginRight: 1 }} />
                 Add Form
@@ -696,6 +724,161 @@ const FormTable: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Create Form Dialog */}
+      <Dialog
+                open={createFormOpen}
+                onClose={() => setCreateFormOpen(false)}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                    sx: {
+                        borderRadius: '20px',
+                        padding: '16px 28px 40px',
+                        maxWidth: '650px',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+                    }
+                }}
+            >
+                <Box sx={{ position: 'relative' }}>
+                    {/* Back button */}
+                    <IconButton
+                        onClick={handleCloseDialog}
+                        sx={{
+                            position: 'absolute',
+                            left: 8,
+                            top: 8,
+                        }}
+                    >
+                        <ArrowBackIcon />
+                    </IconButton>
+
+                    {/* Header section */}
+                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+                        <Box sx={{ textAlign: 'left' }}>
+                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                                Create Form
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                Boost your employee’s productivity with digital forms.
+                            </Typography>
+                        </Box>
+
+
+                    </Box>
+
+                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                        <Box display="flex" flexDirection="column" gap={2.5}>
+                            {/* First Row: Form Type and Page Size */}
+                            <Box display="flex" gap={2} width="100%">
+                                {/* Form Type Field */}
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
+                                     Template
+                                    </Typography>
+                                    <TextField
+                                        select
+                                        value={newForm.type}
+                                        size="small"
+                                        onChange={(e) => setNewForm({ ...newForm, type: e.target.value })}
+                                        fullWidth
+                                        InputProps={{
+                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                        }}
+                                    >
+                                        <MenuItem value="Employees">Employees</MenuItem>
+                                        {/* Add more options as needed */}
+                                    </TextField>
+                                </Box>
+
+                                {/* Page Size Field */}
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
+                                        Template Type
+                                    </Typography>
+                                    <TextField
+                                        value={newForm.formName}
+                                        size="small"
+                                        onChange={(e) => setNewForm({ ...newForm, formName: e.target.value })}
+                                        fullWidth
+                                        InputProps={{
+                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+
+                            {/* Second Row: Form Name */}
+                            <Grid item xs={12} sm={6}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Form Name</Typography>
+                                <TextField
+                                    value={newForm.name}
+                                    InputProps={{ 
+                                        readOnly: true,
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
+                                    }}
+                                    fullWidth
+                                    variant="outlined"
+                                    size="small"
+                                />
+                            </Grid>
+
+                            <Grid item xs={12} sm={6} mt={-2}>
+                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
+
+                                <TextField
+                                    fullWidth
+                                    multiline
+                                    rows={4}
+                                    value={newForm.description}
+                                    onChange={(e) => setNewForm({ ...newForm, description: e.target.value })}
+                                    InputProps={{
+                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
+                                    }}
+                                />
+                            </Grid>
+                        </Box>
+                    </DialogContent>
+
+                    <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 5 }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => console.log('Preview clicked')} // Add your preview logic here
+                            sx={{
+                                backgroundColor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                width: '30%',
+                                marginTop: '-20px',
+                                marginBottom: '-25px',
+                                '&:hover': {
+                                    backgroundColor: '#333'
+                                }
+                            }}
+                        >
+                            Preview
+                        </Button>
+                        <Button
+                            variant="contained"
+                            onClick={handleCreateForm}
+                            sx={{
+                                backgroundColor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                width: '30%',
+                                marginTop: '-20px',
+                                marginBottom: '-25px',
+                                '&:hover': {
+                                    backgroundColor: '#333'
+                                }
+                            }}
+                        >
+                            Create
+                        </Button>
+                    </DialogActions>
+                </Box>
+            </Dialog>
       <ToastContainer></ToastContainer>
     </Paper>
   );
