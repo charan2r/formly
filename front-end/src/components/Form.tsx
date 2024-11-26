@@ -151,7 +151,9 @@ const FormTable: React.FC = () => {
     }
   };
 
-  const handleEditClick = (form: form) => {
+  const handleEditClick = (form: form | undefined) => {
+    if (!form) return;
+    
     setEditFormData({
       name: form.name,
       type: form.category,
@@ -162,6 +164,7 @@ const FormTable: React.FC = () => {
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
+    event.stopPropagation(); // Prevent event bubbling
     setMenuAnchor(event.currentTarget);
     setSelectedRowId(id);
   };
@@ -333,22 +336,31 @@ const FormTable: React.FC = () => {
 
   const filteredData = forms
     .filter((frm) => {
-      const nameMatches = frm.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        frm.name.toLowerCase().includes(filters.name.toLowerCase());
+      const searchLower = searchTerm.toLowerCase();
+      
+      // Search across multiple fields
+      const nameMatch = frm.name.toLowerCase().includes(searchLower);
+      const categoryMatch = frm.category.toLowerCase().includes(searchLower);
+      const createdByMatch = frm.createdBy.toLowerCase().includes(searchLower);
+      const lastModifiedByMatch = frm.lastModifiedBy.toLowerCase().includes(searchLower);
 
-      const categoryMatches = frm.category
-        ? frm.category.toLowerCase().includes(filters.category.toLowerCase())
-        : !filters.category; // If org.category is null, match only if filters.category is empty
-
-      const lastActiveMatches = frm.lastActive
-        ? frm.lastActive.toLowerCase().includes(filters.lastActive.toLowerCase())
-        : !filters.lastActive; // If org.lastActive is null, match only if filters.lastActive is empty
+      // Return true if any field matches the search term
+      return nameMatch || categoryMatch || createdByMatch || lastModifiedByMatch;
+    })
+    .filter((frm) => {
+      // Apply additional filters if they exist
+      const nameMatches = filters.name ? frm.name.toLowerCase().includes(filters.name.toLowerCase()) : true;
+      const categoryMatches = filters.category ? frm.category.toLowerCase().includes(filters.category.toLowerCase()) : true;
+      const lastActiveMatches = filters.lastActive ? frm.lastModifiedDate.toLowerCase().includes(filters.lastActive.toLowerCase()) : true;
 
       return nameMatches && categoryMatches && lastActiveMatches;
     })
     .sort((a, b) => {
-      const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
-      return (a[orderBy] ?? "").localeCompare(b[orderBy] ?? "") * orderMultiplier;
+      if (orderBy) {
+        const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
+        return (a[orderBy] ?? "").toString().localeCompare((b[orderBy] ?? "").toString()) * orderMultiplier;
+      }
+      return 0;
     });
 
   const selectedCount = Object.values(selectedForms).filter(Boolean).length;
@@ -406,7 +418,7 @@ const FormTable: React.FC = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     <IconButton>
-                      <MenuIcon sx={{ color: 'grey.600' }} /> {/* Hamburger menu icon */}
+                      <MenuIcon sx={{ color: 'grey.600' }} />
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -483,7 +495,15 @@ const FormTable: React.FC = () => {
                                 />
                             </TableCell>
                             <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
-                            <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                            <TableCell 
+                                sx={{ 
+                                    backgroundColor: '#f9f9f9', 
+                                    padding: '4px', 
+                                    position: 'relative',
+                                    textAlign: 'left',  // Add this
+                                    paddingLeft: '16px'  // Add this for some spacing
+                                }}
+                            >
                                 <TableSortLabel
                                     active={orderBy === 'name'}
                                     direction={orderDirection}
@@ -492,7 +512,7 @@ const FormTable: React.FC = () => {
                                     Form Name
                                 </TableSortLabel>
                                 {showFilters && (
-                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
+                                    <div style={{ position: 'absolute', top: '70%', width: '45%', right: 0 }}>
                                         <TextField
                                             variant="outlined"
                                             size="small"
@@ -509,7 +529,15 @@ const FormTable: React.FC = () => {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                            <TableCell 
+                                sx={{ 
+                                    backgroundColor: '#f9f9f9', 
+                                    padding: '4px', 
+                                    position: 'relative',
+                                    textAlign: 'left',  // Add this
+                                    paddingLeft: '16px'  // Add this for some spacing
+                                }}
+                            >
                                 <TableSortLabel
                                     active={orderBy === 'category'}
                                     direction={orderDirection}
@@ -535,7 +563,15 @@ const FormTable: React.FC = () => {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                            <TableCell 
+                                sx={{ 
+                                    backgroundColor: '#f9f9f9', 
+                                    padding: '4px', 
+                                    position: 'relative',
+                                    textAlign: 'left',
+                                    paddingLeft: '16px'
+                                }}
+                            >
                                 <TableSortLabel
                                     active={orderBy === 'createdDate'}
                                     direction={orderDirection}
@@ -561,7 +597,15 @@ const FormTable: React.FC = () => {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                            <TableCell 
+                                sx={{ 
+                                    backgroundColor: '#f9f9f9', 
+                                    padding: '4px', 
+                                    position: 'relative',
+                                    textAlign: 'left',
+                                    paddingLeft: '16px'
+                                }}
+                            >
                                 <TableSortLabel
                                     active={orderBy === 'createdBy'}
                                     direction={orderDirection}
@@ -587,7 +631,15 @@ const FormTable: React.FC = () => {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                            <TableCell 
+                                sx={{ 
+                                    backgroundColor: '#f9f9f9', 
+                                    padding: '4px', 
+                                    position: 'relative',
+                                    textAlign: 'left',
+                                    paddingLeft: '16px'
+                                }}
+                            >
                                 <TableSortLabel
                                     active={orderBy === 'lastModifiedDate'}
                                     direction={orderDirection}
@@ -613,11 +665,19 @@ const FormTable: React.FC = () => {
                                     </div>
                                 )}
                             </TableCell>
-                            <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+                            <TableCell 
+                                sx={{ 
+                                    backgroundColor: '#f9f9f9', 
+                                    padding: '4px', 
+                                    position: 'relative',
+                                    textAlign: 'left',
+                                    paddingLeft: '16px'
+                                }}
+                            >
                                 <TableSortLabel
                                     active={orderBy === 'lastModifiedBy'}
                                     direction={orderDirection}
-                                    onClick={() => handleRequestSort('lastModifiedByy')}
+                                    onClick={() => handleRequestSort('lastModifiedBy')}
                                 >
                                     Last Modified By
                                 </TableSortLabel>
@@ -645,42 +705,47 @@ const FormTable: React.FC = () => {
 
                     <TableBody>
                         {paginatedData.map((row) => (
-                            <TableRow key={row.formId} sx={{ height: '60px' }}>
+                            <TableRow key={row.templateId} sx={{ height: '60px' }}>
                                 <TableCell padding="checkbox">
                                     <Checkbox
-                                        checked={!!selectedForms[row.formId]}
-                                        onChange={() => handleSelectForms(row.formId)}
+                                        checked={!!selectedForms[row.templateId]}
+                                        onChange={() => handleSelectForm(row.templateId)}
                                     />
                                 </TableCell>
-                                <TableCell>{row.name}</TableCell>
-                                <TableCell>{row.category}</TableCell>
-                                <TableCell>{new Date(row.createdDate).toLocaleString("en-GB", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric"
-                                })}</TableCell>
-                                <TableCell>{row.createdBy}</TableCell>
-                                <TableCell>{new Date(row.lastModifiedDate).toLocaleString("en-GB", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric"
-                                })}</TableCell>
-                                <TableCell>{row.lastModifiedBy}</TableCell>
+                                <TableCell padding="checkbox" />
+                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.name}</TableCell>
+                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.category}</TableCell>
+                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>
+                                    {new Date(row.createdDate).toLocaleString("en-GB", {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric"
+                                    })}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.createdBy}</TableCell>
+                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>
+                                    {new Date(row.lastModifiedDate).toLocaleString("en-GB", {
+                                        day: "2-digit",
+                                        month: "short",
+                                        year: "numeric"
+                                    })}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.lastModifiedBy}</TableCell>
                                 <TableCell padding="checkbox">
-                                    <IconButton onClick={(event) => handleMenuOpen(event, row.formId)}>
+                                    <IconButton onClick={(event) => handleMenuOpen(event, row.templateId)}>
                                         <MoreVertIcon />
                                     </IconButton>
-                                    <Popover
-                                        open={Boolean(menuAnchor) && selectedRowId === row.id}
+                                    <Menu
                                         anchorEl={menuAnchor}
+                                        open={Boolean(menuAnchor) && selectedRowId === row.templateId}
                                         onClose={handleMenuClose}
                                         anchorOrigin={{
                                             vertical: 'center',
-                                            horizontal: 'left',
+                                            horizontal: 'right',
                                         }}
                                         transformOrigin={{
                                             vertical: 'center',
-                                            horizontal: 'right',
+                                            horizontal: 'left',
                                         }}
                                         PaperProps={{
                                             sx: {
@@ -690,58 +755,63 @@ const FormTable: React.FC = () => {
                                             },
                                         }}
                                     >
-                    <MenuItem
-                       onClick={() => setEditDialogOpen(true)}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '10px',
-                        margin: '5px',
-                        justifyContent: 'center',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Edit
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleMenuClose();
-                        navigate(`/share-form/${row.formId}`);
-                      }}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '10px',
-                        margin: '5px',
-                        justifyContent: 'center',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Share
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleDeleteConfirmation(row.formId)}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '10px',
-                        margin: '5px',
-                        justifyContent: 'center',
-                        color: 'red',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
-
-                  </Popover>
-                </TableCell>
+                                        <MenuItem
+                                            onClick={() => {
+                                                handleEditClick(forms.find(form => form.templateId === selectedRowId));
+                                                handleMenuClose();
+                                            }}
+                                            sx={{
+                                                backgroundColor: 'white',
+                                                borderRadius: '10px',
+                                                margin: '5px',
+                                                justifyContent: 'center',
+                                                fontSize: '0.875rem',
+                                                minHeight: '30px',
+                                                minWidth: '100px',
+                                                '&:hover': { backgroundColor: '#f0f0f0' },
+                                            }}
+                                        >
+                                            Edit
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={() => {
+                                                handleMenuClose();
+                                                navigate(`/share-form/${selectedRowId}`);
+                                            }}
+                                            sx={{
+                                                backgroundColor: 'white',
+                                                borderRadius: '10px',
+                                                margin: '5px',
+                                                justifyContent: 'center',
+                                                fontSize: '0.875rem',
+                                                minHeight: '30px',
+                                                minWidth: '100px',
+                                                '&:hover': { backgroundColor: '#f0f0f0' },
+                                            }}
+                                        >
+                                            Share
+                                        </MenuItem>
+                                        <MenuItem
+                                            onClick={() => {
+                                                handleDeleteConfirmation(selectedRowId!.toString());
+                                                handleMenuClose();
+                                            }}
+                                            sx={{
+                                                backgroundColor: 'white',
+                                                borderRadius: '10px',
+                                                margin: '5px',
+                                                justifyContent: 'center',
+                                                color: 'red',
+                                                fontSize: '0.875rem',
+                                                minHeight: '30px',
+                                                minWidth: '100px',
+                                                '&:hover': { backgroundColor: '#f0f0f0' },
+                                            }}
+                                        >
+                                            Delete
+                                        </MenuItem>
+                                    </Menu>
+                                </TableCell>
 
 
 
