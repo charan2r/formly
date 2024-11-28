@@ -1,8 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Post, Body, Get, Query, Patch, NotFoundException, Delete } from '@nestjs/common';
 import { FormsService } from './form.service';
-import { CreateFormDto } from './create-form.dto'; // Adjust the path as necessary
-import { Form } from '../model/form.entity'; // Adjust the path as necessary
+import { CreateFormDto } from './create-form.dto'; 
+import { Form } from '../model/form.entity'; 
 import { UpdateFormDto } from './update-form.dto'; // Create this DTO
 
 interface MetaSchemaResponse<T> {

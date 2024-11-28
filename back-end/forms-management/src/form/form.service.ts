@@ -11,17 +11,8 @@ export class FormsService {
 
   // Method to create a form
   async create(createFormDto: CreateFormDto): Promise<Form> {
-    const form = this.formsRepository.create({
-      name: createFormDto.name,
-      description: createFormDto.description, 
-      templateName: createFormDto.templateName, 
-      templateType: createFormDto.templateType, 
-      status: createFormDto.status || 'active', 
-      categoryId: createFormDto.categoryId, 
-      
-      formTemplate: { formId: createFormDto.formTemplateId } as any,
-    });
-    return this.formsRepository.save(form);
+    const field = this.formsRepository.create(createFormDto);
+        return this.formsRepository.save(field);
   }
 
   // Method to get all forms

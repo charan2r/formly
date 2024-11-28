@@ -18,6 +18,10 @@ export class CreateFormDto {
   @IsString()
   templateType: string; // Template type (e.g., "standard", "custom")
 
+  @IsOptional()
+  @IsString()
+  status?: string; // Optional status for the form
+  
   @IsNotEmpty()
   @IsUUID()
   categoryId: string; // Category ID
@@ -26,7 +30,5 @@ export class CreateFormDto {
   @IsUUID()
   formTemplateId: string; 
 
-  @IsOptional()
-  @IsString()
-  status?: string; // Optional status for the form
+  
 }
