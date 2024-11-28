@@ -62,6 +62,10 @@ interface EditFormData {
   description: string;
 }
 
+interface ViewFormData extends form {
+  // Add any additional fields you want to display
+}
+
 const SquarePagination = styled(Pagination)(({ theme }) => ({
   '& .MuiPaginationItem-root': {
     borderRadius: '5px',
@@ -112,6 +116,8 @@ const FormTable: React.FC = () => {
   });
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [viewFormData, setViewFormData] = useState<ViewFormData | null>(null);
 
   const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -405,6 +411,11 @@ const FormTable: React.FC = () => {
     setShareUrl('https://www.example.com/share/form/' + selectedRowId);
     setShareDialogOpen(true);
     handleMenuClose();
+  };
+
+  const handleCloseViewDialog = () => {
+    setViewDialogOpen(false);
+    setViewFormData(null);
   };
 
   return (
@@ -1442,6 +1453,41 @@ const FormTable: React.FC = () => {
               <ContentCopyIcon fontSize="small" />
             </IconButton>
           </Box>
+        </Box>
+      </Dialog>
+
+      <Dialog
+        open={viewDialogOpen}
+        onClose={handleCloseViewDialog}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '16px 28px 40px',
+            maxWidth: '650px',
+            height: '500px',
+            backgroundColor: '#f9f9f9',
+            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          {/* Back button */}
+          <IconButton
+            onClick={handleCloseViewDialog}
+            sx={{
+              position: 'absolute',
+              left: 8,
+              top: 8,
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+
+          {/* Empty content */}
+          <DialogContent>
+          </DialogContent>
         </Box>
       </Dialog>
 
