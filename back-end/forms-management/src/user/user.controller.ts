@@ -1,11 +1,13 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Query, NotFoundException, Post, Body, Patch, Delete} from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException, Post, Body, Patch, Delete, UseGuards} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 
 @Controller('users')
+@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
 export class UserController {
   constructor(private readonly userService: UserService) {}
 

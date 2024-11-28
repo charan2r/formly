@@ -1,8 +1,9 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException} from '@nestjs/common';
-import { Category } from '../model/category.entity';
-import { CreateCategoryDto } from 'src/dto/Create-Category.dto';
+//import { Category } from '../model/category.entity';
+import { CreateCategoryDto } from '../user/Create-Category.dto';
 import { CategoryRepository } from './category.repository';
-import { UserRepository } from '../user/user.repository';
+//import { UserRepository } from '../user/user.repository';
 import { OrganizationRepository } from 'src/organization/organization.repository';
 import { In } from 'typeorm';
 

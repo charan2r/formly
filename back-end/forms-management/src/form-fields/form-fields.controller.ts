@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Controller, Body, Post, Get, Query, Delete, Patch } from '@nestjs/common';
+import { Controller, UseGuards, Body, Post, Get, Query, Delete, Patch } from '@nestjs/common';
 import { FormFieldsService } from '../form-fields/form-fields.service';
 import { CreateFormFieldDto } from '../form-fields/create-form-field.dto';
 import { FormField } from '../model/form-fields.entity';
 import { UpdateFormFieldDto } from './update-form-field.dto';
+import { AuthGuard } from '@nestjs/passport';
 interface MetaSchemaResponse<T = any> {
   success: boolean;
   message: string;
@@ -12,6 +13,7 @@ interface MetaSchemaResponse<T = any> {
 }
 
 @Controller('form-fields')
+@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
 export class FormFieldsController {
   constructor(private readonly formFieldsService: FormFieldsService) {}
 

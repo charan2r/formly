@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 // organization.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from '../model/user.entity';

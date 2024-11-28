@@ -23,6 +23,11 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
     return await this.userRepository.findOne({ where: { id } });
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return this.userRepository.findOne({ where: { email } });
+  }
+  
+
   // Method to add a new user
   async addUser(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create(createUserDto);
