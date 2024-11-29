@@ -1,9 +1,10 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, Get, Query, Patch, NotFoundException, Delete } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Get, Query, Patch, NotFoundException, Delete } from '@nestjs/common';
 import { FormTemplateService } from './form-template.service';
 import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
 import { UpdateTemplateDto } from './update-template.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 interface MetaSchemaResponse<T> {
   status: string;
@@ -12,6 +13,7 @@ interface MetaSchemaResponse<T> {
 }
 
 @Controller('form-templates')
+@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
 export class FormTemplateController {
   constructor(private readonly formTemplateService: FormTemplateService) {}
 

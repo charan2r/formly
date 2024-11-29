@@ -1,6 +1,7 @@
+/* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { CreateCategoryDto } from '../dto/Create-Category.dto';
+import { CreateCategoryDto } from '../user/Create-Category.dto';
 import { Category } from '../model/category.entity';
 
 interface CategoryResponse {

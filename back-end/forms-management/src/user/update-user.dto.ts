@@ -16,6 +16,22 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
+  readonly passwordHash?: string;
+
+  @IsString()
+  @IsOptional()
+  readonly isVerified?: boolean;
+
+  @IsString()
+  @IsOptional()
+  readonly verificationToken?: string;
+
+  @IsString()
+  @IsOptional()
+  readonly verificationTokenExpires?: Date;
+
+  @IsString()
+  @IsOptional()
   readonly phoneNumber?: string;
 
   @IsString()

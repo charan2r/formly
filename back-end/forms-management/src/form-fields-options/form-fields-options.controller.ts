@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Body, Controller, Delete, Get, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, UseGuards, Delete, Get, Patch, Post, Query } from '@nestjs/common';
 import { FormFieldsOption } from '../model/form-fields-option.entity';
 import { CreateFormFieldsOptionDto } from './create-form-fields-option.dto';
 import { FormFieldsOptionsService } from './form-fields-options.service';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiProperty } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 interface MetaSchemaResponse<T = any> {
     success: boolean;
@@ -25,6 +26,7 @@ export class UpdateOptionDto {
 }
 
 @Controller('form-fields-options')
+@UseGuards(AuthGuard('jwt'))
 export class FormFieldsOptionsController {
     constructor(private readonly formFieldsOptionsService: FormFieldsOptionsService) {}
     

@@ -1,14 +1,15 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Delete, Post, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException } from '@nestjs/common';
+import { Controller, UseGuards,Get, Delete, Post, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException } from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
-import { CreateOrganizationWithSuperAdminDto } from 'src/dto/create-organization.dto';
+//import { CreateOrganizationWithSuperAdminDto } from '../user/create-organization.dto';
 import { User } from 'src/model/user.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('organization')
+@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
 export class OrganizationController {
-
     constructor(private readonly organizationService: OrganizationService) {}
 
     // API endpoint to get all organizations
@@ -90,9 +91,8 @@ export class OrganizationController {
 // API endpoint to create a new organization with super admin
 @Post('create')
 async createOrganizationWithSuperAdmin(
-  @Body() createOrganizationDto: CreateOrganizationWithSuperAdminDto,
-) {
-  const { organizationData, superAdminData } = createOrganizationDto;
+  @Body('organizationData') organizationData: any,
+  @Body('superAdminData') superAdminData: any,) {
   
   try {
     // Check if the super admin email already exists
@@ -106,7 +106,8 @@ async createOrganizationWithSuperAdmin(
     // Proceed with creating the organization and super admin
     return await this.organizationService.createOrganizationWithSuperAdmin(organizationData, superAdminData);
     
-  } catch (error) {
+  }
+  catch (error) {
     // Log the error (you can enhance this by using a logger service)
     console.error('Error occurred while creating organization with super admin:', error);
   

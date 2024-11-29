@@ -4,12 +4,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  OneToMany,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
-import { Category } from './category.entity'; 
 
 @Entity()
 export class User {
@@ -34,7 +32,7 @@ export class User {
   @Column('boolean', { default: false })
   isDeleted: boolean;
 
-  @Column({ type: 'enum', enum: ['PlatformAdmin', 'SuperAdmin', 'SubUser'] })
+  @Column({ type: 'enum', enum: ['PlatformAdmin', 'SuperAdmin', 'Admin', 'SubUser'] })
   userType: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -42,6 +40,15 @@ export class User {
 
   @Column({ type: 'timestamp', nullable: true })
   lastLogin: Date;
+
+  @Column( 'text', { nullable: true})
+  verificationToken: string;
+
+  @Column('boolean', {default: false})
+  isVerified: boolean;
+
+  @Column({type: 'timestamp', nullable: true})
+  verificationTokenExpires: Date;
 
   @Column({
     type: 'timestamp',
