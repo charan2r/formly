@@ -23,8 +23,14 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
     return await this.userRepository.findOne({ where: { id } });
   }
 
+  // Method to get a user by email
   async getUserByEmail(email: string): Promise<User | undefined> {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  // Fetch user by verification token
+  async getUserByVerificationToken(token: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { verificationToken: token } });
   }
   
 

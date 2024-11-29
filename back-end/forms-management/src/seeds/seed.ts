@@ -8,13 +8,13 @@ import { Category } from "src/model/category.entity";
 async function seed() {
     await AppDataSource.initialize();
 
-    // Step 1: Create a Super Super Admin User
+    // Step 1: Create Platform Admin
     const user1 = new User();
     user1.firstName = "John";
     user1.lastName = "Doe";
     user1.email = "john.doe@example.com";
-    user1.passwordHash = "hashedpassword1"; // Normally, use a proper hashing function
-    user1.userType = "PlatformAdmin"; // Updated role
+    user1.passwordHash = "hashedpassword1"; 
+    user1.userType = "PlatformAdmin"; 
     user1.organizationId = null; // This user doesn't belong to a specific organization
 
     await AppDataSource.manager.save(user1);
@@ -52,7 +52,7 @@ async function seed() {
     user2.firstName = "Jane";
     user2.lastName = "Smith";
     user2.email = "jane.smith@example.com";
-    user2.passwordHash = "hashedpassword2"; // Use hashed password
+    user2.passwordHash = "hashedpassword2"; 
     user2.userType = "SuperAdmin";
     user2.organizationId = org1.orgId; // Assign org1's ID to user2 after saving org1
 

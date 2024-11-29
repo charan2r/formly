@@ -27,6 +27,18 @@ export class CreateUserDto {
   readonly userType: string;
 
   @IsString()
+  @IsOptional()
+  readonly isVerified?: boolean;
+
+  @IsString()
+  @IsOptional()
+  readonly verificationToken?: string;
+
+  @IsString()
+  @IsOptional()
+  readonly verificationTokenExpires?: Date;
+
+  @IsString()
   @IsNotEmpty()
   readonly organizationId?: string;
 }

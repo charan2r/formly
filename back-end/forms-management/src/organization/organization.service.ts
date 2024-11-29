@@ -7,43 +7,41 @@ import { UserRepository } from 'src/user/user.repository';
 import { OrganizationRepository } from './organization.repository';
 import { UpdateOrganizationDto } from './organization.dto';
 import { In } from 'typeorm';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class OrganizationService {
   constructor(
     private organizationRepository: OrganizationRepository,
     private userRepository: UserRepository, // Inject the UserRepository
+    private authService: AuthService, // Inject the AuthService
   ) {}
 
-  // Method to create an organization and its super admin
+  // Create an organization and register its admin
   async createOrganizationWithSuperAdmin(
     organizationData: Partial<Organization>,
     superAdminData: Partial<User>,
-  ) {
-    // Step 1: Create the Super Admin User
-    const superAdmin = await this.userRepository.createUser({
-      ...superAdminData,
-      userType: 'SuperAdmin',
-    });
-
-    // Step 2: Create the Organization and link the Super Admin
+  ): Promise<Organization> {
+    // Step 1: Create the Organization
     const organization = this.organizationRepository.create({
       ...organizationData,
-      superAdminId: superAdmin.id,
     });
     await this.organizationRepository.save(organization);
 
-    // Step 3: Assign the organization ID to the SuperAdmin
-    superAdmin.organizationId = organization.orgId;
-    await this.userRepository.save(superAdmin);
+    // Step 2: Register Admin via AuthService
+    const adminData = {
+      ...superAdminData,
+      organizationId: organization.orgId, // Link admin to organization
+    };
+    await this.authService.registerAdmin(adminData);
+    organization.superAdminId = adminData.id; // Link organization to admin
+    await this.organizationRepository.save(organization);
 
-    // Return the structured response
     return organization;
   }
 
   // Method to get all organizations
   async getAll() {
-    // return this.organizationRepository.find();
     return await this.organizationRepository.find();
   }
 
@@ -51,7 +49,6 @@ export class OrganizationService {
   async getOne(
     id: string,
   ): Promise<{ organization: Organization; superAdmin: User | null }> {
-    // Find the organization by its ID
     const organization = await this.organizationRepository.findOne({
       where: { orgId: id },
     });
