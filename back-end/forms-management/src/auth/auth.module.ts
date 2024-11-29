@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
+import { EmailModule } from './email.module';
 import { JwtStrategy } from './jwt.strategy';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -14,6 +15,7 @@ const keysPath = path.resolve(process.cwd(), 'keys');
 @Module({
   imports: [
     UserModule,
+    EmailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       privateKey: fs.readFileSync(path.join(keysPath, 'private.pem')),

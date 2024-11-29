@@ -47,7 +47,7 @@ export class UserController {
   async addUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<{ message: string; status: string; data: User }> {
-    const newUser = await this.userService.addUser(createUserDto);
+    const newUser: User = await this.userService.addUser(createUserDto);
     return {
       status: 'success',
       message: 'User created successfully',

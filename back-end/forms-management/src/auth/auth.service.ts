@@ -5,11 +5,14 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from './email.service';
+import { TokenService } from 'src/auth/token.service';
 
 @Injectable()
 export class AuthService {
     constructor( 
         private readonly userService: UserService, 
+        private readonly emailService: EmailService,
         private readonly jwtService: JwtService) {}
 
     // Register admin 
@@ -21,8 +24,7 @@ export class AuthService {
         }
 
         // Generate verification token
-        const verificationToken = uuidv4();
-        const verificationTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+        const { verificationToken, verificationTokenExpires } = TokenService.generateVerificationToken();
 
         // Create Admin user
         const user = await this.userService.addUser({
@@ -38,19 +40,14 @@ export class AuthService {
         });
 
         // Send verification email
-        await this.sendVerificationEmail(email, verificationToken);
+        await this.emailService.sendVerificationEmail(email, verificationToken);
 
         return { message: 'Admin registered successfully. Verification email sent', data: user };
         
     }
 
-    // Send verification email
-    async sendVerificationEmail(email: string, token: string) {
-        const verificationLink = `http://localhost:3000/auth/verify-email?token=${token}`;
-        console.log(verificationLink);
-    }
 
-    // First time verification
+    // First time verification for admin
     async verifyAndSetPassword(token: string, newPassword: string): Promise<{message: string}> {
         const user = await this.userService.getUserByVerificationToken(token);
         if(!user) {
@@ -80,7 +77,7 @@ export class AuthService {
     }
 
 
-    // Login a user
+    // Login admin
     async login(email: string, password: string): Promise<{accessToken: string}> {
         const user = await this.userService.getUserByEmail(email);
         if(!user) {

@@ -5,10 +5,16 @@ import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { In } from 'typeorm';
+//import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from 'src/auth/email.service';
+import { TokenService } from 'src/auth/token.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly emailService: EmailService
+  ) {}
 
 // Method to get users for grid view without pagination
 async getUsers(organizationId?: string): Promise<[User[], number]> {
@@ -36,13 +42,28 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
 
   // Method to add a new user
   async addUser(createUserDto: CreateUserDto): Promise<User> {
+
+    const candidate = await this.getUserByEmail(createUserDto.email);
+    if (candidate) {
+      throw new NotFoundException('User with this email already exists');
+    }
+
+    const {verificationToken, verificationTokenExpires} = TokenService.generateVerificationToken();
+
     const newUser = this.userRepository.create({
       ...createUserDto,
-      isVerified: false
+      isVerified: false,
+      passwordHash: '',
+      verificationToken,
+      verificationTokenExpires,
     });
+    
+    await this.emailService.sendVerificationEmail(createUserDto.email, verificationToken);
     return await this.userRepository.save(newUser);
+    
   }
 
+  // Method to update a user
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOneBy({ id });
     if (!existingUser) {
