@@ -13,7 +13,7 @@ export class AuthService {
         private readonly jwtService: JwtService) {}
 
     // Register admin 
-    async registerAdmin(userDto: any): Promise<{message:string}> {
+    async registerAdmin(userDto: any): Promise<{message:string, data: any}> {
         const {email, firstName,lastName, organizationId } = userDto;
         const candidate = await this.userService.getUserByEmail(email);
         if(candidate) {
@@ -25,7 +25,7 @@ export class AuthService {
         const verificationTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
 
         // Create Admin user
-        await this.userService.addUser({
+        const user = await this.userService.addUser({
             email,
             firstName,
             lastName,
@@ -40,7 +40,7 @@ export class AuthService {
         // Send verification email
         await this.sendVerificationEmail(email, verificationToken);
 
-        return { message: 'Admin registered successfully. Verification email sent' };
+        return { message: 'Admin registered successfully. Verification email sent', data: user };
         
     }
 

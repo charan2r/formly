@@ -36,7 +36,10 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
 
   // Method to add a new user
   async addUser(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create(createUserDto);
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      isVerified: false
+    });
     return await this.userRepository.save(newUser);
   }
 
