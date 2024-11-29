@@ -129,7 +129,7 @@ const Template: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/categories/organization/8478937e-17cf-4936-97a8-0e92a33280f9');
+                const response = await axios.get('http://localhost:3001/categories/organization/3f1b43a2-8add-4145-a4ec-6c560c7ac766');
                 // Filter categories where status is 'active'
                 const activeCategories = response.data.data.filter((cat: Category) => cat.status === 'active');
                 setCategories(activeCategories);

@@ -13,7 +13,14 @@ import axios from 'axios'; // dont add this import ^ _ ^
 import { Droppable } from 'react-beautiful-dnd';
 import { useTemplate } from '../context/TemplateContext';
 import './DraggableQuestion.css';
-
+import SectionContent from './SectionContent';
+import SingleLineQuestion from './questions/SingleLineQuestion';
+import MultiLineQuestion from './questions/MultiLineQuestion';
+import LabelQuestion from './questions/LabelQuestion';
+import DateContent from './DateContent';
+import DateTimeContent from './DateTimeContent';
+import YesNoContent from './YesNoContent';
+import CheckboxContent from './CheckboxContent';
 
 interface DraggableQuestionProps {
   formTemplateId: string;
@@ -249,17 +256,117 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
     }
   };
 
+  const renderQuestionComponent = (item: QuestionItem) => {
+    switch (item.type) {
+      case 'label':
+        return (
+          <LabelQuestion
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+          />
+        );
+
+      case 'single-line':
+        return (
+          <SingleLineQuestion
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+          />
+        );
+
+      case 'multiline':
+        return (
+          <MultiLineQuestion
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+          />
+        );
+
+      case 'title':
+        return (
+          <TitleContent
+            item={item}
+            formFieldId={item.id}
+            onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
+            onSubtitleChange={handleOptionChange}
+            onDeleteSubtitle={handleDeleteOption}
+            onAddSubtitle={handleAddOption}
+          />
+        );
+
+      case 'section':
+        return (
+          <SectionContent
+            item={item}
+            formFieldId={item.id}
+          />
+        );
+
+      case 'date':
+        return (
+          <DateContent
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+            type="date"
+          />
+        );
+
+      case 'datetime':
+        return (
+          <DateTimeContent
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+          />
+        );
+
+      case 'yes-no':
+        return (
+          <YesNoContent
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+          />
+        );
+
+      case 'checkbox':
+        return (
+          <CheckboxContent
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+            onOptionChange={handleOptionChange}
+            onDeleteOption={handleDeleteOption}
+            onAddOption={handleAddOption}
+          />
+        );
+
+      // Add other cases for different question types
+      default:
+        return (
+          <QuestionContent
+            item={item}
+            formFieldId={item.id}
+            onQuestionChange={handleQuestionUpdate}
+            onOptionChange={handleOptionChange}
+            onDeleteOption={handleDeleteOption}
+            onAddOption={handleAddOption}
+          />
+        );
+    }
+  };
+
   return (
     <Droppable droppableId="rnd-container">
       {(provided) => (
         <div
           ref={provided.innerRef}
           {...provided.droppableProps}
-          style={{ 
-            width: '100%', 
-            height: '100%', 
-            position: 'relative',
-          }}
+          style={{ width: '100%', height: '100%', position: 'relative' }}
         >
           {formFields.map((item) => (
             <Rnd
@@ -281,42 +388,26 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
                 x: ((item.x / pageSizes[selectedSize].width) * gridSize.width) * calculateScale(selectedSize, pageSizes),
                 y: ((item.y / pageSizes[selectedSize].height) * gridSize.height) * calculateScale(selectedSize, pageSizes)
               }}
-              enableResizing={!isViewMode}
-              disableDragging={isViewMode}
-              onDragStart={!isViewMode ? handleDragStart : undefined}
-              onDragStop={!isViewMode ? (e, data) => {
+              onDragStart={handleDragStart}
+              onDragStop={(e, data) => {
                 const scale = calculateScale(selectedSize, pageSizes);
                 const newX = (data.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
                 const newY = (data.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
                 handleDragStop(e, { x: newX, y: newY }, item);
-              } : undefined}
-              onResizeStop={!isViewMode ? handleResizeStop : undefined}
+              }}
+              onResizeStop={(e, direction, ref, delta, position) => {
+                const scale = calculateScale(selectedSize, pageSizes);
+                const newWidth = (ref.offsetWidth / (gridSize.width * scale)) * pageSizes[selectedSize].width;
+                const newHeight = (ref.offsetHeight / (gridSize.height * scale)) * pageSizes[selectedSize].height;
+                const newX = (position.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
+                const newY = (position.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
+                handleResizeStop(e, direction, ref, { width: newWidth, height: newHeight }, { x: newX, y: newY }, item);
+              }}
               bounds="parent"
-              dragHandleClassName={!isViewMode ? "drag-handle" : undefined}
+              dragHandleClassName="drag-handle"
             >
-              <Box sx={{ 
-                width: '100%',
-                height: '100%',
-              }}>
-                {item.type === 'title' ? (
-                  <TitleContent
-                    item={item}
-                    formFieldId={item.id}
-                    onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
-                    onSubtitleChange={handleOptionChange}
-                    onDeleteSubtitle={handleDeleteOption}
-                    onAddSubtitle={handleAddOption}
-                  />
-                ) : (
-                  <QuestionContent
-                    item={item}
-                    formFieldId={item.id}
-                    onQuestionChange={handleQuestionUpdate}
-                    onOptionChange={handleOptionChange}
-                    onDeleteOption={handleDeleteOption}
-                    onAddOption={handleAddOption}
-                  />
-                )}
+              <Box sx={{ width: '100%', height: '100%' }}>
+                {renderQuestionComponent(item)}
               </Box>
             </Rnd>
           ))}

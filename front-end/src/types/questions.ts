@@ -6,13 +6,14 @@ export interface QuestionOption {
 
 export interface QuestionItem {
   id: string;
+  question: string;
+  type: string;
   x: number;
   y: number;
   width: number;
   height: number;
   color: string;
-  question: string;
-  options: QuestionOption[];
+  options?: any[];
 }
 
 export interface TitleItem {
@@ -24,4 +25,10 @@ export interface TitleItem {
   y: number;
   width: number;
   height: number;
+}
+
+export interface BaseQuestionProps {
+  item: QuestionItem;
+  formFieldId: string;
+  onQuestionChange: (itemId: string, newContent: string) => void;
 } 

@@ -11,6 +11,8 @@ import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import TitleIcon from '@mui/icons-material/Title';
+import LabelIcon from '@mui/icons-material/Label';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import axios from 'axios';
 import { useTemplate } from '../context/TemplateContext';
 
@@ -21,6 +23,7 @@ const initialElements = [
     category: 'Layout Elements', 
     items: [
       { label: 'Title', icon: <TitleIcon />, type: 'title' }, 
+      { label: 'Label', icon: <LabelIcon />, type: 'label' }, 
       { label: 'Sections', icon: <ViewModuleIcon />, type: 'section' }, 
       { label: 'Tables', icon: <TableChartIcon />, type: 'table' }
     ] 
@@ -31,8 +34,6 @@ const initialElements = [
     items: [
       { label: 'Single Line', icon: <TextFieldsIcon />, type: 'single-line' }, 
       { label: 'Multiline', icon: <SubjectIcon />, type: 'multiline' }, 
-      { label: 'Number', icon: <KeyboardIcon />, type: 'number' }, 
-      { label: 'Rich Text', icon: <FormatBoldIcon />, type: 'rich-text' }
     ] 
   },
   { 
@@ -48,7 +49,7 @@ const initialElements = [
     category: 'Multi Elements', 
     items: [
       { label: 'Yes/No', icon: <CheckBoxIcon />, type: 'yes-no' }, 
-      { label: 'Checkbox', icon: <CheckBoxIcon />, type: 'checkbox' }
+      { label: 'Checkbox List', icon: <CheckBoxOutlineBlankIcon />, type: 'checkbox' }
     ] 
   },
 ];
@@ -65,24 +66,19 @@ const DraggableItem = memo(({ item, index }) => {
 
     try {
       const newField = {
-        question: item.type === 'title' ? "New Title" : "New Question",
+        question: item.type === 'label' ? "New Label" : 
+                 item.type === 'title' ? "New Title" : 
+                 item.type === 'section' ? "" : "New Question",
         type: item.type,
         x: "0",
         y: "0",
         width: "300",
-        height: item.type === 'title' ? "150" : "200",
+        height: item.type === 'label' ? "50" : 
+               item.type === 'title' ? "150" : 
+               item.type === 'section' ? "100" : "200",
         color: "#a8d8ea",
         formTemplateId: formTemplateId,
-        options: JSON.stringify(
-          item.type === 'checkbox' || item.type === 'yes-no' 
-            ? [
-                { id: 1, text: "Option 1", value: 1 },
-                { id: 2, text: "Option 2", value: 2 }
-              ]
-            : item.type === 'title' 
-              ? [{ id: 1, text: "New Subtitle", value: 1 }]
-              : []
-        )
+        options: JSON.stringify([])
       };
 
       await axios.post('http://localhost:3001/form-fields/create', newField);
@@ -196,7 +192,6 @@ const LeftSidebar: React.FC = () => {
     
     if (!destination) return;
 
-    // Check if dropping into RND container
     if (destination.droppableId === 'rnd-container') {
       if (!formTemplateId) {
         console.error('No template ID available');
@@ -205,12 +200,14 @@ const LeftSidebar: React.FC = () => {
 
       try {
         const newField = {
-          question: type === 'title' ? "New Title" : "New Question",
+          question: type === 'title' ? "New Title" : 
+                   type === 'section' ? "" : "New Question",
           type: type,
           x: "0",
           y: "0",
           width: "300",
-          height: type === 'title' ? "150" : "200",
+          height: type === 'title' ? "150" : 
+                 type === 'section' ? "100" : "200",
           color: "#a8d8ea",
           formTemplateId: formTemplateId,
           options: JSON.stringify(
@@ -227,19 +224,16 @@ const LeftSidebar: React.FC = () => {
 
         await axios.post('http://localhost:3001/form-fields', newField);
         
-        // Don't reorder items when dropping into RND container
         return;
       } catch (error) {
         console.error('Error creating form field:', error);
       }
     }
 
-    // Only handle reordering if not dropping into RND container
     if (source.droppableId !== destination.droppableId) {
       return;
     }
 
-    // Update category reordering logic to use new droppableId format
     const sourceCategoryId = source.droppableId.replace('category-', '');
     const destinationCategoryId = destination.droppableId.replace('category-', '');
 
