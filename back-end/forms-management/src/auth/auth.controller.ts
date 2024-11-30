@@ -21,6 +21,12 @@ export class AuthController {
       return this.authService.verifyAndSetPassword(token, newPassword);
     }
 
+    // API endpoint to forgot password
+    @Post('forgot-password')
+    async forgotPassword(@Body('email') email: string): Promise<{ message: string }> {
+      return this.authService.forgotPassword(email);
+    }
+
     // API endpoint to login
     @Post('login')
     async login(@Body('email') email:string, @Body('password') password:string): Promise<{ accessToken: string }> {

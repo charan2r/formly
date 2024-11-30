@@ -1,10 +1,9 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+//import { v4 as uuidv4 } from 'uuid';
 import { EmailService } from './email.service';
 import { TokenService } from 'src/auth/token.service';
 
@@ -47,7 +46,7 @@ export class AuthService {
     }
 
 
-    // First time verification for admin
+    // First time verification 
     async verifyAndSetPassword(token: string, newPassword: string): Promise<{message: string}> {
         const user = await this.userService.getUserByVerificationToken(token);
         if(!user) {
@@ -72,12 +71,30 @@ export class AuthService {
             });
 
         return { message: 'Password set successfully. You can login now.' };
+ 
+    }
 
-        
+    // Forgot Password
+    async forgotPassword(email: string): Promise<{message: string}> {
+        const user = await this.userService.getUserByEmail(email);
+        if(!user) {
+            throw new UnauthorizedException('User with this email does not exist');
+        }
+
+        // Generate verification token
+        const { verificationToken, verificationTokenExpires } = TokenService.generateVerificationToken();
+
+        // Update user
+        await this.userService.updateUser(user.id, { verificationToken, verificationTokenExpires });
+
+        // Send verification email
+        await this.emailService.sendForgotPasswordEmail(email, verificationToken);
+
+        return { message: 'Password reset email sent' };
     }
 
 
-    // Login admin
+    // Login 
     async login(email: string, password: string): Promise<{accessToken: string}> {
         const user = await this.userService.getUserByEmail(email);
         if(!user) {
