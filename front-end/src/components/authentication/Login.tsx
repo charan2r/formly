@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Box,
   Button,
@@ -6,11 +7,72 @@ import {
   TextField,
   Typography,
   Stack,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import axios from "axios";
+import { useAuth } from '../../context/AuthContext';
 
 const Login = () => {
+  const { setAccessToken } = useAuth();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Toast state
+  const [toast, setToast] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error" | "info" | "warning",
+  });
+
+  const handleCloseToast = () => {
+    setToast({ ...toast, open: false });
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post('http://localhost:3000/auth/login', {
+        email,
+        password
+      });
+
+      if (response.data.success) {
+        // Store token in global state
+        setAccessToken(response.data.data.accessToken);
+        
+        // Show success toast
+        setToast({
+          open: true,
+          message: "Login successful!",
+          severity: "success"
+        });
+
+        // Navigate after a short delay
+        setTimeout(() => {
+          const from = (location.state as any)?.from?.pathname || "/overview";
+          navigate(from, { replace: true });
+        }, 1000);
+      } else {
+        // Show error toast
+        setToast({
+          open: true,
+          message: response.data.message || "Login failed",
+          severity: "error"
+        });
+      }
+    } catch (error: any) {
+      // Show error toast
+      setToast({
+        open: true,
+        message: error.response?.data?.message || "Login failed",
+        severity: "error"
+      });
+    }
+  };
 
   return (
     <Box
@@ -96,8 +158,33 @@ const Login = () => {
         </Box>
       </Box>
 
+      {/* Toast Notification */}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={3000}
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={handleCloseToast} 
+          severity={toast.severity}
+          sx={{ 
+            width: '100%',
+            backgroundColor: toast.severity === 'success' ? '#4CAF50' : '#f44336',
+            color: 'white',
+            '& .MuiAlert-icon': {
+              color: 'white'
+            }
+          }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
+
       {/* Login Card */}
       <Container
+        component="form"
+        onSubmit={handleLogin}
         maxWidth="xs"
         sx={{
           backgroundColor: "white",
@@ -144,7 +231,9 @@ const Login = () => {
           </Typography>
           <TextField
             name="email"
-            placeholder="Enter your username"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
             fullWidth
             required
             InputProps={{
@@ -189,6 +278,7 @@ const Login = () => {
         {/* Login Button */}
         <Box sx={{ marginTop: 4 }}>
           <Button
+            type="submit"
             fullWidth
             variant="contained"
             sx={{

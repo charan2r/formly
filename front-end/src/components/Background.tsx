@@ -17,6 +17,8 @@ import EditPageSettings from './RightSidebar';
 import ViewTemplate from './ViewTemplate';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { TemplateProvider } from '../context/TemplateContext';
+import Login from './authentication/Login';
+import ProtectedRoute from './authentication/ProtectedRoute';
 
 
 const Background: React.FC = () => {
@@ -34,14 +36,39 @@ const Background: React.FC = () => {
     <TemplateProvider>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
-          {/* Conditionally render Sidebar or LeftSidebar */}
-          {isEditTemplate ? <LeftSidebar /> : <Sidebar />}
+          {/* Only show sidebar if user is authenticated */}
+          {location.pathname !== '/login' && (isEditTemplate ? <LeftSidebar /> : <Sidebar />)}
           
           <Routes>
+            {/* Public routes */}
+            <Route path="/login" element={<Login />} />
+            
+            {/* Protected routes */}
             <Route path="/" element={<Navigate to="/overview" replace />} />
-            <Route path="/overview" element={<Overview />} />
-            <Route path="/useroverview" element={<UserOverview />} />
-            <Route path="/organizations" element={<DataTable />} />
+            <Route
+              path="/overview"
+              element={
+                <ProtectedRoute>
+                  <Overview />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/useroverview"
+              element={
+                <ProtectedRoute>
+                  <UserOverview />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/organizations"
+              element={
+                <ProtectedRoute>
+                  <DataTable />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/users" element={<Users />} />
             <Route path='/templates' element={<Template />} />
             <Route path='/edittemplate/:formTemplateId' element={<EditPageSettings />} />
