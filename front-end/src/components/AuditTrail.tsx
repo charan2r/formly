@@ -35,7 +35,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
+import 'react-toastify/dist/ReactToastify.css';
+import auditTrailData from '../data/auditTrailData';
 
 interface AuditTrail {
   audtId: string;
@@ -78,21 +79,23 @@ const AuditTrail: React.FC = () => {
   const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
   const [auditTrailToDelete, setAuditTrailToDelete] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchAuditTrails = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/auditTrail');
-        // Filter AuditTrails where the status is 'active'
-        const activeAuditTrails = response.data.data.filter(audt => audt.status === 'active');
-        console.log(activeAuditTrails);
-        setAuditTrails(activeAuditTrails);
-      } catch (error) {
-        console.error('Error fetching auditTrails data:', error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchAuditTrails = async () => {
+  //     try {
+  //       const response = await axios.get('http://localhost:3001/auditTrail');
+  //       // Filter AuditTrails where the status is 'active'
+  //       const activeAuditTrails = response.data.data.filter(audt => audt.status === 'active');
+  //       console.log(activeAuditTrails);
+  //       setAuditTrails(activeAuditTrails);
+  //     } catch (error) {
+  //       console.error('Error fetching auditTrails data:', error);
+  //     }
+  //   };
 
-    fetchAuditTrails();
-  }, []);
+useEffect(() => {
+  // For testing with dummy data:
+  setAuditTrails(auditTrailData);
+}, []);
 
 
 
@@ -458,10 +461,10 @@ const AuditTrail: React.FC = () => {
                   }
                 </TableCell>
                 <TableCell padding="checkbox">
-                  <IconButton onClick={(event) => handleMenuOpen(event, row.audtId)}>
+                  {/* <IconButton onClick={(event) => handleMenuOpen(event, row.audtId)}>
                     <MoreVertIcon />
-                  </IconButton>
-                  <Popover
+                  </IconButton> */}
+                  {/* <Popover
                     open={Boolean(menuAnchor) && selectedRowId === row.audtId}
                     anchorEl={menuAnchor}
                     onClose={handleMenuClose}
@@ -553,7 +556,7 @@ const AuditTrail: React.FC = () => {
 </MenuItem>
 
               
-                  </Popover>
+                  </Popover> */}
                 </TableCell>
 
 
