@@ -77,19 +77,20 @@ const Login = () => {
   return (
     <Box
       sx={{
-        backgroundColor: "F9F9F9",
-        height: "100vh",
+        backgroundColor: "#F9F9F9",
+        minHeight: "100vh",
+        width: "100vw",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
         alignItems: "center",
+        position: "relative",
       }}
     >
       {/* Navbar */}
       <Box
         component="nav"
         sx={{
-          position: "absolute",
+          position: "fixed",
           top: 8,
           left: 16,
           right: 16,
@@ -101,6 +102,7 @@ const Login = () => {
           alignItems: "center",
           padding: "4px 8px",
           height: "45px",
+          zIndex: 1000,
         }}
       >
         {/* Logo */}
@@ -158,6 +160,185 @@ const Login = () => {
         </Box>
       </Box>
 
+      {/* Main content wrapper */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "100%",
+          maxWidth: "400px",
+          padding: "0 20px",
+        }}
+      >
+        {/* Login Card */}
+        <Container
+          component="form"
+          onSubmit={handleLogin}
+          sx={{
+            backgroundColor: "white",
+            borderRadius: "16px",
+            boxShadow: 3,
+            padding: "32px",
+            position: "relative",
+            textAlign: "center",
+            height: "350px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            margin: 0,
+            width: "100%",
+          }}
+        >
+          {/* Logo and Title */}
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            sx={{
+              mb: 6,
+              mt: 2,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {/* Icon */}
+            <HighlightOffIcon fontSize="large" sx={{ color: "black" }} />
+            {/* Title */}
+            <Typography variant="h5" fontWeight="bold">
+              Form.M
+            </Typography>
+          </Stack>
+
+          {/* Email Field */}
+          <Box sx={{ textAlign: "left", mt: -3 }}>
+            <Typography
+              variant="caption"
+              gutterBottom
+              sx={{ 
+                marginBottom: "4px", 
+                display: "block",
+                color: "#666",
+                fontWeight: 500,
+                fontSize: "0.75rem",
+                letterSpacing: "0.03em"
+              }}
+            >
+              Email *
+            </Typography>
+            <TextField
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              fullWidth
+              required
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+                  }
+                }
+              }}
+              InputProps={{
+                sx: {
+                  height: "40px",
+                  borderRadius: "8px",
+                  backgroundColor: "#FAFAFA",
+                  "& fieldset": {
+                    borderColor: "#e0e0e0",
+                    transition: "all 0.2s"
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#000",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#000",
+                    borderWidth: "2px"
+                  },
+                },
+              }}
+            />
+          </Box>
+
+          {/* Password Field */}
+          <Box sx={{ textAlign: "left", marginTop: 2 }}>
+            <Typography
+              variant="caption" 
+              gutterBottom
+              sx={{ 
+                marginBottom: "4px", 
+                display: "block",
+                color: "#666",
+                fontWeight: 500,
+                fontSize: "0.75rem",
+                letterSpacing: "0.03em"
+              }}
+            >
+              Password *
+            </Typography>
+            <TextField
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  transition: "all 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
+                  }
+                }
+              }}
+              InputProps={{
+                sx: {
+                  height: "40px",
+                  borderRadius: "8px",
+                  backgroundColor: "#FAFAFA",
+                  "& fieldset": {
+                    borderColor: "#e0e0e0",
+                    transition: "all 0.2s"
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#000",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#000",
+                    borderWidth: "2px"
+                  },
+                },
+              }}
+            />
+          </Box>
+
+          {/* Login Button */}
+          <Box sx={{ marginTop: 4 }}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                backgroundColor: "black",
+                color: "white",
+                fontWeight: "bold",
+                borderRadius: "40px",
+                paddingY: "4px",
+                height: "35px",
+              }}
+            >
+              Login
+            </Button>
+          </Box>
+        </Container>
+      </Box>
+
       {/* Toast Notification */}
       <Snackbar
         open={toast.open}
@@ -180,120 +361,6 @@ const Login = () => {
           {toast.message}
         </Alert>
       </Snackbar>
-
-      {/* Login Card */}
-      <Container
-        component="form"
-        onSubmit={handleLogin}
-        maxWidth="xs"
-        sx={{
-          backgroundColor: "white",
-          borderRadius: "16px",
-          boxShadow: 3,
-          padding: "32px",
-          position: "relative",
-          textAlign: "center",
-          height: "350px",
-          display: "flex",
-          width: "400px",
-          flexDirection: "column",
-          justifyContent: "space-between",
-        }}
-      >
-        {/* Logo and Title */}
-        <Stack
-          direction="row"
-          alignItems="center"
-          spacing={1}
-          sx={{
-            mb: 6,
-            mt: 2,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {/* Icon */}
-          <HighlightOffIcon fontSize="large" sx={{ color: "black" }} />
-          {/* Title */}
-          <Typography variant="h5" fontWeight="bold">
-            Form.M
-          </Typography>
-        </Stack>
-
-        {/* Email Field */}
-        <Box sx={{ textAlign: "left", mt: -3 }}>
-          <Typography
-            variant="caption"
-            gutterBottom
-            sx={{ marginBottom: "4px", display: "block" }}
-          >
-            Email *
-          </Typography>
-          <TextField
-            name="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            fullWidth
-            required
-            InputProps={{
-              sx: {
-                backgroundColor: "#f9f9f9",
-                borderRadius: "5px",
-                paddingY: "2px",
-                height: "30px",
-              },
-            }}
-          />
-        </Box>
-
-        {/* Password Field */}
-        <Box sx={{ textAlign: "left", marginTop: 2 }}>
-          <Typography
-            variant="caption"
-            gutterBottom
-            sx={{ marginBottom: "4px", display: "block" }}
-          >
-            Password *
-          </Typography>
-          <TextField
-            name="password"
-            type="password"
-            placeholder="Enter your password"
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            InputProps={{
-              sx: {
-                backgroundColor: "#f9f9f9",
-                borderRadius: "5px",
-                paddingY: "2px",
-                height: "30px",
-              },
-            }}
-          />
-        </Box>
-
-        {/* Login Button */}
-        <Box sx={{ marginTop: 4 }}>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{
-              backgroundColor: "black",
-              color: "white",
-              fontWeight: "bold",
-              borderRadius: "40px",
-              paddingY: "4px",
-              height: "35px",
-            }}
-          >
-            Login
-          </Button>
-        </Box>
-      </Container>
     </Box>
   );
 };
