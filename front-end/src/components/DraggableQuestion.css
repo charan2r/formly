@@ -2,6 +2,7 @@
   scrollbar-width: none;  /* Firefox */
   -ms-overflow-style: none;  /* IE and Edge */
   position: relative;
+  transition: all 0.2s ease-in-out !important;
 }
 
 .draggable-question::-webkit-scrollbar {
@@ -39,4 +40,19 @@
 
 .draggable-question:hover .MuiIconButton-root {
   opacity: 1;
+}
+
+.form-field-container {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.draggable-question:hover .color-picker-button {
+  opacity: 1 !important;
+}
+
+.color-picker-button {
+  cursor: pointer;
 }

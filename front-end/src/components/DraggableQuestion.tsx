@@ -33,6 +33,50 @@ interface DraggableQuestionProps {
   onDeleteOption: (itemId: string, optionId: number) => void;
   onAddOption: (itemId: string) => void;
   isViewMode?: boolean;
+  fieldStyle?: {
+    border: {
+      width: number;
+      style: string;
+      color: string;
+      radius: number;
+    };
+    shadow: {
+      x: number;
+      y: number;
+      blur: number;
+      spread: number;
+      color: string;
+    };
+    background: {
+      color: string;
+      opacity: number;
+    };
+  };
+  borderStyle?: {
+    width: number;
+    style: string;
+    color: string;
+  };
+  appearanceSettings?: {
+    border: {
+      width: number;
+      style: string;
+      color: string;
+      radius: number;
+    };
+    boxShadow: {
+      x: number;
+      y: number;
+      blur: number;
+      spread: number;
+      color: string;
+      enabled: boolean;
+    };
+    background: {
+      color: string;
+      opacity: number;
+    };
+  };
 }
 
 const calculateScale = (selectedSize: string, pageSizes: { [key: string]: { width: number; height: number } }) => {
@@ -52,6 +96,9 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   onDeleteOption,
   onAddOption,
   isViewMode,
+  fieldStyle,
+  borderStyle,
+  appearanceSettings,
 }) => {
   const [formFields, setFormFields] = useState<QuestionItem[]>(items);
   const [isDragging, setIsDragging] = useState(false);
@@ -76,7 +123,10 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
             color: field.color || "#a8d8ea",
             type: field.type || 'question',
             question: field.question || "New Question",
-            options: field.options ? JSON.parse(field.options) : []
+            options: field.options ? JSON.parse(field.options) : [],
+            borderWidth: field.borderWidth || '1px',
+            borderStyle: field.borderStyle || 'solid',
+            borderColor: field.borderColor || '#e0e0e0',
           }));
           setFormFields(transformedFields);
         }
@@ -372,10 +422,13 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
             <Rnd
               key={item.id}
               style={{
-                backgroundColor: '#ffffff',
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                borderRadius: '12px',
-                border: '1px solid #e0e0e0',
+                backgroundColor: appearanceSettings?.background.color || '#ffffff',
+                opacity: (appearanceSettings?.background.opacity || 100) / 100,
+                boxShadow: appearanceSettings?.boxShadow.enabled 
+                  ? `${appearanceSettings.boxShadow.x}px ${appearanceSettings.boxShadow.y}px ${appearanceSettings.boxShadow.blur}px ${appearanceSettings.boxShadow.spread}px ${appearanceSettings.boxShadow.color}`
+                  : 'none',
+                borderRadius: `${appearanceSettings?.border.radius || 12}px`,
+                border: `${appearanceSettings?.border.width || 1}px ${appearanceSettings?.border.style || 'solid'} ${appearanceSettings?.border.color || '#e0e0e0'}`,
                 overflow: 'hidden',
                 pointerEvents: isViewMode ? 'none' : 'auto',
               }}
@@ -408,6 +461,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
             >
               <Box sx={{ width: '100%', height: '100%' }}>
                 {renderQuestionComponent(item)}
+                
               </Box>
             </Rnd>
           ))}

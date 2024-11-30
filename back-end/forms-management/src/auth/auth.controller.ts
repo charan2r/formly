@@ -7,10 +7,10 @@ export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     // API endpoint to register admin
-    @Post('register-admin')
-    async register(@Body() userDto: any): Promise<{message: string}> {
-        return this.authService.registerAdmin(userDto);
-    }
+    // @Post('register-admin')
+    // async register(@Body() userDto: any): Promise<{message: string}> {
+    //     return this.authService.registerAdmin(userDto);
+    // }
 
     // API endpoint to first-time password creation
     @Post('set-password')

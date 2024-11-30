@@ -132,6 +132,35 @@ const EditPageSettings: React.FC = () => {
   const [tempDescription, setTempDescription] = useState('');
   const [templateId, setTemplateId] = useState('');
 
+  // Add this state near your other useState declarations
+  const [borderStyle, setBorderStyle] = useState({
+    width: 1,
+    style: 'solid',
+    color: '#e0e0e0'
+  });
+
+  // Add these state declarations at the top
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    border: {
+      width: 1,
+      style: 'solid',
+      color: '#e0e0e0',
+      radius: 12
+    },
+    boxShadow: {
+      x: 0,
+      y: 4,
+      blur: 12,
+      spread: 0,
+      color: 'rgba(0, 0, 0, 0.1)',
+      enabled: true
+    },
+    background: {
+      color: '#ffffff',
+      opacity: 100
+    }
+  });
+
   useEffect(() => {
     const fetchTemplateData = async () => {
       try {
@@ -976,10 +1005,12 @@ const EditPageSettings: React.FC = () => {
       gridSize={gridSize}
       selectedSize={selectedSize}
       pageSizes={pageSizes}
+      borderStyle={borderStyle}
       onQuestionChange={handleQuestionChange}
       onOptionChange={handleOptionChange}
       onDeleteOption={handleDeleteOption}
       onAddOption={handleAddOption}
+      appearanceSettings={appearanceSettings}
     />
   </div>
 </div>
@@ -1123,46 +1154,7 @@ const EditPageSettings: React.FC = () => {
               ))}
             </Box>
 
-            {/* Images Section */}
-            <Typography variant="body1" 
-              sx={{ 
-                fontWeight: 600, 
-                marginBottom: 2, 
-                marginTop: 2,
-                fontSize: '16px', 
-                color: '#333' 
-              }}
-            >
-              Images
-            </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'space-around', mb: 2 }}>
-              {['Background', 'Footer', 'Header'].map((label) => (
-                <Box
-                  key={label}
-                  sx={{ textAlign: 'center', cursor: 'pointer' }}
-                  onClick={() => handleImageClick(label)}
-                >
-                  <CircleIcon
-                    sx={{
-                      fontSize: 47,
-                      color: imageData[label] ? '#000000' : '#ccc',
-                      borderRadius: '50%',
-                      border: imageData[label] ? '3px solid #000000' : 'none',
-                      backgroundImage: imageData[label] ? `url(${imageData[label]})` : 'none',
-                      backgroundSize: 'cover',
-                    }}
-                  />
-                  <Typography variant="body2">{label}</Typography>
-                  <input
-                    id={`${label}-upload`}
-                    type="file"
-                    style={{ display: 'none' }}
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e, label)}
-                  />
-                </Box>
-              ))}
-            </Box>
+            
 
             {/* Background Color Picker */}
             <Typography variant="body1" sx={{ fontWeight: 'medium', marginBottom: '15px' }}>
@@ -1176,6 +1168,273 @@ const EditPageSettings: React.FC = () => {
                   onChange={handleBackgroundColorChange}
                   style={{ width: '100%', height: '30px', border: 'none', cursor: 'pointer', borderRadius: '6px' }}
                 />
+              </Box>
+            </Box>
+
+            <Typography variant="body1" sx={{ fontWeight: 'medium', marginTop: '20px', marginBottom: '15px' }}>
+              Form Fields Border
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, backgroundColor: '#fff', p: 2, borderRadius: 1, boxShadow: 1 }}>
+              {/* Border Width */}
+              <Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>Border Width</Typography>
+                <TextField
+                  type="number"
+                  size="small"
+                  value={borderStyle.width}
+                  onChange={(e) => setBorderStyle(prev => ({
+                    ...prev,
+                    width: Number(e.target.value)
+                  }))}
+                  inputProps={{ min: 0, max: 10 }}
+                  fullWidth
+                />
+              </Box>
+
+              {/* Border Style */}
+              <Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>Border Style</Typography>
+                <Select
+                  size="small"
+                  value={borderStyle.style}
+                  onChange={(e) => setBorderStyle(prev => ({
+                    ...prev,
+                    style: e.target.value
+                  }))}
+                  fullWidth
+                >
+                  <MenuItem value="solid">Solid</MenuItem>
+                  <MenuItem value="dashed">Dashed</MenuItem>
+                  <MenuItem value="dotted">Dotted</MenuItem>
+                  <MenuItem value="double">Double</MenuItem>
+                </Select>
+              </Box>
+
+              {/* Border Color */}
+              <Box>
+                <Typography variant="body2" sx={{ mb: 1 }}>Border Color</Typography>
+                <input
+                  type="color"
+                  value={borderStyle.color}
+                  onChange={(e) => setBorderStyle(prev => ({
+                    ...prev,
+                    color: e.target.value
+                  }))}
+                  style={{ width: '100%', height: '30px', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
+                />
+              </Box>
+            </Box>
+
+            <Box sx={{ mt: 3 }}>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  fontWeight: 600, 
+                  mb: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}
+              >
+                Field Appearance
+              </Typography>
+
+              {/* Border Settings */}
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1.5, color: 'text.secondary' }}>
+                  Border
+                </Typography>
+                <Box sx={{ display: 'grid', gap: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                      size="small"
+                      type="number"
+                      label="Width"
+                      value={appearanceSettings.border.width}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        border: {
+                          ...prev.border,
+                          width: Number(e.target.value)
+                        }
+                      }))}
+                      InputProps={{ inputProps: { min: 0, max: 10 } }}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      label="Radius"
+                      value={appearanceSettings.border.radius}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        border: {
+                          ...prev.border,
+                          radius: Number(e.target.value)
+                        }
+                      }))}
+                      InputProps={{ inputProps: { min: 0, max: 50 } }}
+                    />
+                  </Box>
+                  <Select
+                    size="small"
+                    value={appearanceSettings.border.style}
+                    onChange={(e) => setAppearanceSettings(prev => ({
+                      ...prev,
+                      border: {
+                        ...prev.border,
+                        style: e.target.value
+                      }
+                    }))}
+                    fullWidth
+                  >
+                    <MenuItem value="solid">Solid</MenuItem>
+                    <MenuItem value="dashed">Dashed</MenuItem>
+                    <MenuItem value="dotted">Dotted</MenuItem>
+                    <MenuItem value="double">Double</MenuItem>
+                  </Select>
+                  <Box>
+                    <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
+                      Border Color
+                    </Typography>
+                    <input
+                      type="color"
+                      value={appearanceSettings.border.color}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        border: {
+                          ...prev.border,
+                          color: e.target.value
+                        }
+                      }))}
+                      style={{ width: '100%', height: '30px', padding: '0', border: '1px solid #ddd', borderRadius: '4px' }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Box Shadow Settings */}
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1.5, color: 'text.secondary' }}>
+                  Box Shadow
+                </Typography>
+                <Box sx={{ display: 'grid', gap: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                      size="small"
+                      type="number"
+                      label="X"
+                      value={appearanceSettings.boxShadow.x}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        boxShadow: {
+                          ...prev.boxShadow,
+                          x: Number(e.target.value)
+                        }
+                      }))}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      label="Y"
+                      value={appearanceSettings.boxShadow.y}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        boxShadow: {
+                          ...prev.boxShadow,
+                          y: Number(e.target.value)
+                        }
+                      }))}
+                    />
+                  </Box>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <TextField
+                      size="small"
+                      type="number"
+                      label="Blur"
+                      value={appearanceSettings.boxShadow.blur}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        boxShadow: {
+                          ...prev.boxShadow,
+                          blur: Number(e.target.value)
+                        }
+                      }))}
+                      InputProps={{ inputProps: { min: 0 } }}
+                    />
+                    <TextField
+                      size="small"
+                      type="number"
+                      label="Spread"
+                      value={appearanceSettings.boxShadow.spread}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        boxShadow: {
+                          ...prev.boxShadow,
+                          spread: Number(e.target.value)
+                        }
+                      }))}
+                    />
+                  </Box>
+                  <Box>
+                    <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
+                      Shadow Color & Opacity
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <input
+                        type="color"
+                        value={appearanceSettings.boxShadow.color}
+                        onChange={(e) => setAppearanceSettings(prev => ({
+                          ...prev,
+                          boxShadow: {
+                            ...prev.boxShadow,
+                            color: e.target.value
+                          }
+                        }))}
+                        style={{ width: '50px', height: '30px', padding: '0', border: '1px solid #ddd', borderRadius: '4px' }}
+                      />
+                      <TextField
+                        size="small"
+                        type="number"
+                        label="Opacity %"
+                        value={appearanceSettings.background.opacity}
+                        onChange={(e) => setAppearanceSettings(prev => ({
+                          ...prev,
+                          background: {
+                            ...prev.background,
+                            opacity: Number(e.target.value)
+                          }
+                        }))}
+                        InputProps={{ inputProps: { min: 0, max: 100 } }}
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Background Settings */}
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1.5, color: 'text.secondary' }}>
+                  Background
+                </Typography>
+                <Box sx={{ display: 'grid', gap: 2 }}>
+                  <Box>
+                    <Typography variant="caption" sx={{ mb: 0.5, display: 'block' }}>
+                      Background Color
+                    </Typography>
+                    <input
+                      type="color"
+                      value={appearanceSettings.background.color}
+                      onChange={(e) => setAppearanceSettings(prev => ({
+                        ...prev,
+                        background: {
+                          ...prev.background,
+                          color: e.target.value
+                        }
+                      }))}
+                      style={{ width: '100%', height: '30px', padding: '0', border: '1px solid #ddd', borderRadius: '4px' }}
+                    />
+                  </Box>
+                </Box>
               </Box>
             </Box>
           </Box>
