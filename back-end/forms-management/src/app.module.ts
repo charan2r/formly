@@ -19,6 +19,15 @@ import { FormTemplateModule } from './form-template/form-template.module';
 import { FormTemplate } from './model/form-template.entity';
 import { FormTemplateRepository } from './form-template/form-template.repository';
 import { CategoryRepository } from './category/category.repository';
+import { Role } from './model/role.entity';
+import { RoleModule } from './role/role.module';
+import { RoleRepository } from './role/role.repository';
+import { PermissionModule } from '../src/permission/permission.module'
+import { Permission } from './model/permission.entity';
+import { PermissionRepository } from './permission/permission.repository';
+import { RolePermissionModule } from './role-permission/role-permission.module';
+import { RolePermission } from '../src/model/role-permission.entity';
+import { RolePermissionRepository } from '../src/role-permission/role-permission.repository';
 import { FormFieldsModule } from './form-fields/form-fields.module';
 import { FormFieldsRepository } from './form-fields/form-fields.repository';
 import { FormField } from './model/form-fields.entity';
@@ -44,16 +53,19 @@ import { AuthModule } from './auth/auth.module';
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, FormField, FormFieldsOption]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, Role, Permission,RolePermission, FormField, FormFieldsOption]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
     CategoryModule,
     FormFieldsModule,
     FormFieldsOptionsModule,
-    AuthModule
+    AuthModule,
+    RoleModule,
+    PermissionModule,
+    RolePermissionModule
   ],
   controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController, FormFieldsOptionsController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository,RoleRepository,PermissionRepository, RolePermissionRepository],
 })
 export class AppModule { }
