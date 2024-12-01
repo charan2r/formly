@@ -5,6 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,7 @@ export class AuthService {
         private readonly jwtService: JwtService) {}
 
     // Register admin 
-    async registerAdmin(userDto: any): Promise<{message:string}> {
+    async registerAdmin(userDto: any): Promise<{message:string,data:any}> {
         const {email, firstName,lastName, organizationId } = userDto;
         const candidate = await this.userService.getUserByEmail(email);
         if(candidate) {
@@ -25,7 +26,7 @@ export class AuthService {
         const verificationTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
 
         // Create Admin user
-        await this.userService.addUser({
+        const newAdmin = await this.userService.addUser({
             email,
             firstName,
             lastName,
@@ -40,7 +41,7 @@ export class AuthService {
         // Send verification email
         await this.sendVerificationEmail(email, verificationToken);
 
-        return { message: 'Admin registered successfully. Verification email sent' };
+        return { message: 'Admin registered successfully. Verification email sent', data: newAdmin };
         
     }
 
@@ -81,27 +82,65 @@ export class AuthService {
 
 
     // Login a user
-    async login(email: string, password: string): Promise<{accessToken: string}> {
+    async login(email: string, password: string): Promise<{ accessToken: string; user: any }> {
         const user = await this.userService.getUserByEmail(email);
-        if(!user) {
-            throw new UnauthorizedException('Invalid Credentials');
+        if (!user) {
+            throw new UnauthorizedException('Invalid credentials');
         }
 
-
-        // Check if user is verified
-        if(!user.isVerified) {
+        if (!user.isVerified) {
             throw new UnauthorizedException('User is not verified');
         }
 
-        // Compare the password
         const isPasswordCorrect = await bcrypt.compare(password, user.passwordHash);
-        if(!isPasswordCorrect) {
-            throw new UnauthorizedException('Incorrect Credentials');
+        if (!isPasswordCorrect) {
+            throw new UnauthorizedException('Invalid credentials');
         }
 
         // Generate JWT token
-        const payload = { userId: user.id, email: user.email, userType: user.userType, organizationId: user.organizationId };
+        const payload = {
+            userId: user.id,
+            email: user.email,
+            userType: user.userType,
+            organizationId: user.organizationId
+        };
+        
         const accessToken = this.jwtService.sign(payload);
-        return { accessToken };
+
+        // Return user data without sensitive information
+        const userData = {
+            id: user.id,
+            email: user.email,
+            userType: user.userType,
+            organizationId: user.organizationId
+        };
+
+        return { accessToken, user: userData };
+    }
+
+    async validateUser(request: Request): Promise<any> {
+        try {
+            const token = request.cookies['accessToken'];
+            if (!token) {
+                throw new UnauthorizedException('No token provided');
+            }
+
+            const decoded = this.jwtService.verify(token);
+            const user = await this.userService.getUserById(decoded.userId);
+            
+            if (!user) {
+                throw new UnauthorizedException('User not found');
+            }
+
+            // Return user data without sensitive information
+            return {
+                id: user.id,
+                email: user.email,
+                userType: user.userType,
+                organizationId: user.organizationId
+            };
+        } catch (error) {
+            throw new UnauthorizedException('Invalid token');
+        }
     }
 }

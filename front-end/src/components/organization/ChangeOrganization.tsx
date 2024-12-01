@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/axios';
 import { Paper, TextField, Button, Typography, Grid, Box, IconButton } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -6,11 +9,15 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 function ChangeOrganization() {
+  const navigate = useNavigate();
+  const { orgId } = useParams();
+  const { isAuthenticated } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    category: '',
-    newphone: '',
-    newEmail: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
   });
 
   const handleChange = (event) => {
@@ -21,28 +28,85 @@ function ChangeOrganization() {
     });
   };
 
-  const handleUpdate = () => {
-    toast.success("Changed successfully!", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      style: {
-        backgroundColor: 'black',
-        color: 'white',
-        borderRadius: '10px',
-        fontWeight: 'bold',
-      },
-    });
+  const handleUpdate = async () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    // Validate required fields
+    const requiredFields = ['firstName', 'lastName', 'phone', 'email'];
+    const missingFields = requiredFields.filter(field => !formData[field]);
+
+    if (missingFields.length > 0) {
+      toast.error('Please fill in all required fields', {
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await api.patch('/organization/change-admin', formData, {
+        params: { orgId }
+      });
+
+      if (response.data.status === 'success') {
+        toast.success("Admin changed successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+
+        // Navigate after success
+        setTimeout(() => {
+          navigate(`/view-organization/${orgId}`);
+        }, 2000);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Failed to change admin. Please try again.";
+      toast.error(errorMessage, {
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBack = () => {
+    navigate(`/view-organization/${orgId}`);
   };
 
   return (
-    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
+    <Paper elevation={4} sx={{ 
+      padding: { xs: '16px', sm: '24px', md: '36px' },
+      margin: '16px',
+      width: '100%',
+      borderRadius: 3,
+      overflow: 'hidden'
+    }}>
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
-          <IconButton onClick={() => console.log("Back arrow clicked")}>
+          <IconButton onClick={handleBack}>
             <CircleIcon style={{ color: 'black' }} />
           </IconButton>
           <ArrowForward style={{ color: 'black' }} />
@@ -60,10 +124,16 @@ function ChangeOrganization() {
           </Box>
           <Button
             variant="contained"
-            sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', paddingX: '30px' }}
+            sx={{ 
+              backgroundColor: 'black',
+              color: 'white',
+              borderRadius: '20px',
+              paddingX: '30px'
+            }}
             onClick={handleUpdate}
+            disabled={isLoading}
           >
-            Change
+            {isLoading ? 'Changing...' : 'Change'}
           </Button>
         </Box>
       </Box>
@@ -76,8 +146,8 @@ function ChangeOrganization() {
           <Grid item xs={12} sm={6}>
             <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's First Name *</Typography>
             <TextField
-              name="name"
-              value={formData.name}
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
               fullWidth
               required
@@ -92,8 +162,8 @@ function ChangeOrganization() {
           <Grid item xs={12} sm={6}>
             <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's Last Name *</Typography>
             <TextField
-              name="category"
-              value={formData.category}
+              name="lastName"
+              value={formData.lastName}
               onChange={handleChange}
               fullWidth
               required
@@ -108,8 +178,8 @@ function ChangeOrganization() {
           <Grid item xs={12} sm={6}>
             <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Phone</Typography>
             <TextField
-              name="newphone"
-              value={formData.newphone}
+              name="phone"
+              value={formData.phone}
               onChange={handleChange}
               fullWidth
               placeholder="Enter New Phone"
@@ -123,8 +193,8 @@ function ChangeOrganization() {
           <Grid item xs={12} sm={6}>
             <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Email</Typography>
             <TextField
-              name="newEmail"
-              value={formData.newEmail}
+              name="email"
+              value={formData.email}
               onChange={handleChange}
               fullWidth
               placeholder="Enter New Email"

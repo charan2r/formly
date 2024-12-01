@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, List, ListItemButton, ListItemText, Stack, Avatar } from '@mui/material';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import HelpOutlineOutlinedIcon from '@mui/icons-material/HelpOutlineOutlined';
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined';
@@ -8,17 +8,29 @@ import ExitToAppOutlinedIcon from '@mui/icons-material/ExitToAppOutlined';
 import KeyboardArrowUpOutlinedIcon from '@mui/icons-material/KeyboardArrowUpOutlined';
 import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDownOutlined';
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleProfileClick = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  const isUsersPage = true;
-  
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  const isUsersPage = user?.userType === 'Admin';
+
   // Define separate menu items for GENERAL and AUTHORIZATION sections
   const generalMenuItems = isUsersPage
     ? [
@@ -47,8 +59,12 @@ const Sidebar: React.FC = () => {
         p: 2,
         display: 'flex',
         flexDirection: 'column',
-        height: '100vh',
+        minHeight: '100vh',
+        height: '100%',
         boxSizing: 'border-box',
+        position: 'sticky',
+        top: 0,
+        left: 0,
       }}
     >
       {/* Logo and Title */}
@@ -116,7 +132,18 @@ const Sidebar: React.FC = () => {
       </Box>
 
       {/* Profile Dropdown */}
-      <Box mt="auto" mb={2} ml={2} sx={{ position: 'relative' }}>
+      <Box 
+        mt="auto" 
+        mb={2} 
+        ml={2} 
+        sx={{ 
+          position: 'sticky',
+          bottom: 0,
+          backgroundColor: '#F9F9F9',
+          paddingTop: 2,
+          zIndex: 1,
+        }}
+      >
         <Box
           onClick={handleProfileClick}
           sx={{
@@ -125,7 +152,7 @@ const Sidebar: React.FC = () => {
             justifyContent: 'space-between',
             cursor: 'pointer',
             borderRadius: '8px',
-            padding: '4px 16px',
+            padding: '8px 20px',
             width: '100%',
             boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
             backgroundColor: '#fff',
@@ -137,11 +164,24 @@ const Sidebar: React.FC = () => {
             },
           }}
         >
-          <Avatar src="/path/to/avatar.jpg" alt="Sardor" sx={{ width: 24, height: 24, borderRadius: '50%', border: '1px solid white' }} />
+          <Avatar 
+            sx={{ 
+              width: 24, 
+              height: 24, 
+              borderRadius: '50%', 
+              border: '1px solid white',
+              bgcolor: 'black'
+            }}
+          >
+            {user?.email?.charAt(0).toUpperCase()}
+          </Avatar>
           <Typography fontWeight="bold" sx={{ ml: 1, fontSize: '0.75rem', color: '#333' }}>
-            Jhon Doe
+            {user?.email?.split('@')[0]}
           </Typography>
-          {isDropdownOpen ? <KeyboardArrowUpOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} /> : <KeyboardArrowDownOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} />}
+          {isDropdownOpen ? 
+            <KeyboardArrowUpOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} /> : 
+            <KeyboardArrowDownOutlinedIcon style={{ color: '#333', marginLeft: 'auto' }} />
+          }
         </Box>
 
         {/* Drop-Up Menu */}
@@ -159,32 +199,44 @@ const Sidebar: React.FC = () => {
               overflow: 'hidden',
               border: '1px solid #E0E0E0',
               zIndex: 10,
-              padding: '4px 0',
+              padding: '8px 0',
             }}
           >
-            <Stack direction="row" alignItems="center" spacing={1} p={1}>
-              <Avatar src="/path/to/avatar.jpg" alt="Jhon" sx={{ width: 30, height: 30 }} />
+            <Stack direction="row" alignItems="center" spacing={1} p={1.5}>
+              <Avatar 
+                sx={{ 
+                  width: 30, 
+                  height: 30,
+                  bgcolor: 'black'
+                }}
+              >
+                {user?.email?.charAt(0).toUpperCase()}
+              </Avatar>
               <Box textAlign="left">
-                <Typography fontSize="0.75rem" fontWeight="bold">Jhon</Typography>
-                <Typography fontSize="0.7rem" color="gray">jdoe@gmail.com</Typography>
+                <Typography fontSize="0.75rem" fontWeight="bold">
+                  {user?.email?.split('@')[0]}
+                </Typography>
+                <Typography fontSize="0.5rem" color="gray">
+                  {user?.email}
+                </Typography>
               </Box>
             </Stack>
             <Box sx={{ borderBottom: '1px solid #E0E0E0', mb: 0.5 }} />
-            <List dense sx={{ py: 0 }}>
-              <ListItemButton sx={{ py: 0.5 }}>
+            <List dense sx={{ py: 0.5 }}>
+              <ListItemButton sx={{ py: 0.75 }}>
                 <SettingsOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
                 <ListItemText primary="Profile Settings" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
-              <ListItemButton sx={{ py: 0.5 }}>
+              <ListItemButton sx={{ py: 0.75 }}>
                 <HelpOutlineOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
                 <ListItemText primary="Help Center" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
-              <ListItemButton sx={{ py: 0.5 }}>
+              <ListItemButton sx={{ py: 0.75 }}>
                 <DescriptionOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
                 <ListItemText primary="Terms" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
               <Box sx={{ borderBottom: '1px solid #E0E0E0', mb: 0.5, mt: 0.5 }} />
-              <ListItemButton sx={{ py: 0.5 }}>
+              <ListItemButton onClick={handleLogout} sx={{ py: 0.75 }}>
                 <ExitToAppOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
                 <ListItemText primary="Sign Out" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>

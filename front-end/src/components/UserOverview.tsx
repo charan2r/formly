@@ -4,6 +4,8 @@ import {
   Box,
   Typography,
   IconButton,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { Bar, Doughnut, Pie } from 'react-chartjs-2';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -23,6 +25,10 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const UserOverview: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
+
   const [barData, setBarData] = useState({ labels: [], datasets: [] });
   const [categoryData, setCategoryData] = useState({ labels: [], datasets: [] });
 
@@ -83,7 +89,6 @@ const UserOverview: React.FC = () => {
     const date = new Date(dateString);
     const today = new Date();
   
-
     if (date.toDateString() === today.toDateString()) {
       return "Today"; 
     } else {
@@ -96,7 +101,6 @@ const UserOverview: React.FC = () => {
       });
     }
   };
-  
 
   const sortedUserData = sampleUserData.sort((a, b) => {
     const today = new Date().toISOString().split('T')[0];
@@ -107,8 +111,7 @@ const UserOverview: React.FC = () => {
   
     // For other dates, sort them by creation time (most recent first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  }).slice(0, 4); 
-  
+  }).slice(0, 4);
 
   useEffect(() => {
     const categoryCount = {};
@@ -148,107 +151,151 @@ const UserOverview: React.FC = () => {
   }), []);
 
   return (
-    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'auto'  }}>
-  <Box display="flex" flexDirection="column" gap={2}>
+    <Paper 
+      elevation={4} 
+      sx={{ 
+        padding: { xs: '16px', sm: '24px', md: '36px' },
+        margin: { xs: '8px', sm: '12px', md: '16px' },
+        width: '100%',
+        borderRadius: 3,
+        overflow: 'hidden',
+      }}
+    >
+      <Box display="flex" flexDirection="column" gap={2}>
         {/* Header Section */}
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
-          <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <CircleIcon style={{ color: 'black' }} />
+          <IconButton 
+            onClick={() => console.log("Back arrow clicked")}
+            sx={{ padding: { xs: '4px', sm: '8px' } }}
+          >
+            <CircleIcon style={{ color: 'black', fontSize: isMobile ? '16px' : '24px' }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
-          <Typography variant="body2" color="textSecondary">
+          <ArrowForward style={{ color: 'black', fontSize: isMobile ? '16px' : '24px' }} />
+          <Typography variant={isMobile ? "body2" : "body1"} color="textSecondary">
             Dashboard
           </Typography>
         </Box>
-        <Typography variant="h5" fontWeight="bold">Dashboard</Typography>
-        <Typography variant="body2" color="textSecondary" marginBottom="5px" marginTop="-10px">
+        
+        <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold">Dashboard</Typography>
+        <Typography 
+          variant="body2" 
+          color="textSecondary" 
+          marginBottom="5px" 
+          marginTop="-10px"
+          sx={{ fontSize: { xs: '12px', sm: '14px' } }}
+        >
           Manage your users and their account permissions here.
         </Typography>
 
         {/* Chart Section */}
-        <Box display="flex" justifyContent="space-between" mt={2} height="300px" flexWrap="wrap">
+        <Box 
+          display="flex" 
+          flexDirection={{ xs: 'column', md: 'row' }}
+          justifyContent="space-between" 
+          mt={2} 
+          gap={4}
+        >
+          {/* First Column - Bar Chart */}
           <Box
-            width={{ xs: '100%', sm: '45%' }}
-            height="100%"
+            width={{ xs: '100%', md: '45%' }}
+            minHeight={{ xs: '400px', md: '300px' }}
             display="flex"
             flexDirection="column"
-
           >
-            <Typography variant="h6"  gutterBottom>Sub Users </Typography>
-            {/* Date Range */}
-            <Typography variant="body2" fontSize={12} color="textSecondary" sx={{ color: 'rgb(180, 180, 180)', marginBottom: 1 }}>
+            <Typography variant={isMobile ? "subtitle1" : "h6"} gutterBottom>Sub Users</Typography>
+            <Typography 
+              variant="body2" 
+              fontSize={isMobile ? 10 : 12} 
+              color="textSecondary" 
+              sx={{ color: 'rgb(180, 180, 180)', marginBottom: 1 }}
+            >
               01 - 25 November 2024
             </Typography>
-            <Bar
-              data={barData}
-              options={{
-                maintainAspectRatio: true,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    display: false,
-                    position: 'bottom',
+            
+            <Box height={{ xs: '200px', sm: '250px', md: '300px' }}>
+              <Bar
+                data={barData}
+                options={{
+                  maintainAspectRatio: false,
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: false,
+                    },
                   },
-                },
-                scales: {
-                  x: {
-                    display: false,
+                  scales: {
+                    x: {
+                      display: false,
+                    },
+                    y: {
+                      display: false,
+                      beginAtZero: true
+                    },
                   },
-                  y: {
-                    display: false,
-                    beginAtZero:true
-                  },
-                },
-              }}
-              height={25}
-            />
+                }}
+              />
+            </Box>
 
             {sortedUserData.map((user, index) => {
-          const label = formatDateLabel(user.createdAt);
-          return (
-            <Box key={index} display="flex" flexDirection="column" mt={4}>
-              <Typography variant="h8" color="textPrimary">{label}</Typography>
-              <Box display="flex" alignItems="center" gap={1}>
-                <CircleIcon style={{ color: 'green', fontSize: '14px' }} />
-                <Typography variant="body2" color="textSecondary">
-                  User added on {user.createdAt} ({label})
-                </Typography>
-              </Box>
-            </Box>
-          );
-        })}
+              const label = formatDateLabel(user.createdAt);
+              return (
+                <Box key={index} display="flex" flexDirection="column" mt={2}>
+                  <Typography variant="subtitle2" color="textPrimary">{label}</Typography>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <CircleIcon style={{ color: 'green', fontSize: isMobile ? '12px' : '14px' }} />
+                    <Typography 
+                      variant="body2" 
+                      color="textSecondary"
+                      sx={{ fontSize: { xs: '11px', sm: '14px' } }}
+                    >
+                      User added on {user.createdAt} ({label})
+                    </Typography>
+                  </Box>
+                </Box>
+              );
+            })}
           </Box>
-         {/* Second Column with Charts */}
-         <Box 
-            width={{ xs: '100%', sm: '55%' }} 
-            height="100%"
+
+          {/* Second Column - Pie & Doughnut Charts */}
+          <Box 
+            width={{ xs: '100%', md: '55%' }}
             display="flex" 
             flexDirection="column" 
-            justifyContent="space-between"
-            order={{ xs: 1, sm: 2 }}
+            gap={4}
           >
-            {/* Pie Chart for Categories */}
-            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="60%">
-                <Typography variant="h6" gutterBottom>Forms Categories</Typography>
-                <Pie
-    data={categoryData} // Use categoryData state
-    options={{
-      maintainAspectRatio: false,
-      responsive: true,
-    }}
-    style={{ height: '100%', width: '100%' }}
-  />
+            {/* Pie Chart */}
+            <Box height={{ xs: '250px', sm: '300px' }}>
+              <Typography 
+                variant={isMobile ? "subtitle1" : "h6"} 
+                align="center" 
+                gutterBottom
+              >
+                Forms Categories
+              </Typography>
+              <Pie
+                data={categoryData}
+                options={{
+                  maintainAspectRatio: false,
+                  responsive: true,
+                }}
+              />
             </Box>
+
             {/* Doughnut Chart */}
-            <Box display="flex" flexDirection="column" alignItems="center" height="60%" marginTop={7}>
-              <Typography variant="h6" gutterBottom>Users</Typography>
+            <Box height={{ xs: '250px', sm: '300px' }}>
+              <Typography 
+                variant={isMobile ? "subtitle1" : "h6"} 
+                align="center" 
+                gutterBottom
+              >
+                Users
+              </Typography>
               <Doughnut
                 data={doughnutData}
                 options={{
                   maintainAspectRatio: false,
                   responsive: true,
                 }}
-                style={{ height: '100%' }}
               />
             </Box>
           </Box>
@@ -259,4 +306,3 @@ const UserOverview: React.FC = () => {
 };
 
 export default UserOverview;
-

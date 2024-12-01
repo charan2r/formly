@@ -1,11 +1,11 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthService } from './auth.service';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
-import { UserModule } from 'src/user/user.module';
+import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { UserModule } from '../user/user.module';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -14,18 +14,18 @@ const keysPath = path.resolve(process.cwd(), 'keys');
 @Module({
   imports: [
     UserModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    PassportModule,
     JwtModule.register({
       privateKey: fs.readFileSync(path.join(keysPath, 'private.pem')),
       publicKey: fs.readFileSync(path.join(keysPath, 'public.pem')),
       signOptions: {
-        expiresIn: '1d',
         algorithm: 'RS256',
+        expiresIn: '24h'
       },
     }),
   ],
-  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
-  exports: [JwtStrategy, PassportModule, AuthService],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
 export class AuthModule {}

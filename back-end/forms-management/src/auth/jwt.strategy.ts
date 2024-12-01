@@ -1,9 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Injectable } from '@nestjs/common';
-import { PassportStrategy } from '@nestjs/passport';
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Injectable, ExecutionContext } from '@nestjs/common';
+import { AuthGuard, PassportStrategy } from '@nestjs/passport';
+import { Strategy } from 'passport-jwt';
+import { Request } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Observable } from 'rxjs';
 
 const keysPath = path.resolve(process.cwd(), 'keys');
 
@@ -12,7 +14,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     const publicKey = fs.readFileSync(path.join(keysPath, 'public.pem'));
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: (req: Request) => {
+        return req?.cookies?.accessToken || null;
+      },
       ignoreExpiration: false,
       secretOrKey: publicKey,
       algorithms: ['RS256'],
@@ -20,6 +24,26 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
-    return { userId: payload.userId, email: payload.email };
+    return {
+      userId: payload.userId,
+      email: payload.email,
+      userType: payload.userType,
+      organizationId: payload.organizationId
+    };
+  }
+}
+
+@Injectable()
+export class 
+JwtAuthGuard extends AuthGuard('jwt') {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    return super.canActivate(context);
+  }
+
+  handleRequest(err: any, user: any, info: any) {
+    if (err || !user) {
+      throw err || new Error('Unauthorized');
+    }
+    return user;
   }
 }

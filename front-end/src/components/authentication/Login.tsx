@@ -7,85 +7,61 @@ import {
   TextField,
   Typography,
   Stack,
-  Snackbar,
-  Alert,
 } from "@mui/material";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import axios from "axios";
 import { useAuth } from '../../context/AuthContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Login = () => {
-  const { setAccessToken } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Toast state
-  const [toast, setToast] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error" | "info" | "warning",
-  });
-
-  const handleCloseToast = () => {
-    setToast({ ...toast, open: false });
+  // Toast configuration
+  const toastConfig = {
+    position: "top-right" as const,
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored"
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3000/auth/login', {
-        email,
-        password
-      });
-
-      if (response.data.success) {
-        // Store token in global state
-        setAccessToken(response.data.data.accessToken);
-        
-        // Show success toast
-        setToast({
-          open: true,
-          message: "Login successful!",
-          severity: "success"
-        });
-
-        // Navigate after a short delay
-        setTimeout(() => {
-          const from = (location.state as any)?.from?.pathname || "/overview";
-          navigate(from, { replace: true });
-        }, 1000);
-      } else {
-        // Show error toast
-        setToast({
-          open: true,
-          message: response.data.message || "Login failed",
-          severity: "error"
-        });
+      const response = await login(email, password);
+      
+      if (response.success === false) {
+        // Show error toast immediately for failed login
+        toast.error(response.message, toastConfig);
+        return;
       }
+
+      // Show success toast and wait for it to complete before navigating
+      toast.success("Login successful!", toastConfig);
+      
+      // Reduced delay for better UX
+      setTimeout(() => {
+        const from = (location.state as any)?.from?.pathname || 
+          (response.data?.user?.userType === 'Admin' ? '/useroverview' : '/overview');
+        navigate(from, { replace: true });
+      }, 2000); // Reduced from 10000 to 2000ms
+
     } catch (error: any) {
-      // Show error toast
-      setToast({
-        open: true,
-        message: error.response?.data?.message || "Login failed",
-        severity: "error"
-      });
+      // Handle specific error messages
+      const errorMessage = error.response?.data?.message || error.message || "Login failed";
+      toast.error(errorMessage, toastConfig);
     }
   };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: "#F9F9F9",
-        minHeight: "100vh",
-        width: "100vw",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        position: "relative",
-      }}
-    >
+    <Box sx={{ backgroundColor: "#F9F9F9", minHeight: "100vh", width: "100vw", display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
       {/* Navbar */}
       <Box
         component="nav"
@@ -233,34 +209,9 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
               fullWidth
+              variant="outlined"
+              size="small"
               required
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  transition: "all 0.2s ease-in-out",
-                  "&:hover": {
-                    transform: "translateY(-1px)",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
-                  }
-                }
-              }}
-              InputProps={{
-                sx: {
-                  height: "40px",
-                  borderRadius: "8px",
-                  backgroundColor: "#FAFAFA",
-                  "& fieldset": {
-                    borderColor: "#e0e0e0",
-                    transition: "all 0.2s"
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#000",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#000",
-                    borderWidth: "2px"
-                  },
-                },
-              }}
             />
           </Box>
 
@@ -288,33 +239,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  transition: "all 0.2s ease-in-out",
-                  "&:hover": {
-                    transform: "translateY(-1px)",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
-                  }
-                }
-              }}
-              InputProps={{
-                sx: {
-                  height: "40px",
-                  borderRadius: "8px",
-                  backgroundColor: "#FAFAFA",
-                  "& fieldset": {
-                    borderColor: "#e0e0e0",
-                    transition: "all 0.2s"
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#000",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#000",
-                    borderWidth: "2px"
-                  },
-                },
-              }}
+              size="small"
             />
           </Box>
 
@@ -339,28 +264,19 @@ const Login = () => {
         </Container>
       </Box>
 
-      {/* Toast Notification */}
-      <Snackbar
-        open={toast.open}
-        autoHideDuration={3000}
-        onClose={handleCloseToast}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-      >
-        <Alert 
-          onClose={handleCloseToast} 
-          severity={toast.severity}
-          sx={{ 
-            width: '100%',
-            backgroundColor: toast.severity === 'success' ? '#4CAF50' : '#f44336',
-            color: 'white',
-            '& .MuiAlert-icon': {
-              color: 'white'
-            }
-          }}
-        >
-          {toast.message}
-        </Alert>
-      </Snackbar>
+      {/* Updated ToastContainer configuration */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </Box>
   );
 };

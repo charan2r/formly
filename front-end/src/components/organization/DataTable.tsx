@@ -36,12 +36,25 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
+import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/axios'; // Use the configured axios instance
 
 interface Organization {
   orgId: string;
   name: string;
-  category?: string | null;
-  lastActive?: string | null;
+  logo: string;
+  phone: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  category: string;
+  website: string;
+  superAdminId: string | null;
+  lastActive: string | null;
+  createdAt: string;
+  status: string;
+  updatedAt: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -76,25 +89,40 @@ const DataTable: React.FC = () => {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
   const [organizationToDelete, setOrganizationToDelete] = useState<string | null>(null);
-
+  const { user, isAuthenticated } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/organization');
-        // Filter organizations where the status is 'active'
-        const activeOrganizations = response.data.data.filter(org => org.status === 'active');
-        console.log(activeOrganizations);
-        setOrganizations(activeOrganizations);
+        setIsLoading(true);
+        const response = await api.get('/organization');
+        
+        if (response.data.status === 'success') {
+          const activeOrganizations = response.data.data.filter(
+            (org: Organization) => org.status === 'active'
+          );
+          setOrganizations(activeOrganizations);
+        }
       } catch (error) {
-        console.error('Error fetching organization data:', error);
+        console.error('Error fetching organizations:', error);
+        toast.error("Failed to fetch organizations", {
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchOrganizations();
-  }, []);
-
-
+    if (isAuthenticated) {
+      fetchOrganizations();
+    }
+  }, [isAuthenticated]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchor(event.currentTarget);
@@ -158,47 +186,30 @@ const DataTable: React.FC = () => {
     setConfirmationBulkOpen(true);
   };
 
-
-
   const handleDeleteOrganizations = async () => {
-
     try {
-      const response = await axios.delete('http://localhost:3001/organization/bulk-delete', {
+      const response = await api.delete('/organization/bulk-delete', {
         data: { ids: Object.keys(selectedOrganizations) },
       });
 
-      // Filter out the organizations that were deleted
-      setOrganizations((prevOrganizations) =>
-        prevOrganizations.filter(org => !Object.keys(selectedOrganizations).includes(org.orgId))
-      );
-
-      toast.success("Organization has been deleted successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
-
-      setSelectedOrganizations([]);
-      setConfirmationBulkOpen(false);
+      if (response.data.status === 'success') {
+        setOrganizations((prevOrganizations) =>
+          prevOrganizations.filter(org => !Object.keys(selectedOrganizations).includes(org.orgId))
+        );
+        toast.success("Organizations have been deleted successfully!", {
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+        setSelectedOrganizations({});
+        setConfirmationBulkOpen(false);
+      }
     } catch (error) {
-      toast.error("Failed to delete the organization. Please try again.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+      console.error('Error bulk deleting organizations:', error);
+      toast.error("Failed to delete organizations. Please try again.", {
         style: {
           backgroundColor: 'black',
           color: 'white',
@@ -206,39 +217,28 @@ const DataTable: React.FC = () => {
           fontWeight: 'bold',
         },
       });
-    };
-  }
+    }
+  };
 
-  // Method to handle deletion of an organization
   const handleDeleteOrganization = async () => {
     try {
-      await axios.delete(`http://localhost:3001/organization/delete?id=${organizationToDelete}`);
-      setOrganizations((prev) => prev.filter((org) => org.orgId !== organizationToDelete));
-      setConfirmationOpen(false); // Close confirmation dialog
-      toast.success("Organization has been deleted successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
+      const response = await api.delete(`/organization/delete?id=${organizationToDelete}`);
+      
+      if (response.data.status === 'success') {
+        setOrganizations((prev) => prev.filter((org) => org.orgId !== organizationToDelete));
+        setConfirmationOpen(false);
+        toast.success("Organization has been deleted successfully!", {
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+      }
     } catch (error) {
+      console.error('Error deleting organization:', error);
       toast.error("Failed to delete the organization. Please try again.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         style: {
           backgroundColor: 'black',
           color: 'white',
@@ -272,8 +272,6 @@ const DataTable: React.FC = () => {
   const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-
-
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -468,7 +466,7 @@ const DataTable: React.FC = () => {
 
           <TableBody>
             {paginatedData.map((row) => (
-              <TableRow key={row.id} sx={{ height: '60px' }}>
+              <TableRow key={row.orgId} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
@@ -482,11 +480,11 @@ const DataTable: React.FC = () => {
                 <TableCell>{row.category}</TableCell>
                 <TableCell>{row.lastActive ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
-                  <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
+                  <IconButton onClick={(event) => handleMenuOpen(event, row.orgId)}>
                     <MoreVertIcon />
                   </IconButton>
                   <Popover
-                    open={Boolean(menuAnchor) && selectedRowId === row.id}
+                    open={Boolean(menuAnchor) && selectedRowId === row.orgId}
                     anchorEl={menuAnchor}
                     onClose={handleMenuClose}
                     anchorOrigin={{

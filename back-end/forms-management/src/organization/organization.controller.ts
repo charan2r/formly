@@ -27,7 +27,7 @@ export class OrganizationController {
     @Get('details')
     async getOrganizationDetails(
         @Query('id') orgId: string
-    ): Promise<{ message: string; data: { organization: Organization; superAdmin: User | null } }> {
+    ): Promise<{ status: string; message: string; data: { organization: Organization; superAdmin: User | null } }> {
         const result = await this.organizationService.getOne(orgId);
         
         if (!result) {
@@ -35,6 +35,7 @@ export class OrganizationController {
         }
 
         return {
+            status: 'success',
             message: 'Organization details retrieved successfully',
             data: result,
         };
@@ -45,12 +46,13 @@ export class OrganizationController {
     async updateOrganization(
       @Query('id') orgId: string,
       @Body() updateOrganizationDto: UpdateOrganizationDto,
-    ): Promise<{ message: string; data: Organization }> {
+    ): Promise<{ status: string; message: string; data: Organization }> {
       const updatedOrganization = await this.organizationService.updateOrganization(orgId, updateOrganizationDto);
       if (!updatedOrganization) {
         throw new NotFoundException(`Organization with ID "${orgId}" not found`);
       }
       return {
+        status: 'success',
         message: 'Organization updated successfully',
         data: updatedOrganization,
       };
@@ -58,12 +60,13 @@ export class OrganizationController {
 
     // API endpoint to delete a specific organization
     @Delete('delete')
-    async deleteOne(@Query('id') id: string): Promise<{ message: string }> {
+    async deleteOne(@Query('id') id: string): Promise<{ status: string; message: string }> {
         const deleted = await this.organizationService.deleteOne(id);
         if (!deleted) {
             throw new NotFoundException(`Organization with ID "${id}" not found`);
         }
         return {
+            status: 'success',
             message: `Organization status has been updated successfully`,
         };
     }
@@ -82,43 +85,88 @@ export class OrganizationController {
       return {
         status: 'success',
         message: 'Status of Organizations have been updated successfully',
-        
+        data: updatedOrganizations
       };
     }
 
+    // API endpoint to create a new organization with super admin
+    @Post('create')
+    async createOrganizationWithSuperAdmin(
+      @Body('organizationData') organizationData: any,
+      @Body('superAdminData') superAdminData: any,
+    ): Promise<{ status: string; message: string; data: Organization }> {
+      try {
+        // Check if the super admin email already exists
+        const existingUser = await this.organizationService.findUserByEmail(superAdminData.email);
+        
+        if (existingUser) {
+          // If the email already exists, throw a ConflictException
+          throw new ConflictException('Email already exists');
+        }
 
-
-// API endpoint to create a new organization with super admin
-@Post('create')
-async createOrganizationWithSuperAdmin(
-  @Body('organizationData') organizationData: any,
-  @Body('superAdminData') superAdminData: any,) {
-  
-  try {
-    // Check if the super admin email already exists
-    const existingUser = await this.organizationService.findUserByEmail(superAdminData.email);
-    
-    if (existingUser) {
-      // If the email already exists, throw a ConflictException
-      throw new ConflictException('Email already exists');
+        // Proceed with creating the organization and super admin
+        const result = await this.organizationService.createOrganizationWithSuperAdmin(organizationData, superAdminData);
+        return {
+          status: 'success',
+          message: 'Organization created successfully',
+          data: result
+        };
+      }
+      catch (error) {
+        // Log the error (you can enhance this by using a logger service)
+        console.error('Error occurred while creating organization with super admin:', error);
+      
+        // Return the error details to the client
+        throw new HttpException({
+          status: 'error',
+          message: error.message,
+        }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
 
-    // Proceed with creating the organization and super admin
-    return await this.organizationService.createOrganizationWithSuperAdmin(organizationData, superAdminData);
-    
-  }
-  catch (error) {
-    // Log the error (you can enhance this by using a logger service)
-    console.error('Error occurred while creating organization with super admin:', error);
-  
-    // Return the error details to the client
-    throw new HttpException({
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-      message: error.message,
-    }, HttpStatus.INTERNAL_SERVER_ERROR);
-  }
-}
-    
-}
+    @Patch('change-admin')
+    async changeOrganizationAdmin(
+      @Query('orgId') orgId: string,
+      @Body() adminData: {
+        firstName: string;
+        lastName: string;
+        email: string;
+        phone: string;
+      },
+    ): Promise<{ status: string; message: string; data: any }> {
+      try {
+        const result = await this.organizationService.changeOrganizationAdmin(
+          orgId,
+          adminData
+        );
+        return {
+          status: 'success',
+          message: 'Organization admin changed successfully',
+          data: result
+        };
+      } catch (error) {
+        throw new HttpException({
+          status: 'error',
+          message: error.message,
+        }, HttpStatus.BAD_REQUEST);
+      }
+    }
 
-
+    @Get('user-types-count')
+    async getUserTypesCounts(): Promise<{ status: string; message: string; data: any }> {
+      try {
+        const counts = await this.organizationService.getUserTypesCounts();
+        return {
+          status: 'success',
+          message: 'User types count retrieved successfully',
+          data: counts
+        };
+      } catch (error) {
+        throw new HttpException({
+          status: 'error',
+          message: error.message,
+        }, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+    
+}

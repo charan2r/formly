@@ -1,13 +1,14 @@
 import React from 'react';
-import { Box } from '@mui/material';
-import Sidebar from './Sidebar';
+import { Box, CircularProgress, Typography } from '@mui/material';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Sidebar from './Sidebar';
 import Overview from './Overview';
-import DataTable from './DataTable';
-import CreateOrganization from './CreateOrganization';
-import ViewOrganization from './ViewOrganization';
-import EditOrganization from './EditOrganization';
-import ChangeOrganization from './ChangeOrganization';
+import DataTable from './organization/DataTable';
+import CreateOrganization from './organization/CreateOrganization';
+import ViewOrganization from './organization/ViewOrganization';
+import EditOrganization from './organization/EditOrganization';
+import ChangeOrganization from './organization/ChangeOrganization';
 import UserOverview from './UserOverview';
 import Users from './Users';
 import Template from './Template';
@@ -20,15 +21,77 @@ import { TemplateProvider } from '../context/TemplateContext';
 import Login from './authentication/Login';
 import ProtectedRoute from './authentication/ProtectedRoute';
 
+const LoadingScreen = () => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100vh',
+      width: '100vw',
+      backgroundColor: '#F9F9F9',
+      gap: 2,
+    }}
+  >
+    <CircularProgress
+      size={40}
+      thickness={4}
+      sx={{
+        color: 'black', // Matches your theme
+      }}
+    />
+    <Typography
+      variant="body1"
+      sx={{
+        color: '#666',
+        fontWeight: 500,
+        marginTop: 1,
+      }}
+    >
+      Loading...
+    </Typography>
+  </Box>
+);
 
 const Background: React.FC = () => {
   const location = useLocation();
+  const { isAuthenticated, isLoading, user } = useAuth();
   
-  // Check if the current route matches /edittemplate/{id}
   const isEditTemplate = location.pathname.match(/^\/edittemplate\/[^/]+$/);
+  const isAuthPage = location.pathname === '/login';
+  const isSuperAdmin = user?.userType === 'SuperAdmin';
+  const isAdmin = user?.userType === 'Admin';
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
+  // If not authenticated and not on login page, redirect to login
+  if (!isAuthenticated && !isAuthPage) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If authenticated and on login page, redirect based on user type
+  if (isAuthenticated && isAuthPage) {
+    if (user?.userType === 'Admin') {
+      console.log('Admin user detected');
+      return <Navigate to="/useroverview" replace />;
+    } else if (user?.userType === 'SuperAdmin') {
+      return <Navigate to="/overview" replace />;
+    }
+  }
+
+  // If authenticated but on root path, redirect based on user type
+  if (isAuthenticated && location.pathname === '/') {
+    if (user?.userType === 'admin') {
+      return <Navigate to="/useroverview" replace />;
+    } else if (user?.userType === 'SuperAdmin') {
+      return <Navigate to="/overview" replace />;
+    }
+  }
 
   const handleDragEnd = (result: any) => {
-    // Let the individual components handle their own drag end logic
     return;
   };
 
@@ -36,48 +99,55 @@ const Background: React.FC = () => {
     <TemplateProvider>
       <DragDropContext onDragEnd={handleDragEnd}>
         <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
-          {/* Only show sidebar if user is authenticated */}
-          {location.pathname !== '/login' && (isEditTemplate ? <LeftSidebar /> : <Sidebar />)}
+          {isAuthenticated && !isAuthPage && (
+            isEditTemplate ? (
+              <>
+                <LeftSidebar />
+                <EditPageSettings />
+              </>
+            ) : (
+              <Sidebar />
+            )
+          )}
           
           <Routes>
-            {/* Public routes */}
             <Route path="/login" element={<Login />} />
             
-            {/* Protected routes */}
-            <Route path="/" element={<Navigate to="/overview" replace />} />
-            <Route
-              path="/overview"
-              element={
-                <ProtectedRoute>
-                  <Overview />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/useroverview"
-              element={
-                <ProtectedRoute>
-                  <UserOverview />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/organizations"
-              element={
-                <ProtectedRoute>
-                  <DataTable />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/users" element={<Users />} />
-            <Route path='/templates' element={<Template />} />
-            <Route path='/edittemplate/:formTemplateId' element={<EditPageSettings />} />
-            <Route path='/categories' element={<Category />} />
-            <Route path="/create-organization" element={<CreateOrganization />} />
-            <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
-            <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
-            <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
-            <Route path='/viewtemplate/:templateId' element={<ViewTemplate />} />
+            {/* Protected Routes */}
+            {isAuthenticated && (
+              <>
+                {/* Admin Routes */}
+                {isAdmin && (
+                  <>
+                    <Route path="/useroverview" element={<UserOverview />} />
+                    <Route path="/users" element={<Users />} />
+                    <Route path="/templates" element={<Template />} />
+                    <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
+                    <Route path="/categories" element={<Category />} />
+                    <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
+                  </>
+                )}
+
+                {/* SuperAdmin Routes */}
+                {isSuperAdmin && (
+                  <>
+                    <Route path="/overview" element={<Overview />} />
+                    <Route path="/organizations" element={<DataTable />} />
+                    <Route path="/create-organization" element={<CreateOrganization />} />
+                    <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
+                    <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
+                    <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
+                  </>
+                )}
+
+                {/* Catch-all redirect */}
+                <Route path="*" element={
+                  isAdmin ? 
+                    <Navigate to="/useroverview" replace /> :
+                    <Navigate to="/overview" replace />
+                } />
+              </>
+            )}
           </Routes>
         </Box>
       </DragDropContext>

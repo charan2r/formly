@@ -4,6 +4,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'; // https://doc
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import 'reflect-metadata';
+import * as cookieParser from 'cookie-parser';
 
 //import AppDataSource from 'ormconfig'; 
 
@@ -19,6 +20,8 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization',  // Allow specific headers
     credentials: true,  // Allow credentials
   });
+
+  app.use(cookieParser());
 
   const config = new DocumentBuilder()
   .setTitle('Forms .O')

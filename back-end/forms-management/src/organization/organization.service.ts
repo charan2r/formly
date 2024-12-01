@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 // organization.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { User } from '../model/user.entity';
 import { Organization } from 'src/model/organization.entity';
 import { UserRepository } from 'src/user/user.repository';
@@ -59,8 +59,11 @@ export class OrganizationService {
 
     // Fetch the super admin details using the superAdminId
     const superAdmin = await this.userRepository.findOne({
-      where: { id: organization.superAdminId, userType: 'SuperAdmin' },
+      where: { id: organization.superAdminId },
+      select: ['id', 'firstName', 'lastName', 'email', 'phoneNumber'], // ^ _ ^
     });
+
+    console.log('Found superAdmin:', superAdmin); // Debug log
 
     return { organization, superAdmin };
   }
@@ -115,5 +118,59 @@ export class OrganizationService {
   // Method to find all users by organization, with optional filter if organizationId is provided
   async findUserByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async changeOrganizationAdmin(
+    orgId: string,
+    adminData: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string;
+    }
+  ): Promise<{ organization: Organization; newAdmin: User }> {
+    const organization = await this.organizationRepository.findOne({
+      where: { orgId }
+    });
+
+    if (!organization) {
+      throw new NotFoundException('Organization not found');
+    }
+
+    // Check if email already exists
+    const existingUser = await this.findUserByEmail(adminData.email);
+    if (existingUser) {
+      throw new ConflictException('Email already exists');
+    }
+
+    // Create new admin
+    const newAdminData = {
+      ...adminData,
+      userType: 'SuperAdmin',
+      organizationId: orgId,
+      password: "",
+      verified: false,
+    };
+
+    const newAdmin = await this.authService.registerAdmin(newAdminData);
+    
+    // Update organization with new admin
+    organization.superAdminId = newAdmin.data.id;
+    await this.organizationRepository.save(organization);
+
+    return { organization, newAdmin: newAdmin.data };
+  }
+
+  async getUserTypesCounts(): Promise<{ [key: string]: number }> {
+    const users = await this.userRepository.find({
+      where: { isDeleted: false }
+    });
+
+    const counts = users.reduce((acc, user) => {
+      acc[user.userType] = (acc[user.userType] || 0) + 1;
+      return acc;
+    }, {});
+
+    return counts;
   }
 }
