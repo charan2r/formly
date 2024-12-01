@@ -22,6 +22,7 @@ import {
   Dialog,
   DialogContent,
   Grid,
+  DialogActions,
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SearchIcon from '@mui/icons-material/Search';
@@ -85,6 +86,14 @@ const Users: React.FC = () => {
   const [editFormData, setEditFormData] = useState<EditUserForm | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [createUserOpen, setCreateUserOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    userType: ''
+  });
 
 
   useEffect(() => {
@@ -160,6 +169,17 @@ const Users: React.FC = () => {
     const isAsc = orderBy === property && orderDirection === 'asc';
     setOrderDirection(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
+  };
+
+  const handleCreateUser = async () => {
+    try {
+      const response = await axios.post('http://localhost:3001/user', newUser);
+      setUsers([...users, response.data]);
+      setCreateUserOpen(false);
+      toast.success("User created successfully!");
+    } catch (error) {
+      toast.error("Failed to create user");
+    }
   };
 
   const handleViewUser = async (userId: string) => {
@@ -292,7 +312,7 @@ const Users: React.FC = () => {
   };
 
   return (
-    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
+    <Paper elevation={4} sx={{ padding: '30px 36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
           <IconButton onClick={() => console.log("Back arrow clicked")}>
@@ -366,6 +386,7 @@ const Users: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                onClick={() => setCreateUserOpen(true)}
               >
                 <AddIcon sx={{ marginRight: 1 }} />
                 Add Users
@@ -384,7 +405,7 @@ const Users: React.FC = () => {
                   backgroundColor: '#f9f9f9',
                   borderStartStartRadius: '20px',
                   borderEndStartRadius: '20px',
-                  padding: '4px',
+                  padding: '1px',
                   position: 'relative',
                 }}
               >
@@ -400,8 +421,8 @@ const Users: React.FC = () => {
                   }
                 />
               </TableCell>
-              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
-              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+              <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '1px' }} />
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '1px', position: 'relative' }}>
                 <TableSortLabel
                   active={orderBy === 'email'}
                   direction={orderDirection}
@@ -427,7 +448,7 @@ const Users: React.FC = () => {
                   </div>
                 )}
               </TableCell>
-              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '1px', position: 'relative' }}>
                 <TableSortLabel
                   active={orderBy === 'userType'}
                   direction={orderDirection}
@@ -453,7 +474,7 @@ const Users: React.FC = () => {
                   </div>
                 )}
               </TableCell>
-              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '1px', position: 'relative' }}>
                 <TableSortLabel
                   active={orderBy === 'lastActive'}
                   direction={orderDirection}
@@ -483,11 +504,10 @@ const Users: React.FC = () => {
             </TableRow>
           </TableHead>
 
-
           <TableBody>
             {paginatedData.map((row) => (
-              <TableRow key={row.id} sx={{ height: '60px' }}>
-                <TableCell padding="checkbox">
+              <TableRow key={row.id}>
+                <TableCell padding="checkbox" >
                   <Checkbox
                     checked={!!selectedUsers[row.userId]}
                     onChange={() => handleSelectUser(row.userId)}
@@ -592,6 +612,203 @@ const Users: React.FC = () => {
           color="primary"
         />
       </Box>
+
+      {/* Dialog to add User details */}
+      <Dialog
+        open={createUserOpen}
+        onClose={() => setCreateUserOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: '16px 28px 40px',
+            maxWidth: '650px',
+            backgroundColor: '#f9f9f9',
+            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          {/* Back button */}
+          <IconButton
+            onClick={() => setEditDialogOpen(false)}
+            sx={{
+              position: 'absolute',
+              left: 8,
+              top: 8,
+            }}
+          >
+            <ArrowBackIcon />
+          </IconButton>
+
+          {/* Header section */}
+          <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+            <Avatar
+              sx={{
+                width: 64,
+                height: 64,
+                backgroundColor: '#f5f5f5',
+                color: '#666',
+                marginRight: '30px'
+              }}
+            >
+              {editFormData?.firstName?.[0] || 'U'}
+            </Avatar>
+            <Box sx={{ textAlign: 'left' }}>
+              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                Create an Account
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Boost your employee's productivity with <br/> Digital forms.
+              </Typography>
+            </Box>
+          </Box>
+
+          <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+            <Box display="flex" flexDirection="column" gap={2.5}>
+              <Box display="flex" gap={2} mt={-3} >
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name</Typography>
+                  <TextField
+                    value={newUser.firstName}
+                    onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                    fullWidth
+                    placeholder='Enter your first name'
+                    variant="outlined"
+                    size="small"
+                    inputProps={{
+                      sx: {
+                        backgroundColor: '#ffffff',
+                        borderRadius: '5px',
+                        width: '100%',
+                        '&::placeholder': {
+                          fontSize: '0.8rem',
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Last Name</Typography>
+                  <TextField
+                    value={newUser.lastName}
+                    onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                    fullWidth
+                    placeholder='Enter your last name'
+                    variant="outlined"
+                    size="small"
+                    inputProps={{
+                      sx: {
+                        backgroundColor: '#ffffff',
+                        borderRadius: '5px',
+                        width: '100%',
+                        '&::placeholder': {
+                          fontSize: '0.8rem',
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+              </Box>
+
+              <Grid item xs={12} sm={6} mt={-2}>
+                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email</Typography>
+                <TextField
+                  value={newUser.email}
+                  onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                  fullWidth
+                  placeholder='Enter your email'
+                  variant="outlined"
+                  size="small"
+                  inputProps={{
+                    sx: {
+                      backgroundColor: '#ffffff',
+                      borderRadius: '5px',
+                      width: '100%',
+                      '&::placeholder': {
+                        fontSize: '0.8rem',
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} mt={-2}>
+                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
+                <TextField
+                  value={newUser.phone}
+                  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                  fullWidth
+                  placeholder='Enter your phone number'
+                  variant="outlined"
+                  size="small"
+                  inputProps={{
+                    sx: {
+                      backgroundColor: '#ffffff',
+                      borderRadius: '5px',
+                      width: '100%',
+                      '&::placeholder': {
+                        fontSize: '0.8rem',
+                      }
+                    }
+                  }}
+                />
+              </Grid>
+
+              <Box display="flex" gap={2} alignItems="flex-end" sx={{ width: '100%' }} mt={-2}>
+                <Grid item xs={10} sm={9.5} sx={{ width: '65%' }}>
+                  {/* Role Type Field */}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
+                      Role
+                    </Typography>
+                    <TextField
+                      select
+                      value={newUser.usertype}
+                      onChange={(e) => setNewUser({ ...newUser, userType: e.target.value })}
+                      size="small"
+                      fullWidth
+                      inputProps={{
+                        sx: {
+                          backgroundColor: '#ffffff',
+                          borderRadius: '5px',
+                          width: '100%',
+                          '&::placeholder': {
+                            fontSize: '0.8rem',
+                          }
+                        }
+                      }}
+                    >
+                      <MenuItem value="" disabled style={{ textAlign: 'center', color: 'gray' }}>
+                        Select a Role
+                      </MenuItem>
+                      <MenuItem value="formCreater">Form Creator</MenuItem>
+                      {/* Add more options as needed */}
+                    </TextField>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={2.5} sx={{ width: '35%' }}>
+                  <Button
+                    variant="contained"
+                    onClick={handleCreateUser}
+                    fullWidth
+                    sx={{
+                      backgroundColor: 'black',
+                      color: 'white',
+                      borderRadius: '20px',
+                        height: '40px',
+                        '&:hover': { backgroundColor: '#333' }
+                    }}
+                  >
+                    Create
+                  </Button>
+                </Grid>
+              </Box>
+            </Box>
+          </DialogContent>
+        </Box>
+      </Dialog>
 
       {/* Dialog to display user details */}
       <Dialog

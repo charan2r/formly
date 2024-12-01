@@ -769,7 +769,7 @@ const Template: React.FC = () => {
                                 <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Template Name</Typography>
                                 <TextField
                                     value={newTemplate.name}
-                                    InputProps={{ readOnly: true }}
+                                    onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
                                     fullWidth
                                     variant="outlined"
                                     size="small"

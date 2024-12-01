@@ -17,7 +17,7 @@ export class UpdateOrganizationDto {
   @IsOptional()
   @IsString()
   street?: string;
-
+  
   @IsOptional()
   @IsString()
   city?: string;

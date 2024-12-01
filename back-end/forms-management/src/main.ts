@@ -3,6 +3,8 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'; // https://docs.nestjs.com/openapi/introduction
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
+import 'reflect-metadata';
+
 //import AppDataSource from 'ormconfig'; 
 
 dotenv.config();
