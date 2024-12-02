@@ -1,20 +1,22 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcryptjs';
-import { v4 as uuidv4 } from 'uuid';
+//import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from './email.service';
+import { TokenService } from 'src/auth/token.service';
 import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
     constructor( 
         private readonly userService: UserService, 
+        private readonly emailService: EmailService,
         private readonly jwtService: JwtService) {}
 
     // Register admin 
-    async registerAdmin(userDto: any): Promise<{message:string,data:any}> {
+    async registerAdmin(userDto: any): Promise<{message:string, data: any}> {
         const {email, firstName,lastName, organizationId } = userDto;
         const candidate = await this.userService.getUserByEmail(email);
         if(candidate) {
@@ -22,11 +24,10 @@ export class AuthService {
         }
 
         // Generate verification token
-        const verificationToken = uuidv4();
-        const verificationTokenExpires = new Date(Date.now() + 15 * 60 * 1000);
+        const { verificationToken, verificationTokenExpires } = TokenService.generateVerificationToken();
 
         // Create Admin user
-        const newAdmin = await this.userService.addUser({
+        const user = await this.userService.addUser({
             email,
             firstName,
             lastName,
@@ -39,19 +40,14 @@ export class AuthService {
         });
 
         // Send verification email
-        await this.sendVerificationEmail(email, verificationToken);
+        await this.emailService.sendVerificationEmail(email, verificationToken);
 
-        return { message: 'Admin registered successfully. Verification email sent', data: newAdmin };
+        return { message: 'Admin registered successfully. Verification email sent', data: user };
         
     }
 
-    // Send verification email
-    async sendVerificationEmail(email: string, token: string) {
-        const verificationLink = `http://localhost:3000/auth/verify-email?token=${token}`;
-        console.log(verificationLink);
-    }
 
-    // First time verification
+    // First time verification 
     async verifyAndSetPassword(token: string, newPassword: string): Promise<{message: string}> {
         const user = await this.userService.getUserByVerificationToken(token);
         if(!user) {
@@ -76,13 +72,31 @@ export class AuthService {
             });
 
         return { message: 'Password set successfully. You can login now.' };
+ 
+    }
 
-        
+    // Forgot Password
+    async forgotPassword(email: string): Promise<{message: string}> {
+        const user = await this.userService.getUserByEmail(email);
+        if(!user) {
+            throw new UnauthorizedException('User with this email does not exist');
+        }
+
+        // Generate verification token
+        const { verificationToken, verificationTokenExpires } = TokenService.generateVerificationToken();
+
+        // Update user
+        await this.userService.updateUser(user.id, { verificationToken, verificationTokenExpires });
+
+        // Send verification email
+        await this.emailService.sendForgotPasswordEmail(email, verificationToken);
+
+        return { message: 'Password reset email sent' };
     }
 
 
-    // Login a user
-    async login(email: string, password: string): Promise<{ accessToken: string; user: any }> {
+    // Login 
+    async login(email: string, password: string): Promise<{accessToken: string}> {
         const user = await this.userService.getUserByEmail(email);
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');

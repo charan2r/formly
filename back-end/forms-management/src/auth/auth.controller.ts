@@ -42,6 +42,12 @@ export class AuthController {
       }
     }
 
+    // API endpoint to forgot password
+    @Post('forgot-password')
+    async forgotPassword(@Body('email') email: string): Promise<{ message: string }> {
+      return this.authService.forgotPassword(email);
+    }
+
     // API endpoint to login
     @Post('login')
     async login(
