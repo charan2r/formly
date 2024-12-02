@@ -7,6 +7,8 @@ import { Role } from '../model/role.entity';
 import { RoleService } from '../role/role.service';
 import { PermissionService } from '../permission/permission.service'; 
 import { RolePermissionService} from '../role-permission/role-permission.service'
+import { Organization } from 'src/model/organization.entity';
+import { OrganizationService } from 'src/organization/organization.service';
 
 @EventSubscriber()
 @Injectable()
@@ -14,20 +16,23 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
   private static entitiesToMonitor: Function[] = [
     Role,
     Permission, 
-    RolePermission
+    RolePermission,
+    Organization
   ];
 
   // Map entities to their respective soft delete services
   private static entityToServiceMap = {
     Role: RoleService,
     Permission: PermissionService,
-    RolePermission: RolePermissionService
+    RolePermission: RolePermissionService,
+    Organization: OrganizationService
   };
 
   constructor(
     private readonly roleService: RoleService, 
     private readonly permissionService: PermissionService,
     private readonly rolePermissionService: RolePermissionService,
+    private readonly organizationService: OrganizationService,
   ) {
     console.log('MONITORED_ENTITIES:', AuditTrailSubscriber.entitiesToMonitor);
   }
@@ -119,6 +124,8 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
         return this.permissionService.softDeletePermission.bind(this.permissionService);
       case RolePermissionService:
         return this.rolePermissionService.softDeleteRolePermission.bind(this.rolePermissionService);
+      case OrganizationService:
+        return this.organizationService.deleteOne.bind(this.organizationService)
       // Add cases for other services here as needed
       default:
         throw new Error('No soft delete service found for this entity');

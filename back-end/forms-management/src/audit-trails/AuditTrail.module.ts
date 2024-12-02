@@ -19,20 +19,26 @@ import { PermissionModule } from '../permission/permission.module';
 import { RolePermissionModule } from '../role-permission/role-permission.module';
 import { AuditTrailController } from './AuditTrail.controller';
 import { AuditTrailService } from './AuditTrail.service';
+import { OrganizationModule } from 'src/organization/organization.module';
+import { Organization } from 'src/model/organization.entity';
+import { OrganizationService } from 'src/organization/organization.service';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([AuditTrail, AuditTrailRepository,Permission,Role,RolePermission]),
+        TypeOrmModule.forFeature([AuditTrail, AuditTrailRepository,Permission,Role,RolePermission,Organization]),
         UserModule,
         RoleModule,
         PermissionModule,
         RolePermissionModule,
-        AuditTrailModule
+        AuditTrailModule,
+        OrganizationModule,
+        AuthModule
       ],
   providers: [
     {
         provide: 'MONITORED_ENTITIES',
-        useValue: [Role, Permission, RolePermission],
+        useValue: [Role, Permission, RolePermission,Organization],
     },
     RoleService,
     RoleRepository,
@@ -44,13 +50,14 @@ import { AuditTrailService } from './AuditTrail.service';
     AuditTrailSubscriber,
     PermissionRepository,
     AuditTrailService,
-    AuditTrailRepository
+    AuditTrailRepository,
+    OrganizationService
   ],
   controllers:[AuditTrailController],
   exports: [
     {
       provide: 'MONITORED_ENTITIES',
-      useValue: [Role, Permission, RolePermission],
+      useValue: [Role, Permission, RolePermission,Organization],
     },
     AuditTrailService
   ],
