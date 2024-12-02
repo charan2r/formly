@@ -39,9 +39,6 @@ export class AuthService {
             passwordHash: ''
         });
 
-        // Send verification email
-        await this.emailService.sendVerificationEmail(email, verificationToken);
-
         return { message: 'Admin registered successfully. Verification email sent', data: user };
         
     }
@@ -49,27 +46,37 @@ export class AuthService {
 
     // First time verification 
     async verifyAndSetPassword(token: string, newPassword: string): Promise<{message: string}> {
+        console.log('1---------------');
+        console.log(token);
         const user = await this.userService.getUserByVerificationToken(token);
+        console.log(user);
         if(!user) {
             throw new UnauthorizedException('Invalid Token');
         }
-
-
+        
+        
+        console.log('2---------------');
         // Check if token has expired
-        if(!user || user.verificationTokenExpires < new Date()) {
-            throw new UnauthorizedException('Token has expired');
-        }
-
+        // if(!user || user.verificationTokenExpires < new Date()) {
+        //     throw new UnauthorizedException('Token has expired');
+        // }
+        
+        console.log('3---------------');
         // Hash the password
         const passwordHash = await bcrypt.hash(newPassword, 10);
 
+        console.log('4---------------');
         // Update user
-        await this.userService.updateUser(user.id, { 
+        const response = await this.userService.updateUser(user.id, { 
                 passwordHash, 
                 isVerified: true, 
                 verificationToken: null, 
                 verificationTokenExpires: null 
             });
+
+  
+
+        console.log(response)
 
         return { message: 'Password set successfully. You can login now.' };
  
@@ -96,7 +103,7 @@ export class AuthService {
 
 
     // Login 
-    async login(email: string, password: string): Promise<{accessToken: string}> {
+    async login(email: string, password: string): Promise<{accessToken: string, user: any}> {
         const user = await this.userService.getUserByEmail(email);
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');

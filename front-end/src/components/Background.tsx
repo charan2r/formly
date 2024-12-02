@@ -24,6 +24,7 @@ import Role from './role/Role';
 import AddRole from './role/AddRole';
 import ViewRole from './role/ViewRole';
 import EditRole from './role/EditRole';
+import FTReset from './authentication/FTReset';
 
 const LoadingScreen = () => (
   <Box
@@ -63,7 +64,9 @@ const Background: React.FC = () => {
   const { isAuthenticated, isLoading, user } = useAuth();
   
   const isEditTemplate = location.pathname.match(/^\/edittemplate\/[^/]+$/);
-  const isAuthPage = location.pathname === '/login';
+  const isAuthPage = location.pathname === '/login' || 
+                    location.pathname.startsWith('/auth/verify-email') || 
+                    location.pathname.startsWith('/auth/reset-password');
   const isSuperAdmin = user?.userType === 'SuperAdmin';
   const isAdmin = user?.userType === 'Admin';
 
@@ -115,7 +118,10 @@ const Background: React.FC = () => {
           )}
           
           <Routes>
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/verify-email" element={<FTReset />} />
+            <Route path="/auth/reset-password" element={<FTReset />} />
             
             {/* Protected Routes */}
             {isAuthenticated && (

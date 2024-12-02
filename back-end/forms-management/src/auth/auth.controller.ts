@@ -23,7 +23,7 @@ export class AuthController {
     // API endpoint to first-time password creation
     @Post('set-password')
     async setPassword(
-      @Query('token') token: string,
+      @Body('token') token: string,
       @Body('newPassword') newPassword: string,
     ): Promise<StandardResponse<{ passwordSet: boolean }>> {
       try {

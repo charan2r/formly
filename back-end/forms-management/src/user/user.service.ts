@@ -36,6 +36,7 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
 
   // Fetch user by verification token
   async getUserByVerificationToken(token: string): Promise<User | null> {
+    console.log(token);
     return this.userRepository.findOne({ where: { verificationToken: token } });
   }
   
@@ -69,8 +70,15 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+    console.log(updateUserDto);
 
-    await this.userRepository.update(id, updateUserDto);
+    // Update the existing user entity with new data
+    Object.assign(existingUser, updateUserDto);
+
+    // Save the updated entity back to the database
+    await this.userRepository.save(existingUser);
+
+    // Return the updated user
     return this.userRepository.findOneBy({ id });
   }
 
