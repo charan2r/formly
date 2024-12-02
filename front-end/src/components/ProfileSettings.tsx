@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography, Button, Avatar, TextField, Grid, IconButton } from '@mui/material';
+import { Box, Typography, Button, Avatar, TextField, Grid, IconButton, Paper } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import CircleIcon from '@mui/icons-material/Circle';
 import ArrowForward from '@mui/icons-material/ArrowForward';
@@ -7,22 +7,30 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 const ProfileSettings: React.FC = () => {
   const { user } = useAuth();
 
+  const commonTextFieldStyles = {
+    backgroundColor: 'white',
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: '#E0E0E0'
+    },
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    borderRadius: '4px',
+    height: '35px',
+    '& input': {
+      padding: '8px 16px'
+    }
+  };
+
   return (
-    <Box sx={{ 
-      padding: '32px',
-      maxWidth: '100%',
-      margin: '0 auto',
-      backgroundColor: 'white',
-      position: 'fixed',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: '250px',
-      overflowY: 'scroll',
-      height: '100vh'
+    <Paper elevation={4} sx={{ 
+      padding: '36px', 
+      margin: '16px', 
+      width: '100%', 
+      borderRadius: 3, 
+      overflow: 'hidden',
+      backgroundColor: 'white'
     }}>
       {/* Top Navigation Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={6}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4.5}>
         <Box display="flex" alignItems="center" gap={1}>
           <IconButton 
             sx={{ padding: 0 }}
@@ -47,7 +55,7 @@ const ProfileSettings: React.FC = () => {
             fontWeight: '500'
           }}
         >
-          Welcome, Amanda
+          Welcome, Admin
         </Typography>
         <Button 
           variant="contained" 
@@ -98,10 +106,10 @@ const ProfileSettings: React.FC = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box>
               <Typography variant="h6" sx={{ fontSize: '18px', fontWeight: '500' }}>
-                Alexa Rawles
+                admin
               </Typography>
               <Typography sx={{ color: '#666', fontSize: '14px' }}>
-                alexarawles@gmail.com
+              admin@example.com
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -164,18 +172,7 @@ const ProfileSettings: React.FC = () => {
               placeholder="Your First Name"
               variant="outlined"
               InputProps={{
-                sx: { 
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#E0E0E0'
-                  },
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '4px',
-                  height: '45px',
-                  '& input': {
-                    padding: '12px 16px'
-                  }
-                }
+                sx: commonTextFieldStyles
               }}
             />
           </Grid>
@@ -191,21 +188,10 @@ const ProfileSettings: React.FC = () => {
             <TextField
               name="lastName"
               fullWidth
-              placeholder="Your First Name"
+              placeholder="Your Last Name"
               variant="outlined"
               InputProps={{
-                sx: { 
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#E0E0E0'
-                  },
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '4px',
-                  height: '45px',
-                  '& input': {
-                    padding: '12px 16px'
-                  }
-                }
+                sx: commonTextFieldStyles
               }}
             />
           </Grid>
@@ -237,18 +223,7 @@ const ProfileSettings: React.FC = () => {
               placeholder="Your Email"
               variant="outlined"
               InputProps={{
-                sx: { 
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#E0E0E0'
-                  },
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '4px',
-                  height: '45px',
-                  '& input': {
-                    padding: '12px 16px'
-                  }
-                }
+                sx: commonTextFieldStyles
               }}
             />
           </Grid>
@@ -267,18 +242,7 @@ const ProfileSettings: React.FC = () => {
               placeholder="+94 75 203 1111"
               variant="outlined"
               InputProps={{
-                sx: { 
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#E0E0E0'
-                  },
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '4px',
-                  height: '45px',
-                  '& input': {
-                    padding: '12px 16px'
-                  }
-                }
+                sx: commonTextFieldStyles
               }}
             />
           </Grid>
@@ -310,18 +274,7 @@ const ProfileSettings: React.FC = () => {
               placeholder="14.10.2024 19:30"
               variant="outlined"
               InputProps={{
-                sx: { 
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#E0E0E0'
-                  },
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '4px',
-                  height: '45px',
-                  '& input': {
-                    padding: '12px 16px'
-                  }
-                }
+                sx: commonTextFieldStyles
               }}
             />
           </Grid>
@@ -340,18 +293,7 @@ const ProfileSettings: React.FC = () => {
               placeholder="Custom Role"
               variant="outlined"
               InputProps={{
-                sx: { 
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: '#E0E0E0'
-                  },
-                  boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '4px',
-                  height: '45px',
-                  '& input': {
-                    padding: '12px 16px'
-                  }
-                }
+                sx: commonTextFieldStyles
               }}
             />
           </Grid>
@@ -369,7 +311,7 @@ const ProfileSettings: React.FC = () => {
           }}
         />
       </form>
-    </Box>
+    </Paper>
   );
 };
 
