@@ -3,18 +3,20 @@ import { RoleRepository } from './role.repository';
 import { OrganizationRepository } from 'src/organization/organization.repository';
 import { In } from 'typeorm';
 import { CreateRoleDto } from '../dto/create-role.dto';
-import { UpdateRoleDto } from 'src/dto/updateRole.dto';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Role } from 'src/model/role.entity';
 @Injectable()
-export class RoleService {                
+export class RoleService {
   constructor(
-    private readonly roleRepository: RoleRepository,
-    private readonly organizationRepository: OrganizationRepository,  
+    private readonly organizationRepository: OrganizationRepository,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
   ) {}
 
   // create a role
   async create(createRoleDto: CreateRoleDto) {
-    const { role, description, organizationId} = createRoleDto;
+    const { role, description, organizationId } = createRoleDto;
 
     const organization = await this.organizationRepository.findOne({
       where: { orgId: organizationId },
@@ -27,6 +29,7 @@ export class RoleService {
     const newRole = this.roleRepository.create({
       role,
       description,
+      organizationId,
       organization,
       status: 'active',
     });
@@ -35,67 +38,108 @@ export class RoleService {
     return savedRole;
   }
 
-  // Get all roles
-  async getAll() {
-    const role = await this.roleRepository.find({
+  // Get all roles for an organization
+  async getAllByOrganization(organizationId: string) {
+    return this.roleRepository.find({
+      where: {
+        organizationId,
+        status: 'active',
+      },
+      relations: ['organization'],
     });
-
-    return {
-      ...role,
-    };
-  }// excluding/including deleted ones - {where: { status: 'deleted' },}, {where: { status: 'active' },}  
-  
-  
-    //Soft delete a role
-    async deleteRole(roleId: string): Promise<boolean> {
-      const role = await this.roleRepository.findOne({
-        where: { roleId, status: 'active' },
-      });
-      if (!role) {
-        throw new NotFoundException('Role not found or already deleted');
-      }
-      role.status = 'deleted';
-      await this.roleRepository.save(role);
-      return true;
-    }
-
-    //Soft bulk delete
-    async deleteRoles(roleIds: string[]): Promise<boolean> {
-      const roles = await this.roleRepository.find({
-        where: { roleId: In(roleIds), status: 'active' },
-      });
-    
-      if (roles.length === 0) {
-        throw new NotFoundException('No active roles found for the provided IDs');
-      }
-  
-      roles.forEach((role) => {
-        role.status = 'deleted';
-      });
-      await this.roleRepository.save(roles);
-    
-      return true;
-    } 
-    
-    // Update
-  async updateRole(roleId: string, updateRoleDto: UpdateRoleDto) {
-    const { role, description} = updateRoleDto;
-  
-    const existingRole = await this.roleRepository.findOne({
-      where: { roleId },
-    });
-  
-    if (!existingRole) {
-      throw new NotFoundException('Role not found');
-    }
-  
-    existingRole.role = role || existingRole.role;
-    existingRole.description = description || existingRole.description;
-  
-    const updatedRole = await this.roleRepository.save(existingRole);
-  
-    return updatedRole;
   }
-  
 
+  // Soft delete a role
+  async deleteRole(roleId: string): Promise<boolean> {
+    const role = await this.roleRepository.findOne({
+      where: { roleId, status: 'active' },
+    });
+    if (!role) {
+      throw new NotFoundException('Role not found or already deleted');
+    }
+    role.status = 'deleted';
+    await this.roleRepository.save(role);
+    return true;
+  }
+
+  // Delete role for organization
+  async deleteRoleForOrganization(roleId: string, organizationId: string) {
+    const role = await this.roleRepository.findOne({
+      where: {
+        roleId,
+        organizationId,
+        status: 'active',
+      }
+    });
+
+    if (!role) {
+      throw new NotFoundException('Role not found or unauthorized');
+    }
+
+    role.status = 'deleted';
+    return this.roleRepository.save(role);
+  }
+
+  // Bulk delete roles for organization
+  async deleteRolesForOrganization(roleIds: string[], organizationId: string) {
+    const roles = await this.roleRepository.find({
+      where: {
+        roleId: In(roleIds),
+        organizationId,
+        status: 'active',
+      }
+    });
+
+    if (roles.length !== roleIds.length) {
+      throw new NotFoundException('Some roles not found or unauthorized');
+    }
+
+    // Update status to deleted for all roles
+    roles.forEach((role) => {
+      role.status = 'deleted';
+    });
+
+    return this.roleRepository.save(roles);
+  }
+
+  // Update role
+  async updateRoleForOrganization(
+    roleId: string,
+    updateDto: CreateRoleDto,
+    organizationId: string
+  ) {
+    const role = await this.roleRepository.findOne({
+      where: {
+        roleId,
+        organizationId,
+        status: 'active'
+      }
+    });
+
+    if (!role) {
+      throw new NotFoundException('Role not found or unauthorized');
+    }
+
+    // Update the role
+    role.role = updateDto.role || role.role;
+    role.description = updateDto.description || role.description;
+
+    return this.roleRepository.save(role);
+  }
+
+  async getRoleByIdAndOrganization(roleId: string, organizationId: string): Promise<Role> {
+    const role = await this.roleRepository.findOne({
+      where: {
+        roleId,
+        organizationId,
+        status: 'active'
+      }
+    });
+
+    if (!role) {
+      throw new NotFoundException(`Role with ID ${roleId} not found`);
+    }
+
+    return role;
+  }
 }

@@ -1,137 +1,96 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { RolePermissionRepository } from './role-permission.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { RolePermission } from '../model/role-permission.entity';
-import { RoleRepository } from '../role/role.repository';
-import { PermissionRepository } from 'src/permission/permission.repository';
+import { Role } from '../model/role.entity';
+import { Permission } from '../model/permission.entity';
 import { In } from 'typeorm';
 
 @Injectable()
 export class RolePermissionService {
   constructor(
-    private readonly rolePermissionRepository: RolePermissionRepository,
-    private readonly roleRepository: RoleRepository,
-    private readonly permissionRepository: PermissionRepository,
+    @InjectRepository(RolePermission)
+    private readonly rolePermissionRepository: Repository<RolePermission>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>,
   ) {}
 
   async assignPermissionsToRole(
     roleId: string,
     permissionIds: string[],
   ): Promise<RolePermission[]> {
-    const role = await this.roleRepository.findOneOrFail({ where: { roleId } });
-  
-    const permissions = await this.permissionRepository.find({
-      where: { permissionId: In(permissionIds) },
+    // Verify role exists
+    const role = await this.roleRepository.findOne({ 
+      where: { roleId, status: 'active' } 
     });
-    
-    if (permissions.length !== permissionIds.length) {
-      throw new NotFoundException('One or more permissions not found');
+    if (!role) {
+      throw new NotFoundException('Role not found or inactive');
     }
-  
-    await this.rolePermissionRepository.delete({ role });
-  
-    const rolePermissions = permissions.map(permission => {
+
+    // Verify permissions exist
+    const permissions = await this.permissionRepository.find({
+      where: { permissionId: In(permissionIds), status: 'active' }
+    });
+    if (permissions.length !== permissionIds.length) {
+      throw new NotFoundException('One or more permissions not found or inactive');
+    }
+
+    // Create new role-permission entries
+    const rolePermissions = permissionIds.map(permissionId => {
       return this.rolePermissionRepository.create({
-        role,
-        permission,
+        roleId,
+        permissionId,
+        status: 'active'
       });
     });
-  
+
     return this.rolePermissionRepository.save(rolePermissions);
   }
 
-  // Get all role-permission
-  async getAllRolePermissions(): Promise<
-  {
-    roleId: string;
-    role: string;
-    description: string;
-    status: string;
-    permissions: { permissionId: string; name: string; status: string; createdAt: Date }[];
-  }[]
-  > {
+  async getRolePermissions(roleId: string) {
     const rolePermissions = await this.rolePermissionRepository.find({
-      relations: ['role', 'permission'],
-    });
-    const grouped = new Map<
-    string,
-    {
-      roleId: string;
-      role: string;
-      description: string;
-      status: string;
-      permissions: { permissionId: string; name: string; status: string; createdAt: Date }[];
-    }
-  >();
-  rolePermissions.forEach(({ role, permission, status }) => {
-    if (!grouped.has(role.roleId)) {
-      grouped.set(role.roleId, {
-        roleId: role.roleId,
-        role: role.role,
-        description: role.description,
-        status: role.status,
-        permissions: [],
-      });
-    }
-    grouped.get(role.roleId)?.permissions.push({
-      permissionId: permission.permissionId,
-      name: permission.name,
-      status,
-      createdAt: permission.createdAt,
-    });
-  });
-  return Array.from(grouped.values());
-  }
-
-
-
-  // Get a specific role with its permissions
-  async getOne(
-    roleId: string,
-  ): Promise<{
-    roleId: string;
-    role: string;
-    description: string;
-    status: string;
-    permissions: { permissionId: string; name: string; status: string }[];
-    }> {
-      const rolePermissions = await this.rolePermissionRepository.find({
-      where: { role: { roleId } },
-      relations: ['role', 'permission'],
+      where: { roleId, status: 'active' },
+      relations: ['permission']
     });
 
     if (!rolePermissions.length) {
-      throw new NotFoundException('Role not found or no permissions assigned');
+      throw new NotFoundException('No active permissions found for this role');
     }
-    
-    const role = rolePermissions[0].role;
-    return {
-      roleId: role.roleId,
-      role: role.role,
-      description: role.description,
-      status: role.status,
-      permissions: rolePermissions.map(({ permission, status }) => ({
-        permissionId: permission.permissionId,
-        name: permission.name,
-        status,
-      })),
-    };
+
+    return rolePermissions;
   }
-// update 
+
   async updateRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {
-    if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
-      throw new BadRequestException('permissionIds must be a non-empty array');
-    }
-  
-    const rolePermissions = await this.rolePermissionRepository.find({
-      where: { role: { roleId }, permission: { permissionId: In(permissionIds) } },
-      relations: ['role', 'permission'],
+    // Verify role exists
+    console.log(roleId);
+    const role = await this.roleRepository.findOne({ 
+      where: { roleId, status: 'active' } 
     });
-  
+    if (!role) {
+      throw new NotFoundException('Role not found or inactive');
+    }
+
+    // Get existing role permissions
+    const existingPermissions = await this.rolePermissionRepository.find({
+      where: { roleId }
+    });
+
+    // Deactivate permissions not in the new list
+    for (const existing of existingPermissions) {
+      if (!permissionIds.includes(existing.permissionId)) {
+        existing.status = 'deleted';
+        await this.rolePermissionRepository.save(existing);
+      }
+    }
+
+    // Add or reactivate new permissions
     for (const permissionId of permissionIds) {
-      const existingPermission = rolePermissions.find(
-        (rolePermission) => rolePermission.permission?.permissionId === permissionId
+      const existingPermission = existingPermissions.find(
+        rp => rp.permissionId === permissionId
       );
-  
+
       if (existingPermission) {
         if (existingPermission.status === 'deleted') {
           existingPermission.status = 'active';
@@ -139,64 +98,29 @@ export class RolePermissionService {
         }
       } else {
         const newRolePermission = this.rolePermissionRepository.create({
-          role: { roleId },
-          permission: { permissionId },
-          status: 'active',
+          roleId: roleId,
+          permissionId: permissionId,
+          status: 'active'
         });
         await this.rolePermissionRepository.save(newRolePermission);
       }
     }
   }
 
-    // Delete a specific role-permission
-async softDeleteRolePermission(roleId: string, permissionId: string): Promise<void> {
-  const rolePermission = await this.rolePermissionRepository.findOne({
-    where: { role: { roleId }, permission: { permissionId }, status: 'active' }, // Only active records
-  });
+  async softDeleteRolePermission(roleId: string, permissionId: string): Promise<void> {
+    const rolePermission = await this.rolePermissionRepository.findOne({
+      where: { 
+        roleId,
+        permissionId,
+        status: 'active'
+      }
+    });
 
-  if (!rolePermission) {
-    throw new NotFoundException(
-      `Active role-permission with roleId: ${roleId} and permissionId: ${permissionId} not found or already deleted`,
-    );
-  }
+    if (!rolePermission) {
+      throw new NotFoundException('Role permission not found or already deleted');
+    }
 
-  rolePermission.status = 'deleted';
-  await this.rolePermissionRepository.save(rolePermission);
-}
-
-// Bulk delete permissions
-async softBulkDeleteRolePermissions(roleId: string, permissionIds: string[]): Promise<void> {
-  if (!Array.isArray(permissionIds) || permissionIds.length === 0) {
-    throw new BadRequestException('permissionIds must be a non-empty array');
-  }
-
-  const permissions = await this.permissionRepository.find({
-    where: { permissionId: In(permissionIds) },
-  });
-
-  if (permissions.length !== permissionIds.length) {
-    throw new NotFoundException('One or more permissions not found');
-  }
-
-  const rolePermissions = await this.rolePermissionRepository.find({
-    where: {
-      role: { roleId },
-      permission: { permissionId: In(permissionIds) },
-      status: 'active',
-    },
-  });
-
-  if (rolePermissions.length === 0) {
-    throw new NotFoundException(
-      'No active role-permissions found for the given role and permissions',
-    );
-  }
-
-  rolePermissions.forEach((rolePermission) => {
     rolePermission.status = 'deleted';
-  });
-
-  await this.rolePermissionRepository.save(rolePermissions);
-}
-
+    await this.rolePermissionRepository.save(rolePermission);
+  }
 }

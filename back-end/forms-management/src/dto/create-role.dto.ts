@@ -6,15 +6,14 @@ export class CreateRoleDto {
   role: string;
 
   @IsString()
-  @IsNotEmpty()
-  description: string;
+  @IsOptional()
+  description?: string;
 
-  @IsUUID()
-  @IsNotEmpty()
-  organizationId: string;
+  @IsString()
+  @IsOptional()
+  organizationId?: string;
 
-  @IsArray()
-  @IsOptional() 
-  permissions?: string[];
-  
+  @IsString()
+  @IsOptional()
+  status?: string;
 }

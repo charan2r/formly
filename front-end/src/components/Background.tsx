@@ -20,6 +20,10 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { TemplateProvider } from '../context/TemplateContext';
 import Login from './authentication/Login';
 import ProtectedRoute from './authentication/ProtectedRoute';
+import Role from './role/Role';
+import AddRole from './role/AddRole';
+import ViewRole from './role/ViewRole';
+import EditRole from './role/EditRole';
 
 const LoadingScreen = () => (
   <Box
@@ -125,6 +129,10 @@ const Background: React.FC = () => {
                     <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
                     <Route path="/categories" element={<Category />} />
                     <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
+                    <Route path="/roles" element={<Role />} />
+                    <Route path="/addrole" element={<AddRole />} />
+                    <Route path="/editrole/:roleId" element={<EditRole />} />
+                    <Route path="/viewrole/:roleId" element={<ViewRole />} />
                   </>
                 )}
 

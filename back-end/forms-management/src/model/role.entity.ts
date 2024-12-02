@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Organization } from './organization.entity';
 
 @Entity()
@@ -6,7 +6,11 @@ export class Role {
   @PrimaryGeneratedColumn('uuid')
   roleId: string;
 
+  @Column({ name: 'organizationId' })
+  organizationId: string;
+
   @ManyToOne(() => Organization, { nullable: false })
+  @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
   @Column()
@@ -23,5 +27,4 @@ export class Role {
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
-
 }

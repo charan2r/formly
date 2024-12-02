@@ -1,53 +1,254 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/axios';
+import { toast } from 'react-toastify';
 import {
   Paper, Typography, Box, Checkbox, Divider, IconButton, TextField, Button, Grid
 } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
 
+interface Role {
+  roleId: string;
+  role: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Permission {
+  permissionId: string;
+  name: string;
+  status: string;
+}
+
+interface FormData {
+  roleName: string;
+  description: string;
+}
+
+interface PermissionGroups {
+  userManagement: Permission[];
+  formManagement: Permission[];
+}
+
+interface SelectedPermissions {
+  [key: string]: boolean;
+}
+
+interface RoleResponse {
+  status: string;
+  message: string;
+  data: {
+    roleId: string;
+    role: string;
+    description: string;
+    organizationId: string;
+    createdAt: string;
+  };
+}
+
+interface RolePermissionResponse {
+  status: string;
+  message: string;
+  data: any; // Update this with proper type if needed
+}
+
 function AddRole() {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const [formData, setFormData] = useState<FormData>({
     roleName: '',
     description: '',
   });
 
-  const [permissions, setPermissions] = useState({
-    userManagement: false,
-    createUsers: false,
-    editUsers: false,
-    deleteUsers: false,
-    formManagement: false,
-    createForm: false,
-    viewForm: false,
-    editForm: false,
+  const [availablePermissions, setAvailablePermissions] = useState<Permission[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<SelectedPermissions>({});
+  const [permissionGroups, setPermissionGroups] = useState<PermissionGroups>({
+    userManagement: [],
+    formManagement: []
   });
 
-  const handlePermissionChange = (event) => {
-    const { name, checked } = event.target;
-    setPermissions((prevPermissions) => ({
-      ...prevPermissions,
-      [name]: checked,
+  // Fetch permissions when component mounts
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const response = await api.get('/permissions');
+        console.log(response.data);
+        const permissions = response.data;
+        
+        // Group permissions
+        const grouped = permissions.reduce((acc: PermissionGroups, permission: Permission) => {
+          if (permission.name.toLowerCase().includes('user')) {
+            acc.userManagement.push(permission);
+          } else if (permission.name.toLowerCase().includes('form')) {
+            acc.formManagement.push(permission);
+          }
+          return acc;
+        }, { userManagement: [], formManagement: [] });
+
+        setPermissionGroups(grouped);
+        setAvailablePermissions(permissions);
+        
+        // Initialize selected permissions
+        const initialSelected = permissions.reduce((acc: SelectedPermissions, permission: Permission) => {
+          acc[permission.permissionId] = false;
+          return acc;
+        }, {});
+        setSelectedPermissions(initialSelected);
+      } catch (error) {
+        toast.error('Failed to fetch permissions');
+      }
+    };
+
+    fetchPermissions();
+  }, []);
+
+  const handlePermissionChange = (permissionId: string) => {
+    setSelectedPermissions(prev => ({
+      ...prev,
+      [permissionId]: !prev[permissionId]
     }));
   };
 
-  const handleGroupChange = (group, permissionsList) => {
-    setPermissions((prevPermissions) => {
-      const updatedPermissions = { ...prevPermissions };
-      const isGroupChecked = !prevPermissions[group];
-      permissionsList.forEach((permission) => {
-        updatedPermissions[permission] = isGroupChecked;
+  const handleGroupChange = (groupPermissions: Permission[]) => {
+    const allChecked = groupPermissions.every(p => selectedPermissions[p.permissionId]);
+    
+    setSelectedPermissions(prev => {
+      const updated = { ...prev };
+      groupPermissions.forEach(permission => {
+        updated[permission.permissionId] = !allChecked;
       });
-      updatedPermissions[group] = isGroupChecked;
-      return updatedPermissions;
+      return updated;
     });
   };
 
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData({
       ...formData,
       [name]: value,
     });
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // First create the role
+      const roleResponse = await api.post<RoleResponse>('/roles', {
+        role: formData.roleName,
+        description: formData.description,
+        status: 'active'
+      });
+
+      if (roleResponse.data.status !== 'success') {
+        throw new Error(roleResponse.data.message);
+      }
+
+      const roleId = roleResponse.data.data.roleId;
+
+      // Get selected permission IDs
+      const selectedPermissionIds = Object.entries(selectedPermissions)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([permissionId]) => permissionId);
+
+      if (selectedPermissionIds.length === 0) {
+        throw new Error('Please select at least one permission');
+      }
+
+      // Then assign permissions to the role
+      const permissionResponse = await api.post<RolePermissionResponse>(
+        `/role-permissions/${roleId}`,
+        {
+          permissionIds: selectedPermissionIds
+        }
+      );
+
+      if (permissionResponse.data.status !== 'success') {
+        // If permissions assignment fails, we might want to delete the role
+        // or handle this case appropriately
+        throw new Error(permissionResponse.data.message);
+      }
+
+      toast.success('Role and permissions created successfully!');
+      navigate('/roles');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to create role');
+    }
+  };
+
+  // Add function to fetch role permissions if editing
+  const fetchRolePermissions = async (roleId: string) => {
+    try {
+      const response = await api.get<{
+        status: string;
+        data: { permissionId: string }[];
+      }>(`/role-permissions/${roleId}`);
+
+      if (response.data.status === 'success') {
+        // Update selected permissions state
+        const permissionState = response.data.data.reduce(
+          (acc, { permissionId }) => ({
+            ...acc,
+            [permissionId]: true
+          }),
+          {}
+        );
+        setSelectedPermissions(permissionState);
+      }
+    } catch (error: any) {
+      toast.error('Failed to fetch role permissions');
+    }
+  };
+
+  // Add function to update role permissions
+  const updateRolePermissions = async (roleId: string) => {
+    try {
+      const selectedPermissionIds = Object.entries(selectedPermissions)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([permissionId]) => permissionId);
+
+      if (selectedPermissionIds.length === 0) {
+        throw new Error('Please select at least one permission');
+      }
+
+      const response = await api.patch<RolePermissionResponse>(
+        `/role-permissions/${roleId}`,
+        {
+          permissionIds: selectedPermissionIds
+        }
+      );
+
+      if (response.data.status !== 'success') {
+        throw new Error(response.data.message);
+      }
+
+      toast.success('Role permissions updated successfully!');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Failed to update permissions');
+    }
+  };
+
+  // Add function to remove a single permission from role
+  const removePermissionFromRole = async (roleId: string, permissionId: string) => {
+    try {
+      const response = await api.delete<{
+        status: string;
+        message: string;
+      }>(`/role-permissions/${roleId}/${permissionId}`);
+
+      if (response.data.status === 'success') {
+        setSelectedPermissions(prev => ({
+          ...prev,
+          [permissionId]: false
+        }));
+        toast.success('Permission removed successfully');
+      }
+    } catch (error: any) {
+      toast.error('Failed to remove permission');
+    }
   };
 
   return (
@@ -90,10 +291,10 @@ function AddRole() {
                 backgroundColor: '#f9f9f9', 
                 borderRadius: '5px', 
                 fontSize: '12px', 
-                padding: '-100px -100px', // Smaller padding
-                paddingY: '3px', // Small padding to reduce height
-          paddingX: '6px', // Adjust horizontal padding as needed
-          height: '30px'
+                padding: '-100px -100px',
+                paddingY: '3px',
+                paddingX: '6px',
+                height: '30px'
               }
             }}
             variant="outlined"
@@ -114,11 +315,10 @@ function AddRole() {
                 backgroundColor: '#f9f9f9', 
                 borderRadius: '5px', 
                 fontSize: '12px', 
-                padding: '-10px -10px', // Consistent smaller padding
-                paddingY: '3px', // Small padding to reduce height
-          paddingX: '6px', // Adjust horizontal padding as needed
-          height: '30px'
-                
+                padding: '-10px -10px',
+                paddingY: '3px',
+                paddingX: '6px',
+                height: '30px'
               }
             }}
             variant="outlined"
@@ -127,6 +327,7 @@ function AddRole() {
         <Grid item xs={12} sm={2} display="flex" alignItems="center">
           <Button
             variant="contained"
+            onClick={handleSubmit}
             sx={{
               backgroundColor: 'black',
               color: 'white',
@@ -147,86 +348,49 @@ function AddRole() {
       <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="20px">
         <Typography variant="subtitle1" fontWeight="bold">User Management</Typography>
         <Checkbox
-          checked={permissions.userManagement}
-          onChange={() =>
-            handleGroupChange('userManagement', ['createUsers', 'editUsers', 'deleteUsers'])
-          }
+          checked={permissionGroups.userManagement.every(p => selectedPermissions[p.permissionId])}
+          onChange={() => handleGroupChange(permissionGroups.userManagement)}
           sx={{ color: 'black' }}
         />
       </Box>
       <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Create Users</Typography>
-        <Checkbox
-          checked={permissions.createUsers}
-          onChange={handlePermissionChange}
-          name="createUsers"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Edit Users</Typography>
-        <Checkbox
-          checked={permissions.editUsers}
-          onChange={handlePermissionChange}
-          name="editUsers"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Delete Users</Typography>
-        <Checkbox
-          checked={permissions.deleteUsers}
-          onChange={handlePermissionChange}
-          name="deleteUsers"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider sx={{ marginY: '16px' }} />
+      {permissionGroups.userManagement.map(permission => (
+        <React.Fragment key={permission.permissionId}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography>{permission.name}</Typography>
+            <Checkbox
+              checked={selectedPermissions[permission.permissionId] || false}
+              onChange={() => handlePermissionChange(permission.permissionId)}
+              sx={{ color: 'black' }}
+            />
+          </Box>
+          <Divider />
+        </React.Fragment>
+      ))}
 
       {/* Form Management Group */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px">
+      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="16px">
         <Typography variant="subtitle1" fontWeight="bold">Form Management</Typography>
         <Checkbox
-          checked={permissions.formManagement}
-          onChange={() =>
-            handleGroupChange('formManagement', ['createForm', 'viewForm', 'editForm'])
-          }
+          checked={permissionGroups.formManagement.every(p => selectedPermissions[p.permissionId])}
+          onChange={() => handleGroupChange(permissionGroups.formManagement)}
           sx={{ color: 'black' }}
         />
       </Box>
       <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Create Form</Typography>
-        <Checkbox
-          checked={permissions.createForm}
-          onChange={handlePermissionChange}
-          name="createForm"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>View Form</Typography>
-        <Checkbox
-          checked={permissions.viewForm}
-          onChange={handlePermissionChange}
-          name="viewForm"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Edit Form</Typography>
-        <Checkbox
-          checked={permissions.editForm}
-          onChange={handlePermissionChange}
-          name="editForm"
-          sx={{ color: 'black' }}
-        />
-      </Box>
+      {permissionGroups.formManagement.map(permission => (
+        <React.Fragment key={permission.permissionId}>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography>{permission.name}</Typography>
+            <Checkbox
+              checked={selectedPermissions[permission.permissionId] || false}
+              onChange={() => handlePermissionChange(permission.permissionId)}
+              sx={{ color: 'black' }}
+            />
+          </Box>
+          <Divider />
+        </React.Fragment>
+      ))}
     </Paper>
   );
 }
