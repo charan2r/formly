@@ -20,6 +20,8 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { TemplateProvider } from '../context/TemplateContext';
 import Login from './authentication/Login';
 import ProtectedRoute from './authentication/ProtectedRoute';
+import ProfileSettings from './ProfileSettings';
+
 
 const LoadingScreen = () => (
   <Box
@@ -116,6 +118,9 @@ const Background: React.FC = () => {
             {/* Protected Routes */}
             {isAuthenticated && (
               <>
+              {/* Common Routes (accessible to both Admin and SuperAdmin) */}
+    <Route path="/profile-settings" element={<ProfileSettings />} />
+
                 {/* Admin Routes */}
                 {isAdmin && (
                   <>
