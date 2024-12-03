@@ -41,4 +41,8 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   readonly organizationId?: string;
+
+  @IsString()
+  @IsOptional()
+  readonly roleId?: string;
 }

@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Organization } from './organization.entity';
+import { Role } from './role.entity';
 
 @Entity()
 export class User {
@@ -34,9 +35,15 @@ export class User {
 
   @Column({ type: 'enum', enum: ['PlatformAdmin', 'SuperAdmin', 'Admin', 'SubUser'] })
   userType: string;
-
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @Column({ type: 'uuid', nullable: true })
+  roleId: string;
+
+  @ManyToOne(() => Role)
+  @JoinColumn({ name: 'roleId' })
+  role: Role;
 
   @Column({ type: 'timestamp', nullable: true })
   lastLogin: Date;

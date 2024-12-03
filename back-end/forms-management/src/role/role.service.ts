@@ -11,9 +11,7 @@ export class RoleService {
   constructor(
     private readonly roleRepository: RoleRepository,
     private readonly organizationRepository: OrganizationRepository,
-    private readonly organizationRepository: OrganizationRepository,
-    @InjectRepository(Role)
-    private readonly roleRepository: Repository<Role>,
+
   ) {}
 
   // create a role
@@ -142,27 +140,13 @@ export class RoleService {
     if (!role) {
       throw new NotFoundException('Role not found or unauthorized');
     }
-
+  
     // Update the role
     role.role = updateDto.role || role.role;
     role.description = updateDto.description || role.description;
 
-    return this.roleRepository.save(role);
+    return this.roleRepository.save(role);  
   }
+  
 
-  async getRoleByIdAndOrganization(roleId: string, organizationId: string): Promise<Role> {
-    const role = await this.roleRepository.findOne({
-      where: {
-        roleId,
-        organizationId,
-        status: 'active'
-      }
-    });
-
-    if (!role) {
-      throw new NotFoundException(`Role with ID ${roleId} not found`);
-    }
-
-    return role;
-  }
 }

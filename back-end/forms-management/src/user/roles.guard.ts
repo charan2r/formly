@@ -1,11 +1,15 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { RolePermissionService } from '../role-permission/role-permission.service';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private rolePermissionService: RolePermissionService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
     if (!roles || roles.length === 0) {
       throw new ForbiddenException('Access denied: Roles not defined.');
@@ -20,7 +24,7 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('You do not have permission to access this resource.');
     }
 
-    // if it is  Admin
+    // If it is Admin
     if (user.userType === 'Admin') {
       if (!orgIdFromRequest) {
         orgIdFromRequest = user.organizationId;
@@ -30,6 +34,29 @@ export class RolesGuard implements CanActivate {
         throw new ForbiddenException(
           `Admins can only perform actions on their own organization. You are restricted to organization ID "${user.organizationId}".`
         );
+      }
+    }
+
+    // If it is User, check permissions
+    if (user.userType === 'SubUser') {
+      const requiredPermissions = this.reflector.get<string[]>(
+        'permissions',
+        context.getHandler(),
+      );
+      if (requiredPermissions && requiredPermissions.length > 0) {
+        const userPermissions = await this.rolePermissionService.getRolePermissions(user.roleId);
+        const userPermissionNames = userPermissions.map(
+          (rp) => rp.permission.name,
+        );
+
+        const hasPermission = requiredPermissions.every((permission) =>
+          userPermissionNames.includes(permission),
+        );
+        if (!hasPermission) {
+          throw new ForbiddenException(
+            'You do not have the required permissions to access this resource.',
+          );
+        }
       }
     }
 

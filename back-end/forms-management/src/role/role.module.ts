@@ -7,13 +7,22 @@ import { Role } from '../model/role.entity';
 import { Organization } from '../model/organization.entity';
 import { OrganizationRepository } from 'src/organization/organization.repository'; 
 import { OrganizationModule } from 'src/organization/organization.module';
+import { RolePermissionService } from '../role-permission/role-permission.service';
+import { RolePermissionRepository } from 'src/role-permission/role-permission.repository';
+import { RolePermissionModule } from '../role-permission/role-permission.module';
+import { RolePermission } from 'src/model/role-permission.entity';
+import { Permission } from 'src/model/permission.entity';
+
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Role ,RoleRepository, Organization]),OrganizationModule],
+  imports: [
+    TypeOrmModule.forFeature([Role, Organization, RolePermission, Permission]),
+    OrganizationModule,
+    RolePermissionModule,
+  ],
   controllers: [RoleController],
-  providers: [RoleService,RoleRepository,OrganizationRepository],
-  exports:[RoleService],
+  providers: [RoleService, RoleRepository, OrganizationRepository, RolePermissionService, RolePermissionRepository],
+  exports: [RoleService],
 })
 export class RoleModule {}
-  

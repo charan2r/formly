@@ -1,6 +1,7 @@
 import { IsUUID, IsString, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
 
-export class CreateRoleDto {
+export class 
+CreateRoleDto {
   @IsString()
   @IsNotEmpty()
   role: string;

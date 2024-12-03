@@ -1,8 +1,7 @@
-import { Controller, UseGuards, Get, Delete, Param, Post, Body, Patch, UseGuards, Request, Req, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, UseGuards, Get, Delete, Param, Post, Body, Patch, Request, Req, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from '../dto/create-role.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/user/roles.guard';
 import { Roles } from 'src/user/roles.decorator';
 
@@ -14,7 +13,6 @@ export class RoleController {
   @Post()
   @Roles('Admin')
   async createRole(@Body() createRoleDto: CreateRoleDto, @Request() req: any) {
-
     if (!createRoleDto.organizationId) {
       createRoleDto.organizationId = req.user.organizationId;
     }
@@ -43,7 +41,7 @@ export class RoleController {
       data: roles,
     };
   }
-  
+
   //get one role by id
   @Get(':id')
   @Roles('Admin')
@@ -53,31 +51,23 @@ export class RoleController {
     return {
       status: 'success',
       message: 'Role retrieved successfully',
-      data: role,
-      data: roles.map(role => ({
+      data: {
         roleId: role.roleId,
         role: role.role,
         description: role.description,
         organizationId: role.organizationId,
         createdAt: role.createdAt,
         status: role.status
-      })),
+      },
     };
   }
 
-
   // Soft delete a role
   @Delete(':id')
-  async deleteRole(
-    @User('organizationId') organizationId: string,
-    @Param('id') id: string
-  ) {
-    await this.roleService.deleteRoleForOrganization(id, organizationId);
   @Roles('Admin')
   async deleteRole(@Req() request, @Param('id') id: string) {
     const organizationId = request.user.organizationId;
-    await this.roleService.deleteRole(id, organizationId);
-    
+    await this.roleService.deleteRoleForOrganization(id, organizationId);
     return {
       status: 'success',
       message: 'Role deleted successfully',
@@ -87,10 +77,9 @@ export class RoleController {
 
   //soft bulk delete
   @Delete()
-  async deleteRoles(
-    @User('organizationId') organizationId: string,
-    @Body() ids: string[]
-  ) {
+  @Roles('Admin')
+  async deleteRoles(@Req() request, @Body() ids: string[]) {
+    const organizationId = request.user.organizationId;
     await this.roleService.deleteRolesForOrganization(ids, organizationId);
     return {
       status: 'success',
@@ -100,11 +89,13 @@ export class RoleController {
   }
 
   @Patch(':id')
+  @Roles('Admin')
   async updateRole(
-    @User('organizationId') organizationId: string,
+    @Req() request,
     @Param('id') roleId: string,
     @Body() updateRoleDto: CreateRoleDto
   ) {
+    const organizationId = request.user.organizationId;
     const updatedRole = await this.roleService.updateRoleForOrganization(
       roleId,
       updateRoleDto,
@@ -118,12 +109,11 @@ export class RoleController {
   }
 
   @Get(':id')
-  async getRole(
-    @User('organizationId') organizationId: string,
-    @Param('id') roleId: string
-  ) {
+  @Roles('Admin')
+  async getRoleById(@Req() request, @Param('id') roleId: string) {
     try {
-      const role = await this.roleService.getRoleByIdAndOrganization(roleId, organizationId);
+      const organizationId = request.user.organizationId;
+      const role = await this.roleService.getOne(roleId, organizationId);
       
       if (!role) {
         throw new HttpException({

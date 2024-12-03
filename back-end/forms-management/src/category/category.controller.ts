@@ -1,8 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from '../user/Create-Category.dto';
 import { Category } from '../model/category.entity';
+import { Roles } from 'src/user/roles.decorator';
+import { RolesGuard } from 'src/user/roles.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 interface CategoryResponse {
   categoryId: string;
@@ -12,11 +15,13 @@ interface CategoryResponse {
   status: string;
 }
 
+@UseGuards(AuthGuard('jwt'),RolesGuard) // Protect all routes with JWT authentication
 @Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
     
     // Create a category
+  @Roles("Admin","SubUser")
   @Post('create')
   async addCategory(@Body() createCategoryDto: CreateCategoryDto): Promise<{ status: string; message: string; data: CategoryResponse }> {
     const category = await this.categoryService.create(createCategoryDto);

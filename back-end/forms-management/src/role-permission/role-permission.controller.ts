@@ -1,5 +1,4 @@
 import { Controller, Body, Param, Post, Get, Delete, Patch, BadRequestException, UseGuards } from '@nestjs/common';
-import { Controller, Body, Param, Post, Get, Delete, Patch, BadRequestException, UseGuards } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
 import { PermissionRepository } from '../permission/permission.repository';
 import { Roles } from 'src/user/roles.decorator';
@@ -16,7 +15,7 @@ export class RolePermissionController {
   ) {}
 
   @Post(':roleId')
-  @Roles("Admin")
+  @Roles('Admin')
   async assignPermissionsToRole(
     @Param('roleId') roleId: string,
     @Body('permissionIds') permissionIds: string[],
@@ -25,20 +24,19 @@ export class RolePermissionController {
       throw new BadRequestException('permissionIds must be a non-empty array');
     }
 
-    const rolePermissions = await this.rolePermissionService.assignPermissionsToRole(roleId, permissionIds);
-    
-    return {
-      role,
-      permissions,
-    };
-  }  
+    await this.rolePermissionService.assignPermissionsToRole(
+      roleId,
+      permissionIds,
+    );
 
-  // Get all role-permission
-  @Get()
-  @Roles("Admin")
-  async getAllRolePermissions() {
-    const rolePermissions = await this.rolePermissionService.getAllRolePermissions();
-    return rolePermissions;
+    return {
+      status: 'success',
+      message: 'Permissions assigned to role successfully',
+      data: {
+        roleId,
+        permissionIds
+      }
+    };
   }
 
   // Get a role with its permissions

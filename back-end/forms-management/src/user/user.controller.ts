@@ -61,7 +61,7 @@ export class UserController {
 
   // API endpoint to create a new user
   @Post('create')
-  @Roles("Admin")
+  @Roles("Admin","SubUser")
   async addUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<{ message: string; status: string; data: User }> {

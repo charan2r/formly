@@ -31,6 +31,6 @@ import { OrganizationRepository } from 'src/organization/organization.repository
     RoleRepository,
     PermissionRepository,
   ],
-  exports: [RolePermissionService],
+  exports: [RolePermissionService, RolePermissionRepository],
 })
 export class RolePermissionModule {}
