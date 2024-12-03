@@ -161,16 +161,22 @@ export class OrganizationService {
     return { organization, newAdmin: newAdmin.data };
   }
 
-  async getUserTypesCounts(): Promise<{ [key: string]: number }> {
-    const users = await this.userRepository.find({
-      where: { isDeleted: false }
-    });
-
+  async getUserTypesCounts(user: { userType: string; organizationId?: string }): Promise<{ [key: string]: number }> {
+    const whereCondition: any = { isDeleted: false };
+  
+    // If the user is an Admin, filter by their organizationId
+    if (user.userType === 'Admin') {
+      whereCondition.organizationId = user.organizationId;
+    }
+  
+    const users = await this.userRepository.find({ where: whereCondition });
+  
     const counts = users.reduce((acc, user) => {
       acc[user.userType] = (acc[user.userType] || 0) + 1;
       return acc;
     }, {});
-
+  
     return counts;
   }
+  
 }

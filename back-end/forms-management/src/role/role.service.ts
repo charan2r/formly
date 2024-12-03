@@ -9,6 +9,8 @@ import { Role } from 'src/model/role.entity';
 @Injectable()
 export class RoleService {
   constructor(
+    private readonly roleRepository: RoleRepository,
+    private readonly organizationRepository: OrganizationRepository,
     private readonly organizationRepository: OrganizationRepository,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
@@ -38,29 +40,50 @@ export class RoleService {
     return savedRole;
   }
 
-  // Get all roles for an organization
+  // Get all roles
   async getAllByOrganization(organizationId: string) {
-    return this.roleRepository.find({
-      where: {
-        organizationId,
-        status: 'active',
-      },
-      relations: ['organization'],
+    const organization = await this.organizationRepository.findOne({
+      where: { orgId: organizationId },
     });
-  }
-
-  // Soft delete a role
-  async deleteRole(roleId: string): Promise<boolean> {
-    const role = await this.roleRepository.findOne({
-      where: { roleId, status: 'active' },
-    });
-    if (!role) {
-      throw new NotFoundException('Role not found or already deleted');
+  
+    if (!organization) {
+      throw new NotFoundException('Organization not found');
     }
-    role.status = 'deleted';
-    await this.roleRepository.save(role);
-    return true;
+  
+    return await this.roleRepository.find({
+      where: { organization: { orgId: organizationId } },
+    });
   }
+  
+  
+
+  // Get a single role
+  async getOne(roleId: string, organizationId: string) {
+    const role = await this.roleRepository.findOne({
+      where: { roleId, organization: { orgId: organizationId } },
+    });
+  
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+  
+    return role;
+  }  
+  
+    //Soft delete a role
+    async deleteRole(roleId: string, organizationId: string): Promise<boolean> {
+      const role = await this.roleRepository.findOne({
+        where: { roleId, organization: { orgId: organizationId }, status: 'active' },
+      });
+    
+      if (!role) {
+        throw new NotFoundException('Role not found or already being deleted');
+      }
+    
+      role.status = 'deleted';
+      await this.roleRepository.save(role);
+      return true;
+    }    
 
   // Delete role for organization
   async deleteRoleForOrganization(roleId: string, organizationId: string) {

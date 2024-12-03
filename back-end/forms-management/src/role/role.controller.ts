@@ -1,56 +1,59 @@
-import { Controller, UseGuards, Get, Delete, Param, Post, Body, Patch, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, UseGuards, Get, Delete, Param, Post, Body, Patch, UseGuards, Request, Req, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleService } from './role.service';
-import { CreateRoleDto } from 'src/dto/create-role.dto';
-import { User, JwtUser } from '../decorators/user.decorator';
+import { CreateRoleDto } from '../dto/create-role.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/user/roles.guard';
+import { Roles } from 'src/user/roles.decorator';
 
 @Controller('roles')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post()
-  async createRole(
-    @User() user: JwtUser,
-    @Body() createRoleDto: CreateRoleDto
-  ) {
-    try {
-      // if (!user.permissions?.includes('createUsers')) {
-      //   throw new UnauthorizedException('You do not have permission to create roles');
-      // }
+  @Roles('Admin')
+  async createRole(@Body() createRoleDto: CreateRoleDto, @Request() req: any) {
 
-      const roleWithOrg = {
-        ...createRoleDto,
-        organizationId: user.organizationId
-      };
-      
-      const role = await this.roleService.create(roleWithOrg);
-      
-      return {
-        status: 'success',
-        message: 'Role created successfully',
-        data: {
-          roleId: role.roleId,
-          role: role.role,
-          description: role.description,
-          organizationId: role.organizationId,
-          createdAt: role.createdAt
-        },
-      };
-    } catch (error) {
-      throw new HttpException({
-        status: 'error',
-        message: error.message || 'Failed to create role',
-      }, HttpStatus.BAD_REQUEST);
+    if (!createRoleDto.organizationId) {
+      createRoleDto.organizationId = req.user.organizationId;
     }
+    
+    const role = await this.roleService.create(createRoleDto);
+    const { organization, ...roleData } = role;
+    return {
+      status: 'success',
+      message: 'Role created successfully',
+      data: {
+        ...roleData,
+        organizationId: role.organization?.orgId,
+      },
+    };
   }
 
+  // get all roles 
   @Get()
-  async getAllRoles(@User('organizationId') organizationId: string) {
+  @Roles('Admin')
+  async getAllRoles(@Req() request) {
+    const organizationId = request.user.organizationId;
     const roles = await this.roleService.getAllByOrganization(organizationId);
     return {
       status: 'success',
       message: 'Roles retrieved successfully',
+      data: roles,
+    };
+  }
+  
+  //get one role by id
+  @Get(':id')
+  @Roles('Admin')
+  async getRole(@Req() request, @Param('id') roleId: string) {
+    const organizationId = request.user.organizationId;
+    const role = await this.roleService.getOne(roleId, organizationId);
+    return {
+      status: 'success',
+      message: 'Role retrieved successfully',
+      data: role,
       data: roles.map(role => ({
         roleId: role.roleId,
         role: role.role,
@@ -62,6 +65,7 @@ export class RoleController {
     };
   }
 
+
   // Soft delete a role
   @Delete(':id')
   async deleteRole(
@@ -69,6 +73,11 @@ export class RoleController {
     @Param('id') id: string
   ) {
     await this.roleService.deleteRoleForOrganization(id, organizationId);
+  @Roles('Admin')
+  async deleteRole(@Req() request, @Param('id') id: string) {
+    const organizationId = request.user.organizationId;
+    await this.roleService.deleteRole(id, organizationId);
+    
     return {
       status: 'success',
       message: 'Role deleted successfully',
@@ -76,6 +85,7 @@ export class RoleController {
     };
   }
 
+  //soft bulk delete
   @Delete()
   async deleteRoles(
     @User('organizationId') organizationId: string,

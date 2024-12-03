@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, UseGuards,Get, Delete, Post, Request, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException, ForbiddenException } from '@nestjs/common';
+import { Controller, UseGuards,Get, Delete, Post, Request, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException} from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
@@ -167,7 +167,9 @@ export class OrganizationController {
     @Roles("SuperAdmin")
     async getUserTypesCounts(): Promise<{ status: string; message: string; data: any }> {
       try {
-        const counts = await this.organizationService.getUserTypesCounts();
+        const user = req.user;
+        const organizationId = user.userType === 'Admin' ? user.organizationId : null;
+        const counts = await this.organizationService.getUserTypesCounts(user);
         return {
           status: 'success',
           message: 'User types count retrieved successfully',

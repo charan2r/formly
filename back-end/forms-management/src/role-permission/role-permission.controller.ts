@@ -1,15 +1,22 @@
 import { Controller, Body, Param, Post, Get, Delete, Patch, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Body, Param, Post, Get, Delete, Patch, BadRequestException, UseGuards } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
+import { PermissionRepository } from '../permission/permission.repository';
+import { Roles } from 'src/user/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/user/roles.guard';
+
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('role-permissions')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class RolePermissionController {
   constructor(
     private readonly rolePermissionService: RolePermissionService,
   ) {}
 
   @Post(':roleId')
+  @Roles("Admin")
   async assignPermissionsToRole(
     @Param('roleId') roleId: string,
     @Body('permissionIds') permissionIds: string[],
@@ -21,12 +28,20 @@ export class RolePermissionController {
     const rolePermissions = await this.rolePermissionService.assignPermissionsToRole(roleId, permissionIds);
     
     return {
-      status: 'success',
-      message: 'Permissions assigned successfully',
-      data: rolePermissions
+      role,
+      permissions,
     };
   }  
 
+  // Get all role-permission
+  @Get()
+  @Roles("Admin")
+  async getAllRolePermissions() {
+    const rolePermissions = await this.rolePermissionService.getAllRolePermissions();
+    return rolePermissions;
+  }
+
+  // Get a role with its permissions
   @Get(':roleId')
   async getRolePermissions(@Param('roleId') roleId: string) {
     const rolePermissions = await this.rolePermissionService.getRolePermissions(roleId);

@@ -23,22 +23,30 @@ import { OrganizationModule } from 'src/organization/organization.module';
 import { Organization } from 'src/model/organization.entity';
 import { OrganizationService } from 'src/organization/organization.service';
 import { AuthModule } from 'src/auth/auth.module';
+import { UserRoleService } from 'src/userRole/userRole.service';
+import { UserRepository } from 'src/user/user.repository';
+import { UserRoleRepository } from 'src/userRole/userRole.repository';
+import { User } from 'src/model/user.entity';
+import { UserRole } from 'src/model/UserRole.entity';
+import { userRoleModule } from 'src/userRole/userRole.module';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([AuditTrail, AuditTrailRepository,Permission,Role,RolePermission,Organization]),
+        TypeOrmModule.forFeature([AuditTrail, AuditTrailRepository,Permission,Role,RolePermission,Organization,User,UserRole]),
         UserModule,
         RoleModule,
         PermissionModule,
         RolePermissionModule,
         AuditTrailModule,
         OrganizationModule,
-        AuthModule
+        AuthModule,
+        userRoleModule,
+        UserModule
       ],
   providers: [
     {
         provide: 'MONITORED_ENTITIES',
-        useValue: [Role, Permission, RolePermission,Organization],
+        useValue: [Role, Permission, RolePermission,Organization,User,UserRole],
     },
     RoleService,
     RoleRepository,
@@ -51,7 +59,10 @@ import { AuthModule } from 'src/auth/auth.module';
     PermissionRepository,
     AuditTrailService,
     AuditTrailRepository,
-    OrganizationService
+    OrganizationService,
+    UserRoleService,
+    UserRepository,
+    UserRoleRepository
   ],
   controllers:[AuditTrailController],
   exports: [
