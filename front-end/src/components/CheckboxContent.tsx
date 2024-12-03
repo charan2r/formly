@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ReactQuill from 'react-quill';
 import { QuestionItem } from '../types/questions';
 import DragHandle from './DragHandle';
-import axios from 'axios';
+import api from '../utils/axios';
 
 interface CheckboxContentProps {
   item: QuestionItem;
@@ -57,7 +57,7 @@ const CheckboxContent: React.FC<CheckboxContentProps> = ({
 
   const debouncedUpdate = useDebounce(async (formFieldsOptionId: string, newContent: string) => {
     try {
-      const response = await axios.patch(`http://localhost:3001/form-fields-options/update`, {
+      const response = await api.patch(`/form-fields-options/update`, {
         optionId: formFieldsOptionId,
         option: newContent,
         formFieldId: formFieldId
@@ -115,7 +115,7 @@ const CheckboxContent: React.FC<CheckboxContentProps> = ({
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/form-fields-options`, {
+        const response = await api.get(`/form-fields-options`, {
           params: { formFieldId: formFieldId }
         });
         if (response.data.success) {
