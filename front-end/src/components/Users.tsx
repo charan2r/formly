@@ -34,6 +34,7 @@ import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 interface Users {
   userId: string;
@@ -70,6 +71,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const Users: React.FC = () => {
   const [users, setUsers] = useState<Users[]>([]);
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
@@ -77,7 +79,7 @@ const Users: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ userId: '', firstName: '', lastName: '', email: '', phoneNumber: '', userType: '' });
+  const [filters, setFilters] = useState({ userId: '', firstName: '', lastName: '', email: '', phoneNumber: '', roleId: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [userDetails, setUserDetails] = useState<Users | null>(null);
@@ -92,16 +94,16 @@ const Users: React.FC = () => {
     lastName: '',
     email: '',
     phone: '',
-    userType: ''
+    roleId: ''
   });
 
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await api.get(`/users?userId=${user.userId}`);
+        const response = await api.get(`/users`);
         console.log(response.data)
-        setUsers(response.data.data);
+        setUsers(response.data.data[0]);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -173,7 +175,7 @@ const Users: React.FC = () => {
 
   const handleCreateUser = async () => {
     try {
-      const response = await api.post('/user', newUser);
+      const response = await api.post('/users/create', newUser);
       setUsers([...users, response.data]);
       setCreateUserOpen(false);
       toast.success("User created successfully!");
@@ -202,7 +204,7 @@ const Users: React.FC = () => {
         lastName: response.data.lastName,
         email: response.data.email,
         phoneNumber: response.data.phoneNumber || '',
-        userType: response.data.userType || ''
+        roleId: response.data.roleId || ''
       });
       setEditDialogOpen(true);
       handleMenuClose();
@@ -225,7 +227,7 @@ const Users: React.FC = () => {
     if (!editFormData) return;
 
     try {
-      await api.put(`/users/${editFormData.id}`, editFormData);
+      await api.put(`/users/edit/?id=${editFormData.id}`, editFormData);
       // Refresh the users list
       const response = await api.get(`/users?userId=${user.userId}`);
       setUsers(response.data.data);

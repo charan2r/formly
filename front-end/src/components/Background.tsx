@@ -110,7 +110,7 @@ const Background: React.FC = () => {
             isEditTemplate ? (
               <>
                 <LeftSidebar />
-                <EditPageSettings />
+                
               </>
             ) : (
               <Sidebar />
