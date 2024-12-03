@@ -40,7 +40,7 @@ import { RolePermissionModule } from './role-permission/role-permission.module';
 import { RolePermission } from '../src/model/role-permission.entity'
 import { RolePermissionRepository } from '../src/role-permission/role-permission.repository';
 import { AuditTrailSubscriber } from './audit-trails/AuditTrailSubscriber';
-import { AuditTrail} from './model/Audittrail.entity';
+import { AuditTrail } from './model/AuditTrail.entity';
 import { ClsModule } from 'nestjs-cls';
 import { AuditTrailModule } from './audit-trails/AuditTrail.module';
 import { AuditTrailRepository } from './audit-trails/AuditTrail.repository';

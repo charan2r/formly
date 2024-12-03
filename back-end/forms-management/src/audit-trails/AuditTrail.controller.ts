@@ -1,6 +1,6 @@
 import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
 import { AuditTrailService } from './AuditTrail.service';
-import { AuditTrail } from '../model/Audittrail.entity';
+import { AuditTrail } from '../model/AuditTrail.entity';
 
 
 export class ApiResponse<T> {

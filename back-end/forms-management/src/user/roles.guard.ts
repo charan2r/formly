@@ -19,7 +19,7 @@ export class RolesGuard implements CanActivate {
     if (!roles.includes(user.userType)) {
       throw new ForbiddenException('You do not have permission to access this resource.');
     }
-
+    
     return true;
   }
 }

@@ -1,12 +1,12 @@
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent, RemoveEvent } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { AuditTrail } from '../model/Audittrail.entity';
+import { AuditTrail } from 'src/model/AuditTrail.entity';
 import { RolePermission } from '../model/role-permission.entity';
 import { Permission } from '../model/permission.entity';
 import { Role } from '../model/role.entity';
 import { RoleService } from '../role/role.service';
 import { PermissionService } from '../permission/permission.service'; 
-import { RolePermissionService} from '../role-permission/role-permission.service'
+import { RolePermissionService } from '../role-permission/role-permission.service';
 import { Organization } from 'src/model/organization.entity';
 import { OrganizationService } from 'src/organization/organization.service';
 
@@ -120,12 +120,14 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
     switch (service) {
       case RoleService:
         return this.roleService.deleteRole.bind(this.roleService);
-      case PermissionService:
-        return this.permissionService.softDeletePermission.bind(this.permissionService);
-      case RolePermissionService:
-        return this.rolePermissionService.softDeleteRolePermission.bind(this.rolePermissionService);
+      // case PermissionService:
+      //   return this.permissionService.softDeletePermission.bind(this.permissionService);
+      // case RolePermissionService:
+      //   return this.rolePermissionService.softDeleteRolePermission.bind(this.rolePermissionService);
       case OrganizationService:
-        return this.organizationService.deleteOne.bind(this.organizationService)
+        return this.organizationService.deleteOne.bind(
+          this.organizationService,
+        );
       // Add cases for other services here as needed
       default:
         throw new Error('No soft delete service found for this entity');

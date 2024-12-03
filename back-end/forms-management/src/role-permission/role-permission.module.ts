@@ -8,6 +8,8 @@ import { Permission } from '../model/permission.entity';
 import { RolePermissionRepository } from './role-permission.repository';
 import { RoleRepository } from '../role/role.repository';
 import { PermissionRepository } from '../permission/permission.repository';
+import { RoleService } from 'src/role/role.service';
+import { OrganizationRepository } from 'src/organization/organization.repository';
 
 @Module({
   imports: [
@@ -21,7 +23,14 @@ import { PermissionRepository } from '../permission/permission.repository';
     ]),
   ],
   controllers: [RolePermissionController],
-  providers: [RolePermissionService,RolePermissionRepository,RoleService,OrganizationRepository,RoleRepository,PermissionRepository],
-  exports:[RolePermissionService]
+  providers: [
+    RolePermissionService,
+    RolePermissionRepository,
+    RoleService,
+    OrganizationRepository,
+    RoleRepository,
+    PermissionRepository,
+  ],
+  exports: [RolePermissionService],
 })
 export class RolePermissionModule {}

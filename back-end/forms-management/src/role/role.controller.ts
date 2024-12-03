@@ -62,17 +62,6 @@ export class RoleController {
     };
   }
 
-  //get one role by id
-  @Get(':id')
-  async getRole(@Param('id') roleId: string) {
-    const role = await this.roleService.getOne(roleId);
-    return {
-      status: 'success',
-      message: 'Role retrieved successfully',
-      data: role,
-    };
-  }
-
   // Soft delete a role
   @Delete(':id')
   async deleteRole(

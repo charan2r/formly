@@ -5,7 +5,7 @@ import { Role } from '../model/role.entity';
 import { Permission } from '../model/permission.entity';
 import { RolePermission } from '../model/role-permission.entity';
 import { AuditTrailRepository } from './AuditTrail.repository';
-import { AuditTrail } from '../model/Audittrail.entity';
+import { AuditTrail } from '../model/AuditTrail.entity';
 import { UserModule } from '../user/user.module';
 import { RoleModule } from '../role/role.module';
 import { RoleService } from '../role/role.service';
