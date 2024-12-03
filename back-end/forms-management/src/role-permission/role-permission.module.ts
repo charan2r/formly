@@ -21,12 +21,7 @@ import { PermissionRepository } from '../permission/permission.repository';
     ]),
   ],
   controllers: [RolePermissionController],
-  providers: [
-    RolePermissionService,
-    RolePermissionRepository,
-    RoleRepository,
-    PermissionRepository
-  ],
-  exports: [RolePermissionService]
+  providers: [RolePermissionService,RolePermissionRepository,RoleService,OrganizationRepository,RoleRepository,PermissionRepository],
+  exports:[RolePermissionService]
 })
 export class RolePermissionModule {}

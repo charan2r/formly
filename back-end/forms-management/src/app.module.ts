@@ -19,15 +19,6 @@ import { FormTemplateModule } from './form-template/form-template.module';
 import { FormTemplate } from './model/form-template.entity';
 import { FormTemplateRepository } from './form-template/form-template.repository';
 import { CategoryRepository } from './category/category.repository';
-import { Role } from './model/role.entity';
-import { RoleModule } from './role/role.module';
-import { RoleRepository } from './role/role.repository';
-import { PermissionModule } from '../src/permission/permission.module'
-import { Permission } from './model/permission.entity';
-import { PermissionRepository } from './permission/permission.repository';
-import { RolePermissionModule } from './role-permission/role-permission.module';
-import { RolePermission } from '../src/model/role-permission.entity';
-import { RolePermissionRepository } from '../src/role-permission/role-permission.repository';
 import { FormFieldsModule } from './form-fields/form-fields.module';
 import { FormFieldsRepository } from './form-fields/form-fields.repository';
 import { FormField } from './model/form-fields.entity';
@@ -39,6 +30,21 @@ import { FormFieldsOptionsModule } from './form-fields-options/form-fields-optio
 import { FormFieldsOptionsRepository } from './form-fields-options/form-fields-options.repository';
 import { FormFieldsOption } from './model/form-fields-option.entity';
 import { AuthModule } from './auth/auth.module';
+import { Role } from './model/role.entity';
+import { RoleModule } from './role/role.module';
+import { RoleRepository } from './role/role.repository';
+import { PermissionModule } from '../src/permission/permission.module'
+import { Permission } from './model/permission.entity';
+import { PermissionRepository } from './permission/permission.repository';
+import { RolePermissionModule } from './role-permission/role-permission.module';
+import { RolePermission } from '../src/model/role-permission.entity'
+import { RolePermissionRepository } from '../src/role-permission/role-permission.repository';
+import { AuditTrailSubscriber } from './audit-trails/AuditTrailSubscriber';
+import { AuditTrail} from './model/Audittrail.entity';
+import { ClsModule } from 'nestjs-cls';
+import { AuditTrailModule } from './audit-trails/AuditTrail.module';
+import { AuditTrailRepository } from './audit-trails/AuditTrail.repository';
+
 
 @Module({
   imports: [
@@ -51,9 +57,10 @@ import { AuthModule } from './auth/auth.module';
       database: 'postgres',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/migrations/*{.ts,.js}'],
+      subscribers: [AuditTrailSubscriber],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, Role, Permission,RolePermission, FormField, FormFieldsOption]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, FormField, FormFieldsOption, Role, Permission,RolePermission,AuditTrail]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
@@ -63,9 +70,19 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
     RoleModule,
     PermissionModule,
-    RolePermissionModule
+    RolePermissionModule,
+    AuditTrailModule,
+
+    ClsModule.forRoot({
+      global: true,
+       //middleware: {
+        //mount: true
+      //}
+    })
   ],
   controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController, FormFieldsOptionsController],
-  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository,RoleRepository,PermissionRepository, RolePermissionRepository],
+  providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository,RoleRepository,PermissionRepository, RolePermissionRepository,AuditTrailSubscriber,
+ AuditTrailRepository
+  ],
 })
 export class AppModule { }

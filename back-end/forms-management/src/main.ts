@@ -4,8 +4,11 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'; // https://doc
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import 'reflect-metadata';
-import { PermissionService } from './permission/permission.service';
 import * as cookieParser from 'cookie-parser';
+import { PermissionService } from './permission/permission.service';
+=========
+import * as cookieParser from 'cookie-parser';
+>>>>>>>>> Temporary merge branch 2
 
 //import AppDataSource from 'ormconfig'; 
 
