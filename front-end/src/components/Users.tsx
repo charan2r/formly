@@ -32,7 +32,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-import axios from 'axios';
+import api from '../utils/axios';
 import { toast } from 'react-toastify';
 
 interface Users {
@@ -99,7 +99,7 @@ const Users: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users?userId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
+        const response = await api.get(`/users?userId=${user.userId}`);
         console.log(response.data)
         setUsers(response.data.data);
       } catch (error) {
@@ -173,7 +173,7 @@ const Users: React.FC = () => {
 
   const handleCreateUser = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/user', newUser);
+      const response = await api.post('/user', newUser);
       setUsers([...users, response.data]);
       setCreateUserOpen(false);
       toast.success("User created successfully!");
@@ -184,7 +184,7 @@ const Users: React.FC = () => {
 
   const handleViewUser = async (userId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
+      const response = await api.get(`/users/details?userId=${userId}`);
       setUserDetails(response.data);
       setDialogOpen(true);
       handleMenuClose();
@@ -196,7 +196,7 @@ const Users: React.FC = () => {
   // New handler for edit button click
   const handleEditUser = async (userId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
+      const response = await api.get(`/users/details?userId=${userId}`);
       setEditFormData({
         firstName: response.data.firstName,
         lastName: response.data.lastName,
@@ -225,9 +225,9 @@ const Users: React.FC = () => {
     if (!editFormData) return;
 
     try {
-      await axios.put(`http://localhost:3001/users/${editFormData.id}`, editFormData);
+      await api.put(`/users/${editFormData.id}`, editFormData);
       // Refresh the users list
-      const response = await axios.get('http://localhost:3001/users?userId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
+      const response = await api.get(`/users?userId=${user.userId}`);
       setUsers(response.data.data);
       setEditDialogOpen(false);
       setEditFormData(null);
@@ -244,7 +244,7 @@ const Users: React.FC = () => {
   // Method to handle deletion of an user
   const handleDeleteUser = async () => {
     try {
-      await axios.delete(`http://localhost:3001/user/delete?id=${userToDelete}`);
+      await api.delete(`/user/delete?id=${userToDelete}`);
       setUsers((prev) => prev.filter((org) => org.userId !== userToDelete));
       setConfirmationOpen(false);
       toast.success("User has been deleted successfully!", {

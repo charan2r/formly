@@ -25,7 +25,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import DraggableQuestion from './DraggableQuestion';
 import { useParams, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axios';
 import { useTemplate } from '../context/TemplateContext';
 
 const pageSizes = {
@@ -164,7 +164,7 @@ const EditPageSettings: React.FC = () => {
   useEffect(() => {
     const fetchTemplateData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/form-templates/details?id=${formTemplateId}`);
+        const response = await api.get(`/form-templates/details?id=${formTemplateId}`);
         
         if (response.data.status === 'success') {
           const template = response.data.data;

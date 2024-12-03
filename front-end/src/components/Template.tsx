@@ -38,6 +38,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
+import { useAuth } from '../context/AuthContext';
 
 interface Template {
     formTemplateId: string;
@@ -79,6 +80,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const Template: React.FC = () => {
     const navigate = useNavigate();
+    const {user} = useAuth();
     const [templates, setTemplates] = useState<Template[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
@@ -129,7 +131,9 @@ const Template: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const response = await api.get(`/categories/organization/${organizationId}`);
+                const response = await api.get(`/categories/organization/${user?.organizationId}`);
+                console.log(response.data);
+                setCategories(response.data.data);
                 const activeCategories = response.data.data;
             } catch (error) {
                 console.error('Error fetching categories:', error);

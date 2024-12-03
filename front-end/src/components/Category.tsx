@@ -38,6 +38,7 @@ import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useAuth } from '../context/AuthContext';
 
 interface Category {
     categoryId: string;
@@ -66,6 +67,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const Category: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategories, setSelectedCategories] = useState<Record<number, boolean>>({});
@@ -86,7 +88,7 @@ const Category: React.FC = () => {
     const [newCategory, setNewCategory] = useState({
         name: '',
         description: '',
-        createdById: '8478937e-17cf-4936-97a8-0e92a33280f9'
+        createdById: user?.organizationId ,
     });
      // Adjust `createdById` as needed
      const [error, setError] = useState<string | null>(null); // Optional: To display errors
@@ -102,7 +104,9 @@ const Category: React.FC = () => {
         setError(null);
       
         try {
+            console.log(newCategory);
             const response = await api.post('/categories/create', newCategory);
+
             
             // Add the new category to the existing categories
             setCategories(prevCategories => [...prevCategories, response.data]);
@@ -114,7 +118,7 @@ const Category: React.FC = () => {
             setNewCategory({ 
                 name: '', 
                 description: '', 
-                createdById: '8478937e-17cf-4936-97a8-0e92a33280f9' 
+                createdById: user?.organizationId
             });
 
             // Show success message
@@ -148,8 +152,13 @@ const Category: React.FC = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await api.get(`/categories/organization/${organizationId}`);
-            setCategories(response.data.data);
+            if (user) {
+                const response = await api.get(`/categories/organization/${user.organizationId}`);
+                setCategories(response.data.data);
+            } else {
+                setError('User is not authenticated.');
+            }
+            
         } catch (error) {
             console.error('Error fetching categories:', error);
             setError('Unable to fetch categories. Please try again later.');
