@@ -9,6 +9,10 @@ import { PermissionService } from '../permission/permission.service';
 import { RolePermissionService} from '../role-permission/role-permission.service'
 import { Organization } from 'src/model/organization.entity';
 import { OrganizationService } from 'src/organization/organization.service';
+import { User } from 'src/model/user.entity';
+import { UserService } from 'src/user/user.service';
+import { UserRole } from 'src/model/UserRole.entity';
+import { UserRoleService } from 'src/userRole/userRole.service';
 
 @EventSubscriber()
 @Injectable()
@@ -17,7 +21,9 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
     Role,
     Permission, 
     RolePermission,
-    Organization
+    Organization,
+    User,
+    UserRole
   ];
 
   // Map entities to their respective soft delete services
@@ -25,7 +31,9 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
     Role: RoleService,
     Permission: PermissionService,
     RolePermission: RolePermissionService,
-    Organization: OrganizationService
+    Organization: OrganizationService,
+    User:UserService,
+    UserRole:UserRoleService
   };
 
   constructor(
@@ -33,6 +41,8 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
     private readonly permissionService: PermissionService,
     private readonly rolePermissionService: RolePermissionService,
     private readonly organizationService: OrganizationService,
+    private readonly userService: UserService,
+    private readonly userRoleService: UserRoleService
   ) {
     console.log('MONITORED_ENTITIES:', AuditTrailSubscriber.entitiesToMonitor);
   }
@@ -126,6 +136,10 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
         return this.rolePermissionService.softDeleteRolePermission.bind(this.rolePermissionService);
       case OrganizationService:
         return this.organizationService.deleteOne.bind(this.organizationService)
+      case UserService:
+        return this.userService.deleteUser.bind(this.userService)
+      case UserRoleService:
+        return this.userRoleService.deleteUserRole.bind(this.userRoleService)
       // Add cases for other services here as needed
       default:
         throw new Error('No soft delete service found for this entity');

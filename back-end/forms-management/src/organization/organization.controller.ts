@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, UseGuards,Get, Delete, Post, Request, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException, ForbiddenException } from '@nestjs/common';
+import { Controller, UseGuards,Get, Delete, Post, Request, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException} from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
@@ -28,7 +28,7 @@ export class OrganizationController {
 
     // API endpoint to get details of a specific organization along with super admin details
     @Get('details')
-    @Roles("PlatformAdmin")
+    @Roles("PlatformAdmin","Admin")
     async getOrganizationDetails(
         @Query('id') orgId: string | undefined,
         @Request() req: any
@@ -49,7 +49,7 @@ export class OrganizationController {
 
     // API endpoint to update details of a specific organization
     @Patch('edit')
-    @Roles("PlatformAdmin")
+    @Roles("PlatformAdmin","Admin")
     async updateOrganization(
       @Query('id') orgId: string,
       @Body() updateOrganizationDto: UpdateOrganizationDto,
@@ -135,6 +135,7 @@ export class OrganizationController {
     }
 
     @Patch('change-admin')
+    @Roles("Admin")
     async changeOrganizationAdmin(
       @Query('orgId') orgId: string,
       @Body() adminData: {
@@ -163,10 +164,12 @@ export class OrganizationController {
     }
 
     @Get('user-types-count')
-    @Roles("PlatformAdmin")
-    async getUserTypesCounts(): Promise<{ status: string; message: string; data: any }> {
+    @Roles("PlatformAdmin","Admin")
+    async getUserTypesCounts(@Request() req: any): Promise<{ status: string; message: string; data: any }> {
       try {
-        const counts = await this.organizationService.getUserTypesCounts();
+        const user = req.user;
+        const organizationId = user.userType === 'Admin' ? user.organizationId : null;
+        const counts = await this.organizationService.getUserTypesCounts(user);
         return {
           status: 'success',
           message: 'User types count retrieved successfully',

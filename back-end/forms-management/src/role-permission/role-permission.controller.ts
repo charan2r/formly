@@ -1,8 +1,13 @@
-import { Controller, Body, Param, Post, Get, Delete, Patch, BadRequestException } from '@nestjs/common';
+import { Controller, Body, Param, Post, Get, Delete, Patch, BadRequestException, UseGuards } from '@nestjs/common';
 import { RolePermissionService } from './role-permission.service';
 import { PermissionRepository } from '../permission/permission.repository';
+import { Roles } from 'src/user/roles.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/user/roles.guard';
+
 
 @Controller('role-permissions')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class RolePermissionController {
   constructor(
     private readonly rolePermissionService: RolePermissionService,
@@ -11,6 +16,7 @@ export class RolePermissionController {
 
 
   @Post(':roleId')
+  @Roles("Admin")
   async assignPermissionsToRole(
     @Param('roleId') roleId: string,
     @Body('permissions') permissionIds: string[],
@@ -28,6 +34,7 @@ export class RolePermissionController {
 
   // Get all role-permission
   @Get()
+  @Roles("Admin")
   async getAllRolePermissions() {
     const rolePermissions = await this.rolePermissionService.getAllRolePermissions();
     return rolePermissions;

@@ -20,6 +20,19 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('You do not have permission to access this resource.');
     }
 
+    // if it is  Admin
+    if (user.userType === 'Admin') {
+      if (!orgIdFromRequest) {
+        orgIdFromRequest = user.organizationId;
+      }
+
+      if (user.organizationId !== orgIdFromRequest) {
+        throw new ForbiddenException(
+          `Admins can only perform actions on their own organization. You are restricted to organization ID "${user.organizationId}".`
+        );
+      }
+    }
+
     return true;
   }
 }

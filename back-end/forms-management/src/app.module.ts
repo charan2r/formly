@@ -44,6 +44,9 @@ import { AuditTrail} from './model/Audittrail.entity';
 import { ClsModule } from 'nestjs-cls';
 import { AuditTrailModule } from './audit-trails/AuditTrail.module';
 import { AuditTrailRepository } from './audit-trails/AuditTrail.repository';
+import { UserRole } from './model/UserRole.entity';
+import { userRoleModule } from './userRole/userRole.module';
+import { UserRoleRepository } from './userRole/userRole.repository';
 
 
 @Module({
@@ -60,7 +63,7 @@ import { AuditTrailRepository } from './audit-trails/AuditTrail.repository';
       subscribers: [AuditTrailSubscriber],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, FormField, FormFieldsOption, Role, Permission,RolePermission,AuditTrail]),
+    TypeOrmModule.forFeature([Organization, User, FormTemplate, Category, FormField, FormFieldsOption, Role, Permission,RolePermission,AuditTrail, UserRole]),
     OrganizationModule,
     UserModule,
     FormTemplateModule,
@@ -72,17 +75,18 @@ import { AuditTrailRepository } from './audit-trails/AuditTrail.repository';
     PermissionModule,
     RolePermissionModule,
     AuditTrailModule,
+    userRoleModule,
 
     ClsModule.forRoot({
       global: true,
-       //middleware: {
-        //mount: true
-      //}
+       middleware: {
+        mount: true
+      }
     })
   ],
   controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController, FormFieldsOptionsController],
   providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository,RoleRepository,PermissionRepository, RolePermissionRepository,AuditTrailSubscriber,
- AuditTrailRepository
+ AuditTrailRepository,UserRoleRepository
   ],
 })
 export class AppModule { }
