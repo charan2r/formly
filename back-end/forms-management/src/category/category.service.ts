@@ -17,11 +17,11 @@ export class CategoryService {
 
   // create a category
   async create(createCategoryDto: CreateCategoryDto): Promise<any> {
-    const { name, description, createdById } = createCategoryDto;
+    const { name, description, organizationId } = createCategoryDto;
 
     // Find the user by ID (using createdById)
     const user = await this.organizationRepository.findOne({
-      where: { orgId: createdById },
+      where: { orgId: organizationId },
     });
     if (!user) {
       throw new Error('Organization not found');

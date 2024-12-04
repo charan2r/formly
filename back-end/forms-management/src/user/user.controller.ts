@@ -78,6 +78,7 @@ export class UserController {
 
   // API endpoint to update a user
   @Patch('edit')
+  @Roles("Admin","SubUser")
   async updateUser(
     @Query('userid') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -91,21 +92,15 @@ export class UserController {
   }
 
   // API endpoint to delete a user
-  @Delete('delete')
+  @Post('dele')
   @Roles("Admin")
   async deleteUser(
-    @Body() body: { userId: string; organizationId: string }, 
-    @Request() request: any
+    @Body() body: { userId: string; organizationId: string }
   ): Promise<{ status: string; message: string }> {
     const { userId, organizationId } = body;
   
     if (!userId) {
       throw new BadRequestException('User ID is required');
-    }
-    const user = request.user;
-  
-    if (user.organizationId !== organizationId) {
-      throw new ForbiddenException('Admins can only delete users from their own organization');
     }
   
     const result = await this.userService.deleteUser(userId);

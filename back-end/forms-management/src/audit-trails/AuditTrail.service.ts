@@ -40,4 +40,13 @@ export class AuditTrailService {
       take: 5,
     });
   }
+
+  // Add this new method to fetch top 5 activities for Admin
+  async getTop5ForAdmin(): Promise<AuditTrail[]> {
+    return this.auditTrailRepository.find({
+      where: { type: 'admin' },
+      order: { createdAt: 'DESC' },
+      take: 5,
+    });
+  }
 }

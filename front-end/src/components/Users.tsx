@@ -32,16 +32,17 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-import axios from 'axios';
+import api from '../utils/axios';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 interface Users {
-  userId: string;
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
   userType?: string;
-  lastLogin?: string;
+  updatedAt?: string;
 }
 
 interface EditUserForm {
@@ -50,6 +51,11 @@ interface EditUserForm {
   email: string;
   phoneNumber?: string;
   userType?: string;
+}
+
+interface Role {
+  roleId: string;
+  role: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -77,7 +83,7 @@ const Users: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ userId: '', firstName: '', lastName: '', email: '', phoneNumber: '', userType: '' });
+  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '', phoneNumber: '', userType: '', updatedAt: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [userDetails, setUserDetails] = useState<Users | null>(null);
@@ -92,23 +98,47 @@ const Users: React.FC = () => {
     lastName: '',
     email: '',
     phone: '',
-    userType: ''
+    roleId: '',
+    userType: 'SubUser',
+    updatedAt: ''
   });
-
+  const [roles, setRoles] = useState<Role[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users?userId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
+        const response = await api.get('/users');
         console.log(response.data)
-        setUsers(response.data.data);
+        if (response.data.status === 'success') {
+          setUsers(response.data.data[0]);
+        }
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('Error fetching users:', error);
+        toast.error("Failed to fetch users");
       }
     };
 
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        if (!user?.organizationId) return;
+        
+        const response = await api.get(`/roles/organization/${user.organizationId}`);
+        if (response.data.status === 'success') {
+          setRoles(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+        toast.error("Failed to fetch roles");
+      }
+    };
+
+    fetchRoles();
+  }, [user?.organizationId]);
 
   const StyledDialog = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-paper': {
@@ -119,9 +149,9 @@ const Users: React.FC = () => {
     }
   }));
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, userId: string) => {
     setMenuAnchor(event.currentTarget);
-    setSelectedRowId(id);
+    setSelectedRowId(userId);
   };
 
   const handleMenuClose = () => {
@@ -131,8 +161,8 @@ const Users: React.FC = () => {
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
-    const newSelectedUsers = users.reduce((acc, org) => {
-      acc[org.userId] = checked;
+    const newSelectedUsers = users.reduce((acc, user) => {
+      acc[user.id] = checked;
       return acc;
     }, {} as Record<number, boolean>);
 
@@ -173,10 +203,19 @@ const Users: React.FC = () => {
 
   const handleCreateUser = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/user', newUser);
-      setUsers([...users, response.data]);
-      setCreateUserOpen(false);
-      toast.success("User created successfully!");
+      const response = await api.post('/users/create', newUser);
+      if (response.data.status === 'success') {
+        setUsers([...users, response.data.data]);
+        setCreateUserOpen(false);
+        toast.success("User created successfully!", {
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+      }
     } catch (error) {
       toast.error("Failed to create user");
     }
@@ -184,34 +223,39 @@ const Users: React.FC = () => {
 
   const handleViewUser = async (userId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
-      setUserDetails(response.data);
-      setDialogOpen(true);
-      handleMenuClose();
+      const response = await api.get(`/users/details?userId=${userId}`);
+      if (response.data.status === 'success') {
+        setUserDetails(response.data.data);
+        setDialogOpen(true);
+        handleMenuClose();
+      }
     } catch (error) {
       console.error(`Error fetching user details for ID ${userId}:`, error);
+      toast.error("Failed to fetch user details");
     }
   };
 
-  // New handler for edit button click
   const handleEditUser = async (userId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
-      setEditFormData({
-        firstName: response.data.firstName,
-        lastName: response.data.lastName,
-        email: response.data.email,
-        phoneNumber: response.data.phoneNumber || '',
-        userType: response.data.userType || ''
-      });
-      setEditDialogOpen(true);
-      handleMenuClose();
+      const response = await api.get(`/users/details?userId=${userId}`);
+      if (response.data.status === 'success') {
+        const userData = response.data.data;
+        setEditFormData({
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          phoneNumber: userData.phoneNumber || '',
+          roleId: userData.roleId
+        });
+        setEditDialogOpen(true);
+        handleMenuClose();
+      }
     } catch (error) {
       console.error(`Error fetching user details for ID ${userId}:`, error);
+      toast.error("Failed to fetch user details for editing");
     }
   };
 
-  // Handler for form input changes
   const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setEditFormData(prev => prev ? {
@@ -220,57 +264,62 @@ const Users: React.FC = () => {
     } : null);
   };
 
-  // Handler for form submission
   const handleUpdateUser = async () => {
     if (!editFormData) return;
 
     try {
-      await axios.put(`http://localhost:3001/users/${editFormData.id}`, editFormData);
-      // Refresh the users list
-      const response = await axios.get('http://localhost:3001/users?userId=a27affb6-a80a-41a1-bb8f-a57db98417b9');
-      setUsers(response.data.data);
-      setEditDialogOpen(false);
-      setEditFormData(null);
+      const response = await api.patch(`/users/edit?userId=${editFormData.userId}`, editFormData);
+      if (response.data.status === 'success') {
+        // Refresh the users list
+        const usersResponse = await api.get('/users');
+        if (usersResponse.data.status === 'success') {
+          setUsers(usersResponse.data.data[0]);
+          setEditDialogOpen(false);
+          setEditFormData(null);
+          toast.success("User updated successfully!");
+        }
+      }
     } catch (error) {
       console.error('Error updating user:', error);
+      toast.error("Failed to update user");
     }
   };
 
-  const handleDeleteConfirmation = (userId: string) => {
+  const handleDeleteClick = (userId: string) => {
     setUserToDelete(userId);
     setConfirmationOpen(true);
+    handleMenuClose();
   };
 
-  // Method to handle deletion of an user
   const handleDeleteUser = async () => {
     try {
-      await axios.delete(`http://localhost:3001/user/delete?id=${userToDelete}`);
-      setUsers((prev) => prev.filter((org) => org.userId !== userToDelete));
-      setConfirmationOpen(false);
-      toast.success("User has been deleted successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
+      if (!userToDelete || !user?.organizationId) {
+        toast.error("Missing required information for deletion");
+        return;
+      }
+
+      const response = await api.post('/users/dele', {
+        userId: userToDelete,
+        organizationId: user.organizationId
       });
-    } catch (error) {
-      toast.error("Failed to delete the user. Please try again.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
+
+      if (response.data.status === 'success') {
+        setUsers((prev) => prev.filter((user) => user.userId !== userToDelete));
+        setConfirmationOpen(false);
+        setUserToDelete(null);
+        
+        toast.success("User has been deleted successfully!", {
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+      }
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Failed to delete the user. Please try again.";
+      toast.error(errorMessage, {
         style: {
           backgroundColor: 'black',
           color: 'white',
@@ -309,6 +358,22 @@ const Users: React.FC = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setUserDetails(null);
+  };
+
+  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setNewUser({
+      ...newUser,
+      roleId: event.target.value
+    });
+  };
+
+  const handleEditFormRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (editFormData) {
+      setEditFormData({
+        ...editFormData,
+        roleId: event.target.value
+      });
+    }
   };
 
   return (
@@ -509,8 +574,8 @@ const Users: React.FC = () => {
               <TableRow key={row.id}>
                 <TableCell padding="checkbox" >
                   <Checkbox
-                    checked={!!selectedUsers[row.userId]}
-                    onChange={() => handleSelectUser(row.userId)}
+                    checked={!!selectedUsers[row.id]}
+                    onChange={() => handleSelectUser(row.id)}
                   />
                 </TableCell>
                 <TableCell padding="checkbox">
@@ -524,8 +589,8 @@ const Users: React.FC = () => {
                     {row.email}
                   </Typography>
                 </TableCell>
-                <TableCell>{row.userType}</TableCell>
-                <TableCell>{row.lastLogin ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
+                <TableCell>{roles.find(role => role.roleId === row.roleId)?.role || row.userType}</TableCell>
+                <TableCell>{row.updatedAt ? new Date(row.updatedAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
                   <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
                     <MoreVertIcon />
@@ -581,7 +646,7 @@ const Users: React.FC = () => {
                       Edit
                     </MenuItem>
                     <MenuItem
-                      onClick={() => handleDeleteConfirmation(row.userId)}
+                      onClick={() => handleDeleteClick(row.id)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
@@ -764,27 +829,25 @@ const Users: React.FC = () => {
                       Role
                     </Typography>
                     <TextField
+                      name="roleId"
+                      value={newUser.roleId}
+                      onChange={handleRoleChange}
                       select
-                      value={newUser.usertype}
-                      onChange={(e) => setNewUser({ ...newUser, userType: e.target.value })}
-                      size="small"
                       fullWidth
-                      inputProps={{
-                        sx: {
-                          backgroundColor: '#ffffff',
-                          borderRadius: '5px',
-                          width: '100%',
-                          '&::placeholder': {
-                            fontSize: '0.8rem',
-                          }
-                        }
+                      variant="outlined"
+                      size="small"
+                      InputProps={{
+                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
                       }}
                     >
                       <MenuItem value="" disabled style={{ textAlign: 'center', color: 'gray' }}>
                         Select a Role
                       </MenuItem>
-                      <MenuItem value="formCreater">Form Creator</MenuItem>
-                      {/* Add more options as needed */}
+                      {roles.map((role) => (
+                        <MenuItem key={role.roleId} value={role.roleId}>
+                          {role.role}
+                        </MenuItem>
+                      ))}
                     </TextField>
                   </Box>
                 </Grid>
@@ -1066,9 +1129,9 @@ const Users: React.FC = () => {
                   <Grid item xs={10} sm={9.5} sx={{ width: '65%' }}>
                     <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Role</Typography>
                     <TextField
-                      name="userType"
-                      value={editFormData.userType || ''}
-                      onChange={handleEditFormChange}
+                      name="roleId"
+                      value={editFormData.roleId || ''}
+                      onChange={handleEditFormRoleChange}
                       select
                       fullWidth
                       variant="outlined"
@@ -1077,10 +1140,14 @@ const Users: React.FC = () => {
                         sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
                       }}
                     >
-                      <MenuItem value="Form Creator">Form Creator</MenuItem>
-                      <MenuItem value="Form Manager">Form Manager</MenuItem>
-                      <MenuItem value="Form Viewer">Form Viewer</MenuItem>
-                      <MenuItem value="Admin">Admin</MenuItem>
+                      <MenuItem value="" disabled style={{ textAlign: 'center', color: 'gray' }}>
+                        Select a Role
+                      </MenuItem>
+                      {roles.map((role) => (
+                        <MenuItem key={role.roleId} value={role.roleId}>
+                          {role.role}
+                        </MenuItem>
+                      ))}
                     </TextField>
                   </Grid>
 

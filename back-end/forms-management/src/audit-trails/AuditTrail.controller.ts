@@ -80,4 +80,16 @@ export class AuditTrailController {
       type: 'superadmin',
     };
   }
+
+  @Get('admin/top5')
+  @Roles('Admin')
+  async getTop5ForAdmin(): Promise<ApiResponse<AuditTrail[]>> {
+    const audits = await this.auditTrailService.getTop5ForAdmin();
+    return {
+      status: 'success',
+      message: 'Top 5 Admin audit logs retrieved successfully',
+      data: audits,
+      type: 'admin',
+    };
+  }
 }

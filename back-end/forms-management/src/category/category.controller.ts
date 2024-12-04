@@ -32,6 +32,7 @@ export class CategoryController {
     };
   }
 
+  @Roles("Admin","SubUser")
   @Get('organization/:orgId')
   async getCategoriesByOrganization(
     @Param('orgId') organizationId: string,
@@ -46,6 +47,7 @@ export class CategoryController {
 
 
   // Get a single category by ID
+  @Roles("Admin","SubUser")
   @Get('details/:id')
   async getCategoryById(@Param('id') id: string): Promise<{ status: string; message: string; data: CategoryResponse }> {
     const category = await this.categoryService.getCategoryById(id);
@@ -57,6 +59,7 @@ export class CategoryController {
   }
 
   // Get all categories
+  @Roles("Admin","SubUser")
   async getAllCategories(): Promise<{ status: string; message: string; data: CategoryResponse[] }> {
     const categories = await this.categoryService.getAllCategories();
     return {
@@ -68,6 +71,7 @@ export class CategoryController {
   
 
   // update/edit 
+  @Roles("Admin","SubUser")
   @Patch('update/:id')
    async updateCategory(
      @Param('id') id: string,
@@ -82,6 +86,7 @@ export class CategoryController {
   }
 
   // Delete a single category
+  @Roles("Admin","SubUser")
   @Delete('delete/:id')
   async deleteCategory(@Param('id') id: string): Promise<{ status: string; message: string }> {
     await this.categoryService.deleteCategory(id);
@@ -92,6 +97,7 @@ export class CategoryController {
   }
 
   // Bulk delete categories
+  @Roles("Admin","SubUser")
   @Delete('bulk-delete')
   async deleteCategories(@Body() categoryIds: string[]): Promise<{ status: string; message: string }> {
     await this.categoryService.deleteCategories(categoryIds);

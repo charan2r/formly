@@ -9,7 +9,7 @@ import CreateOrganization from './organization/CreateOrganization';
 import ViewOrganization from './organization/ViewOrganization';
 import EditOrganization from './organization/EditOrganization';
 import ChangeOrganization from './organization/ChangeOrganization';
-import UserOverview from './UserOverview';
+import UserOverview from './superAdmin/userOverview';
 import Users from './Users';
 import Template from './Template';
 import Category from './Category';
@@ -111,7 +111,6 @@ const Background: React.FC = () => {
             isEditTemplate ? (
               <>
                 <LeftSidebar />
-                <EditPageSettings />
               </>
             ) : (
               <Sidebar />
