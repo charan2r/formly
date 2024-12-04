@@ -5,7 +5,7 @@ export class Permission {
   @PrimaryGeneratedColumn('uuid')
   permissionId: string;
 
-  @Column()
+  @Column('text')
   name: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

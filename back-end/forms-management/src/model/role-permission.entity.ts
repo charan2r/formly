@@ -20,6 +20,6 @@ export class RolePermission {
   @JoinColumn({ name: 'permissionId' })
   permission: Permission;
 
-  @Column({ default: 'active' })
+  @Column({type:'text', default: 'active' })
   status: string;
 }

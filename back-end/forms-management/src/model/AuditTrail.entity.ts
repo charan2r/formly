@@ -5,22 +5,22 @@ export class AuditTrail {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column('text')
   tableName: string;
 
-  @Column()
+  @Column('text')
   action: string; 
 
-  @Column({ nullable: true })
+  @Column('text',{ nullable: true })
   type: string;
 
   @Column('jsonb')
   data: Record<string, any>;
 
-  @Column({ nullable: true })
+  @Column('varchar',{ nullable: true })
   createdById: string;
 
-  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
 }
