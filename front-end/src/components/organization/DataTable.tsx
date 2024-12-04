@@ -438,7 +438,7 @@ const DataTable: React.FC = () => {
                   direction={orderDirection}
                   onClick={() => handleRequestSort('lastActive')}
                 >
-                  Last Active
+                  Created At
                 </TableSortLabel>
                 {showFilters && (
                   <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
@@ -477,7 +477,7 @@ const DataTable: React.FC = () => {
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.category}</TableCell>
-                <TableCell>{row.lastActive ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
+                <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
                   <IconButton onClick={(event) => handleMenuOpen(event, row.orgId)}>
                     <MoreVertIcon />
