@@ -47,6 +47,7 @@ import { AuditTrailRepository } from './audit-trails/AuditTrail.repository';
 import { UserRole } from './model/UserRole.entity';
 import { userRoleModule } from './userRole/userRole.module';
 import { UserRoleRepository } from './userRole/userRole.repository';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Module({
@@ -86,7 +87,7 @@ import { UserRoleRepository } from './userRole/userRole.repository';
   ],
   controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController, FormFieldsOptionsController],
   providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository,RoleRepository,PermissionRepository, RolePermissionRepository,AuditTrailSubscriber,
- AuditTrailRepository,UserRoleRepository
+ AuditTrailRepository,UserRoleRepository, JwtService
   ],
 })
 export class AppModule { }

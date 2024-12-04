@@ -7,6 +7,7 @@ import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { Roles } from './roles.decorator';
 import { RolesGuard } from './roles.guard';
+import { Permissions } from './decorators/permissions.decorator';
 
 
 @Controller('users')
@@ -62,6 +63,7 @@ export class UserController {
   // API endpoint to create a new user
   @Post('create')
   @Roles("Admin","SubUser")
+  @Permissions('Create Users')
   async addUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<{ message: string; status: string; data: User }> {

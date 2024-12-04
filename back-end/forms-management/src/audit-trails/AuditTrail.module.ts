@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Scope } from '@nestjs/common';
 import { AuditTrailSubscriber } from '../audit-trails/AuditTrailSubscriber';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Role } from '../model/role.entity';
@@ -29,6 +29,9 @@ import { UserRoleRepository } from 'src/userRole/userRole.repository';
 import { User } from 'src/model/user.entity';
 import { UserRole } from 'src/model/UserRole.entity';
 import { userRoleModule } from 'src/userRole/userRole.module';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 @Module({
     imports: [
@@ -37,40 +40,49 @@ import { userRoleModule } from 'src/userRole/userRole.module';
         RoleModule,
         PermissionModule,
         RolePermissionModule,
-        AuditTrailModule,
         OrganizationModule,
         AuthModule,
         userRoleModule,
-        UserModule
-      ],
-  providers: [
-    {
-        provide: 'MONITORED_ENTITIES',
-        useValue: [Role, Permission, RolePermission,Organization,User,UserRole],
-    },
-    RoleService,
-    RoleRepository,
-    OrganizationRepository,
-    PermissionService,
-    RolePermissionService,
-    RolePermissionRepository,
-    PermissionRepository,
-    AuditTrailSubscriber,
-    PermissionRepository,
-    AuditTrailService,
-    AuditTrailRepository,
-    OrganizationService,
-    UserRoleService,
-    UserRepository,
-    UserRoleRepository
-  ],
-  controllers:[AuditTrailController],
-  exports: [
-    {
-      provide: 'MONITORED_ENTITIES',
-      useValue: [Role, Permission, RolePermission,Organization],
-    },
-    AuditTrailService
-  ],
+        JwtModule.register({
+            secret: process.env.JWT_SECRET,
+            signOptions: { expiresIn: '1d' },
+        }),
+    ],
+    providers: [
+        {
+            provide: 'MONITORED_ENTITIES',
+            useValue: [Role, Permission, RolePermission,Organization,User,UserRole],
+        },
+        RoleService,
+        RoleRepository,
+        OrganizationRepository,
+        PermissionService,
+        RolePermissionService,
+        RolePermissionRepository,
+        PermissionRepository,
+        AuditTrailSubscriber,
+        PermissionRepository,
+        AuditTrailService,
+        AuditTrailRepository,
+        OrganizationService,
+        UserRoleService,
+        UserRepository,
+        UserRoleRepository,
+        {
+            provide: REQUEST,
+            useFactory: (req: Request) => req,
+            inject: [REQUEST],
+            scope: Scope.REQUEST,
+        },
+        JwtService,
+    ],
+    controllers:[AuditTrailController],
+    exports: [
+        {
+            provide: 'MONITORED_ENTITIES',
+            useValue: [Role, Permission, RolePermission,Organization],
+        },
+        AuditTrailService
+    ],
 })
 export class AuditTrailModule {}

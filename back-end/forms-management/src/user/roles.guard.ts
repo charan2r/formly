@@ -24,7 +24,7 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('You do not have permission to access this resource.');
     }
 
-    // If it is Admin
+    // If it is Admin, skip permission checks and just verify organization
     if (user.userType === 'Admin') {
       if (!orgIdFromRequest) {
         orgIdFromRequest = user.organizationId;
@@ -35,14 +35,16 @@ export class RolesGuard implements CanActivate {
           `Admins can only perform actions on their own organization. You are restricted to organization ID "${user.organizationId}".`
         );
       }
+      return true; // Admin is automatically authorized if organization check passes
     }
 
-    // If it is User, check permissions
+    // Only check permissions for SubUsers
     if (user.userType === 'SubUser') {
       const requiredPermissions = this.reflector.get<string[]>(
         'permissions',
         context.getHandler(),
       );
+      console.log('requiredPermissions', requiredPermissions);
       if (requiredPermissions && requiredPermissions.length > 0) {
         const userPermissions = await this.rolePermissionService.getRolePermissions(user.roleId);
         const userPermissionNames = userPermissions.map(
@@ -52,6 +54,7 @@ export class RolesGuard implements CanActivate {
         const hasPermission = requiredPermissions.every((permission) =>
           userPermissionNames.includes(permission),
         );
+        console.log('hasPermission', hasPermission);
         if (!hasPermission) {
           throw new ForbiddenException(
             'You do not have the required permissions to access this resource.',

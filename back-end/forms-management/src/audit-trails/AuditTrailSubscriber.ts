@@ -1,5 +1,5 @@
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent, RemoveEvent } from 'typeorm';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, Scope } from '@nestjs/common';
 import { AuditTrail } from 'src/model/AuditTrail.entity';
 import { RolePermission } from '../model/role-permission.entity';
 import { Permission } from '../model/permission.entity';
@@ -13,9 +13,11 @@ import { User } from 'src/model/user.entity';
 import { UserService } from 'src/user/user.service';
 import { UserRole } from 'src/model/UserRole.entity';
 import { UserRoleService } from 'src/userRole/userRole.service';
+import { REQUEST } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
 
 @EventSubscriber()
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AuditTrailSubscriber implements EntitySubscriberInterface {
   private static entitiesToMonitor: Function[] = [
     Role,
@@ -32,17 +34,19 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
     Permission: PermissionService,
     RolePermission: RolePermissionService,
     Organization: OrganizationService,
-    User:UserService,
-    UserRole:UserRoleService
+    User: UserService,
+    UserRole: UserRoleService,
   };
 
   constructor(
+    @Inject(REQUEST) private readonly request: any,
     private readonly roleService: RoleService, 
     private readonly permissionService: PermissionService,
     private readonly rolePermissionService: RolePermissionService,
     private readonly organizationService: OrganizationService,
     private readonly userService: UserService,
-    private readonly userRoleService: UserRoleService
+    private readonly userRoleService: UserRoleService,
+    private readonly jwtService: JwtService
   ) {
     console.log('MONITORED_ENTITIES:', AuditTrailSubscriber.entitiesToMonitor);
   }
@@ -71,14 +75,31 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
     const auditTrail = new AuditTrail();
     auditTrail.tableName = event.metadata.tableName;
     auditTrail.action = action;
+    
+    try {
+      const token = this.request?.headers?.authorization?.split(' ')[1];
+      console.log('Request headers:', this.request?.headers); // Debug log
+      console.log(
+        'Authorization header:',
+        this.request?.headers?.authorization,
+      ); // Debug log
+      console.log('token:', token); // Debug log
+      if (token) {
+        const decoded = this.jwtService.verify(token);
+        auditTrail.createdById = decoded.userId;
+      }
+    } catch (error) {
+      console.error('Token extraction error:', error); // Debug log
+      auditTrail.createdById = null;
+    }
+
+    auditTrail.createdAt = new Date();
 
     if (action === 'DELETE' && 'databaseEntity' in event) {
       auditTrail.data = event.databaseEntity;
     } else {
       auditTrail.data = event.entity;
     }
-
-    auditTrail.createdAt = new Date();
 
     console.log('Audit Record to Save:', auditTrail);
 
@@ -135,14 +156,15 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
       // case RolePermissionService:
       //   return this.rolePermissionService.softDeleteRolePermission.bind(this.rolePermissionService);
       case OrganizationService:
-        return this.organizationService.deleteOne.bind(this.organizationService)
+        return this.organizationService.deleteOne.bind(this.organizationService);
       case UserService:
-        return this.userService.deleteUser.bind(this.userService)
+        return this.userService.deleteUser.bind(this.userService);
       case UserRoleService:
-        return this.userRoleService.deleteUserRole.bind(this.userRoleService)
+        return this.userRoleService.deleteUserRole.bind(this.userRoleService);
       // Add cases for other services here as needed
       default:
         throw new Error('No soft delete service found for this entity');
     }
   }
+  
 }

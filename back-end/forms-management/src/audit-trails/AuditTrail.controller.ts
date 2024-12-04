@@ -1,6 +1,10 @@
-import { Controller, Get, Param, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Param, NotFoundException, UseGuards } from '@nestjs/common';
 import { AuditTrailService } from './AuditTrail.service';
 import { AuditTrail } from '../model/AuditTrail.entity';
+import { Permissions } from 'src/user/decorators/permissions.decorator';
+import { Roles } from 'src/user/roles.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/user/roles.guard';
 
 
 export class ApiResponse<T> {
@@ -10,6 +14,7 @@ export class ApiResponse<T> {
 }
 
 
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('audit-trail')
 export class AuditTrailController {
   constructor(private readonly auditTrailService: AuditTrailService) {}
@@ -17,6 +22,7 @@ export class AuditTrailController {
 
   //get fetch all 
   @Get()
+  @Roles('Admin','SuperAdmin')
   async getAll(): Promise<ApiResponse<AuditTrail[]>> {
     const audits = await this.auditTrailService.getAll();
     return {
@@ -29,6 +35,7 @@ export class AuditTrailController {
 
   //get one 
   @Get(':id')
+  @Roles('Admin','SuperAdmin')
   async getById(@Param('id') id: string): Promise<ApiResponse<AuditTrail>> {
     try {
       const audit = await this.auditTrailService.getById(id);

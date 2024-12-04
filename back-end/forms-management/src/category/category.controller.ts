@@ -22,6 +22,7 @@ export class CategoryController {
     
     // Create a category
   @Roles("Admin","SubUser")
+  
   @Post('create')
   async addCategory(@Body() createCategoryDto: CreateCategoryDto): Promise<{ status: string; message: string; data: CategoryResponse }> {
     const category = await this.categoryService.create(createCategoryDto);

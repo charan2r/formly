@@ -37,6 +37,7 @@ export class PermissionService {
       { name: 'Create Form' },
       { name: 'View Form' },
       { name: 'Edit Form' },
+      { name: 'View Permissions' },
     ];
 
     for (const permission of permissions) {
