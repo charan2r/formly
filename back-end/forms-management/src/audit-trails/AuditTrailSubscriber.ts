@@ -77,6 +77,9 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
     auditTrail.tableName = event.metadata.tableName;
     auditTrail.action = action;
     
+    // Set the type based on the entity being changed
+    auditTrail.type = event.metadata.target === Organization ? 'superadmin' : 'admin';
+
     try {
       const token = this.request?.headers?.authorization?.split(' ')[1];
       console.log('Request headers:', this.request?.headers); // Debug log

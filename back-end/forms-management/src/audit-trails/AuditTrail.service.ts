@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AuditTrailRepository } from './AuditTrail.repository';
-
+import { AuditTrail } from '../model/AuditTrail.entity';
 
 @Injectable()
 export class AuditTrailService {
@@ -8,34 +8,27 @@ export class AuditTrailService {
     private readonly auditTrailRepository: AuditTrailRepository
   ) {}
 
-
-  //fetch all to audit trail
-  async getAll() {
-    const audits = await this.auditTrailRepository.find();
-    return audits.map(audit => ({
-        id: audit.id,
-        tableName: audit.tableName,
-        action: audit.action,
-        createdAt: audit.createdAt,
-        createdById: audit.createdById,
-        data: audit.data,
-    }));
- }
-
-
- //get one
- async getById(id: string) {
-  const audit = await this.auditTrailRepository.findOne({ where: { id } });
-  if (!audit) {
-    throw new NotFoundException(`AuditTrail with id ${id} not found`);
+  // Fetch all audit trails
+  async getAll(): Promise<AuditTrail[]> {
+    return this.auditTrailRepository.find();
   }
-  return {
-    id: audit.id,
-    tableName: audit.tableName,
-    action: audit.action,
-    createdAt: audit.createdAt,
-    createdById: audit.createdById,
-    data: audit.data,
-  };
-}
+
+  // Fetch all audit trails for Admin
+  async getAllForAdmin(): Promise<AuditTrail[]> {
+    return this.auditTrailRepository.find({ where: { type: 'admin' } });
+  }
+
+  // Fetch all audit trails for SuperAdmin
+  async getAllForSuperAdmin(): Promise<AuditTrail[]> {
+    return this.auditTrailRepository.find({ where: { type: 'superadmin' } });
+  }
+
+  // Get a single audit trail by ID
+  async getById(id: string): Promise<AuditTrail> {
+    const audit = await this.auditTrailRepository.findOne({ where: { id } });
+    if (!audit) {
+      throw new NotFoundException(`AuditTrail with id ${id} not found`);
+    }
+    return audit;
+  }
 }

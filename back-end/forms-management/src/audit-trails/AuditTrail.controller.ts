@@ -1,41 +1,51 @@
 import { Controller, Get, Param, NotFoundException, UseGuards } from '@nestjs/common';
 import { AuditTrailService } from './AuditTrail.service';
 import { AuditTrail } from '../model/AuditTrail.entity';
-import { Permissions } from 'src/user/decorators/permissions.decorator';
 import { Roles } from 'src/user/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/user/roles.guard';
 
-
 export class ApiResponse<T> {
     status: string;
     message: string;
+    type: string;
     data: T;
 }
-
 
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('audit-trail')
 export class AuditTrailController {
   constructor(private readonly auditTrailService: AuditTrailService) {}
 
-
-  //get fetch all 
-  @Get()
-  @Roles('Admin','SuperAdmin')
-  async getAll(): Promise<ApiResponse<AuditTrail[]>> {
-    const audits = await this.auditTrailService.getAll();
+  // Get all audit trails for Admin
+  @Get('admin')
+  @Roles('Admin')
+  async getAllForAdmin(): Promise<ApiResponse<AuditTrail[]>> {
+    const audits = await this.auditTrailService.getAllForAdmin();
     return {
-        status: 'success',
-        message: 'Audit logs retrieved successfully',
-        data: audits,
+      status: 'success',
+      message: 'Admin audit logs retrieved successfully',
+      data: audits,
+      type: 'admin',
     };
   }
 
+  // Get all audit trails for SuperAdmin
+  @Get('superadmin')
+  @Roles('SuperAdmin')
+  async getAllForSuperAdmin(): Promise<ApiResponse<AuditTrail[]>> {
+    const audits = await this.auditTrailService.getAllForSuperAdmin();
+    return {
+      status: 'success',
+      message: 'SuperAdmin audit logs retrieved successfully',
+      data: audits,
+      type: 'superadmin',
+    };
+  }
 
-  //get one 
+  // Get a single audit trail by ID
   @Get(':id')
-  @Roles('Admin','SuperAdmin')
+  @Roles('Admin', 'SuperAdmin')
   async getById(@Param('id') id: string): Promise<ApiResponse<AuditTrail>> {
     try {
       const audit = await this.auditTrailService.getById(id);
@@ -43,6 +53,7 @@ export class AuditTrailController {
         status: 'success',
         message: `Audit log with id ${id} retrieved successfully`,
         data: audit,
+        type: audit.type || 'admin', // Ensure type is set
       };
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -50,10 +61,10 @@ export class AuditTrailController {
           status: 'error',
           message: error.message,
           data: null,
+          type: 'admin',
         };
       }
       throw error;
     }
   }
-
 }

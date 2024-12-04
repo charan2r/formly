@@ -11,6 +11,9 @@ export class AuditTrail {
   @Column()
   action: string; 
 
+  @Column({ nullable: true })
+  type: string;
+
   @Column('jsonb')
   data: Record<string, any>;
 
