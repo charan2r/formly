@@ -6,20 +6,20 @@ export class Role {
   @PrimaryGeneratedColumn('uuid')
   roleId: string;
 
-  @Column({ name: 'organizationId' })
+  @Column('uuid',{ name: 'organizationId' })
   organizationId: string;
 
   @ManyToOne(() => Organization, { nullable: false })
   @JoinColumn({ name: 'organizationId' })
   organization: Organization;
 
-  @Column()
+  @Column('text')
   role: string;
 
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ default: 'active' })
+  @Column({ type:'text', default: 'active' })
   status: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

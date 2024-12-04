@@ -33,15 +33,6 @@ async function bootstrap() {
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
 
-
-//this can remove temporey added to seed the db 
-// Get an instance of PermissionService
-const permissionService = app.get(PermissionService);
-
-// Call the seedPermissions method to seed data on app start
-await permissionService.seedPermissions();
-
-
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

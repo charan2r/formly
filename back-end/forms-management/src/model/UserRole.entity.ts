@@ -18,6 +18,6 @@ export class UserRole {
   @JoinColumn({ name: 'roleId' })
   role: Role; 
 
-  @Column({ default: 'active' })
+  @Column({ type: 'text', default: 'active' })
   status: string;
 }
