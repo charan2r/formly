@@ -287,7 +287,7 @@ function EditRole() {
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography>Delete Users</Typography>
         <Checkbox
-          checked={permissions.deleteUsers}
+          checked={permissions.deleteusers}
           onChange={handlePermissionChange}
           name="deleteUsers"
           sx={{ color: 'black' }}

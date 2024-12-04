@@ -86,23 +86,23 @@ const DataTable: React.FC = () => {
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await api.get('/roles');
+        if (!user?.organizationId) return;
+        
+        const response = await api.get(`/roles/organization/${user.organizationId}`);
         if (response.data.status === 'success') {
           const activeRoles = response.data.data.filter(
             (role: Role) => role.status === 'active'
           );
           setRoles(activeRoles);
-        } else {
-          throw new Error(response.data.message);
         }
-      } catch (error: any) {
-        console.error('Error fetching role data:', error);
-        toast.error(error.response?.data?.message || "Failed to fetch roles");
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+        // Handle error appropriately
       }
     };
 
     fetchRoles();
-  }, []);
+  }, [user?.organizationId]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchor(event.currentTarget);
@@ -451,7 +451,7 @@ const DataTable: React.FC = () => {
 
           <TableBody>
             {paginatedData.map((row) => (
-              <TableRow key={row.id} sx={{ height: '60px' }}>
+              <TableRow key={row.roleId} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={!!selectedRoles[row.roleId]}  // Toggle specific checkbox
@@ -465,11 +465,11 @@ const DataTable: React.FC = () => {
                 <TableCell>{row.description}</TableCell>
                 <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
-                  <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
+                  <IconButton onClick={(event) => handleMenuOpen(event, row.roleId)}>
                     <MoreVertIcon />
                   </IconButton>
                   <Popover
-                    open={Boolean(menuAnchor) && selectedRowId === row.id}
+                    open={Boolean(menuAnchor) && selectedRowId === row.roleId}
                     anchorEl={menuAnchor}
                     onClose={handleMenuClose}
                     anchorOrigin={{

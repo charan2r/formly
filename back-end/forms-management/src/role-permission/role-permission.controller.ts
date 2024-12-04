@@ -41,6 +41,7 @@ export class RolePermissionController {
 
   // Get a role with its permissions
   @Get(':roleId')
+  @Roles('Admin')
   async getRolePermissions(@Param('roleId') roleId: string) {
     const rolePermissions = await this.rolePermissionService.getRolePermissions(roleId);
     return {
@@ -50,6 +51,7 @@ export class RolePermissionController {
   }
 
   @Patch(':roleId')
+  @Roles('Admin')
   async updateRolePermissions(
     @Param('roleId') roleId: string,
     @Body('permissionIds') permissionIds: string[],
@@ -69,6 +71,7 @@ export class RolePermissionController {
   }
 
   @Delete(':roleId/:permissionId')
+  @Roles('Admin')
   async softDeleteRolePermission(
     @Param('roleId') roleId: string,
     @Param('permissionId') permissionId: string,

@@ -110,9 +110,8 @@ export class RoleController {
 
   @Get(':id')
   @Roles('Admin')
-  async getRoleById(@Req() request, @Param('id') roleId: string) {
+  async getRoleById(@Param('id') roleId: string, @Param('organizationId') organizationId: string) {
     try {
-      const organizationId = request.user.organizationId;
       const role = await this.roleService.getOne(roleId, organizationId);
       
       if (!role) {
@@ -138,6 +137,24 @@ export class RoleController {
       throw new HttpException({
         status: 'error',
         message: error.message || 'Failed to retrieve role',
+      }, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('organization/:organizationId')
+  @Roles('Admin', 'SuperAdmin')
+  async getRolesByOrganization(@Param('organizationId') organizationId: string) {
+    try {
+      const roles = await this.roleService.getAllByOrganization(organizationId);
+      return {
+        status: 'success',
+        message: 'Roles retrieved successfully',
+        data: roles,
+      };
+    } catch (error) {
+      throw new HttpException({
+        status: 'error',
+        message: error.message || 'Failed to retrieve roles',
       }, HttpStatus.BAD_REQUEST);
     }
   }
