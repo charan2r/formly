@@ -29,8 +29,6 @@ import { UserRoleRepository } from 'src/userRole/userRole.repository';
 import { User } from 'src/model/user.entity';
 import { UserRole } from 'src/model/UserRole.entity';
 import { userRoleModule } from 'src/userRole/userRole.module';
-import { REQUEST } from '@nestjs/core';
-import { Request } from 'express';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 
 @Module({
@@ -68,12 +66,6 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
         UserRoleService,
         UserRepository,
         UserRoleRepository,
-        {
-            provide: REQUEST,
-            useFactory: (req: Request) => req,
-            inject: [REQUEST],
-            scope: Scope.REQUEST,
-        },
         JwtService,
     ],
     controllers:[AuditTrailController],

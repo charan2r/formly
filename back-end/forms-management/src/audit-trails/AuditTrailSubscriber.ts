@@ -1,5 +1,8 @@
 import { EntitySubscriberInterface, EventSubscriber, InsertEvent, UpdateEvent, RemoveEvent } from 'typeorm';
 import { Injectable, Inject, Scope } from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
 import { AuditTrail } from 'src/model/AuditTrail.entity';
 import { RolePermission } from '../model/role-permission.entity';
 import { Permission } from '../model/permission.entity';
@@ -13,8 +16,6 @@ import { User } from 'src/model/user.entity';
 import { UserService } from 'src/user/user.service';
 import { UserRole } from 'src/model/UserRole.entity';
 import { UserRoleService } from 'src/userRole/userRole.service';
-import { REQUEST } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
 
 @EventSubscriber()
 @Injectable({ scope: Scope.REQUEST })
@@ -39,7 +40,7 @@ export class AuditTrailSubscriber implements EntitySubscriberInterface {
   };
 
   constructor(
-    @Inject(REQUEST) private readonly request: any,
+    @Inject(REQUEST) private readonly request: Request,
     private readonly roleService: RoleService, 
     private readonly permissionService: PermissionService,
     private readonly rolePermissionService: RolePermissionService,
