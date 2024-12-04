@@ -67,4 +67,17 @@ export class AuditTrailController {
       throw error;
     }
   }
+
+  // Add this route to the controller
+  @Get('superadmin/top5')
+  @Roles('SuperAdmin')
+  async getTop5ForSuperAdmin(): Promise<ApiResponse<AuditTrail[]>> {
+    const audits = await this.auditTrailService.getTop5ForSuperAdmin();
+    return {
+      status: 'success',
+      message: 'Top 5 SuperAdmin audit logs retrieved successfully',
+      data: audits,
+      type: 'superadmin',
+    };
+  }
 }

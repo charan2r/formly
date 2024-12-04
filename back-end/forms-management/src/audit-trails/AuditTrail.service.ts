@@ -31,4 +31,13 @@ export class AuditTrailService {
     }
     return audit;
   }
+
+  // Add this method to fetch top 5 activities for SuperAdmin
+  async getTop5ForSuperAdmin(): Promise<AuditTrail[]> {
+    return this.auditTrailRepository.find({
+      where: { type: 'superadmin' },
+      order: { createdAt: 'DESC' },
+      take: 5,
+    });
+  }
 }

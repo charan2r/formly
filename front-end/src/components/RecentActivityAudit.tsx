@@ -1,47 +1,62 @@
-import React from 'react';
-import { Box, Paper, Typography, List, ListItem, ListItemText, Divider, IconButton } from '@mui/material';
-import { AccessTime } from '@mui/icons-material'; // Import an icon for the timestamp
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, List, ListItem, ListItemText, Divider, IconButton } from '@mui/material';
+import { AccessTime } from '@mui/icons-material';
+import api from '../utils/axios'; // Use the configured axios instance
+
+interface Activity {
+  id: number;
+  text: string;
+  timestamp: string;
+  action: string;
+  type: string;
+}
 
 const RecentActivityAudit = () => {
-  // Sample activities data; replace with your actual data fetching logic
-  const activities = [
-    { id: 1, text: 'Organization created - Tech Solutions', timestamp: '2024-11-03 10:30:00' },
-    { id: 2, text: 'User updated - John Doe', timestamp: '2024-11-03 11:00:00' },
-    { id: 2, text: 'User updated - John Doe', timestamp: '2024-11-03 11:00:00' },
-    { id: 3, text: 'Organization deleted - Org One', timestamp: '2024-11-03 11:15:00' },
-    // Add more activities as needed
-  ];
+  const [activities, setActivities] = useState<Activity[]>([]);
+
+  useEffect(() => {
+    const fetchSuperAdminActivities = async () => {
+      try {
+        const response = await api.get('/audit-trail/superadmin/top5'); // Adjust the endpoint as needed
+        setActivities(response.data.data);
+      } catch (error) {
+        console.error('Error fetching superadmin activities:', error);
+      }
+    };
+
+    fetchSuperAdminActivities();
+  }, []);
 
   return (
     <Box marginTop={5}>
       <Typography variant="h6" gutterBottom>
         Recent Activity Audit
       </Typography>
-      {/* <Paper elevation={2} sx={{ padding: 2, maxHeight: '200px', overflow: 'auto', borderRadius: 2 }}> */}
-        <List>
-          {activities.map(activity => (
-            <div key={activity.id}>
-              <ListItem sx={{ padding: 0.4 }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
-                  <Box display="flex" alignItems="center" marginRight={5}>
-                    <IconButton size="small" color="black" sx={{ marginRight: 1 }}>
-                      <AccessTime fontSize="small" />
-                    </IconButton>
-                    <Typography variant="body2" color="textSecondary">
-                      {activity.timestamp}
-                    </Typography>
-                  </Box>
-                  <ListItemText 
-                    primary={activity.text} 
-                    primaryTypographyProps={{ fontWeight: 'regular', fontSize: 'small', }} // Bold for activity text
-                  />
+      <List>
+        {activities.map(activity => (
+          <div key={activity.id}>
+            <ListItem sx={{ padding: 0.4 }}>
+              <Box display="flex" alignItems="center" justifyContent="space-between" width="100%">
+                <Box display="flex" alignItems="center" marginRight={5}>
+                  <IconButton size="small" color="black" sx={{ marginRight: 1 }}>
+                    <AccessTime fontSize="small" />
+                  </IconButton>
+                  <Typography variant="body2" color="textSecondary">
+                    At {activity.timestamp}{' '}
+                    <span style={{ color: '#757575' }}>{activity.action}</span> action was performed by{' '}
+                    <span style={{ color: '#9e9e9e' }}>{activity.type}</span>
+                  </Typography>
                 </Box>
-              </ListItem>
-              <Divider />
-            </div>
-          ))}
-        </List>
-      {/* </Paper> */}
+                <ListItemText 
+                  primary={activity.text} 
+                  primaryTypographyProps={{ fontWeight: 'regular', fontSize: 'small' }}
+                />
+              </Box>
+            </ListItem>
+            <Divider />
+          </div>
+        ))}
+      </List>
     </Box>
   );
 };

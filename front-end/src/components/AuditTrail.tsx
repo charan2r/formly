@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import api from '../utils/axios';
 import {
   Table,
   InputAdornment,
@@ -40,10 +42,10 @@ import auditTrailData from '../data/auditTrailData';
 
 interface AuditTrail {
   audtId: string;
-  user: string;
-  table?: string | null;
+  tableName: string;
+  type: string;
   action?: string | null;
-  timeStamp?: string | null;
+  createdAt?: string | null;
 
 }
 
@@ -64,6 +66,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 }));
 
 const AuditTrail: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [auditTrails, setAuditTrails] = useState<AuditTrail[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -72,32 +75,27 @@ const AuditTrail: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ user: '', table: '', action: '', timeStamp: '' });
+  const [filters, setFilters] = useState({ tableName: '', type: '', action: '', createdAt: '' });
   const [orderBy, setOrderBy] = useState<keyof AuditTrail>('user');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
   const [auditTrailToDelete, setAuditTrailToDelete] = useState<string | null>(null);
 
-  // useEffect(() => {
-  //   const fetchAuditTrails = async () => {
-  //     try {
-  //       const response = await axios.get('http://localhost:3001/auditTrail');
-  //       // Filter AuditTrails where the status is 'active'
-  //       const activeAuditTrails = response.data.data.filter(audt => audt.status === 'active');
-  //       console.log(activeAuditTrails);
-  //       setAuditTrails(activeAuditTrails);
-  //     } catch (error) {
-  //       console.error('Error fetching auditTrails data:', error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchAuditTrails = async () => {
+      if (!isAuthenticated) return;
+      try {
+        const response = await api.get('/audit-trail/superadmin');
+        console.log(response.data.data);
+        setAuditTrails(response.data.data);
+      } catch (error) {
+        console.error('Error fetching audit trails:', error);
+      }
+    };
 
-useEffect(() => {
-  // For testing with dummy data:
-  setAuditTrails(auditTrailData);
-}, []);
-
-
+    fetchAuditTrails();
+  }, [isAuthenticated, user]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchor(event.currentTarget);
@@ -143,12 +141,12 @@ useEffect(() => {
     setConfirmationBulkOpen(true);
   };
 
-
-
   const handleDeleteAuditTrails = async () => {
-
     try {
-      const response = await axios.delete('http://localhost:3001/auditTrail/bulk-delete', {
+      const response = await api.delete('/auditTrail/bulk-delete', {
+        headers: {
+          Authorization: `Bearer ${user?.token}`,
+        },
         data: { ids: Object.keys(selectedAuditTrails) },
       });
 
@@ -161,38 +159,15 @@ useEffect(() => {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
       });
-
-      setSelectedAuditTrails([]);
-      setConfirmationBulkOpen(false);
     } catch (error) {
       toast.error("Failed to delete the auditTrail. Please try again.", {
         position: "top-right",
         autoClose: 5000,
         hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
       });
-    };
-  }
+    }
+  };
 
   // Method to handle deletion of an auditTrail
   const handleDeleteAuditTrail = async () => {
@@ -236,20 +211,20 @@ useEffect(() => {
 
   const filteredData = auditTrails
     .filter((audt) => {
-      const userMatches = audt.user.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        audt.user.toLowerCase().includes(filters.user.toLowerCase());
+      const userMatches = audt.type.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        audt.type.toLowerCase().includes(filters.type.toLowerCase());
 
-      const tableMatches = audt.table
-        ? audt.table.toLowerCase().includes(filters.table.toLowerCase())
-        : !filters.table; // If audt.table is null, match only if filters.table is empty
+      const tableMatches = audt.tableName
+        ? audt.tableName.toLowerCase().includes(filters.tableName.toLowerCase())
+        : !filters.tableName; // If audt.table is null, match only if filters.table is empty
 
       const actionMatches = audt.action
         ? audt.action.toLowerCase().includes(filters.action.toLowerCase())
         : !filters.action; // If audt.action is null, match only if filters.action is empty
 
-      const timeStampMatches = audt.timeStamp
-        ? audt.timeStamp.toLowerCase().includes(filters.timeStamp.toLowerCase())
-        : !filters.timeStamp; // If audt.timeStamp is null, match only if filters.timeStamp is empty
+      const timeStampMatches = audt.createdAt
+        ? audt.createdAt.toLowerCase().includes(filters.createdAt.toLowerCase())
+        : !filters.createdAt; // If audt.timeStamp is null, match only if filters.timeStamp is empty
 
       return userMatches && tableMatches && actionMatches && timeStampMatches;
     })
@@ -259,8 +234,6 @@ useEffect(() => {
     });
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-
-
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -327,13 +300,13 @@ useEffect(() => {
               <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }}>
                 <Avatar sx={{ width: '34px', height: '34px', visibility: 'hidden' }} /> {/* Placeholder for avatar alignment */}
               </TableCell>
-              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
+              <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' , marginLeft: '5%' }}>
                 <TableSortLabel
                   active={orderBy === 'user'}
                   direction={orderDirection}
                   onClick={() => handleRequestSort('user')}
                 >
-                  User
+                  Role
                 </TableSortLabel>
                 {showFilters && (
                   <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
@@ -435,21 +408,20 @@ useEffect(() => {
             </TableRow>
           </TableHead>
 
-
           <TableBody>
             {paginatedData.map((row) => (
               <TableRow key={row.audtId} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
                   <Avatar sx={{ width: '34px', height: '34px' }}>
-                    {row.user?.charAt(0)?.toUpperCase() || 'U'}
+                    {row.type?.charAt(0)?.toUpperCase() || 'U'}
                   </Avatar>
                 </TableCell>
-                <TableCell>{row.user}</TableCell>
-                <TableCell>{row.table || '-'}</TableCell>
+                <TableCell>{row.type}</TableCell>
+                <TableCell>{row.tableName || '-'}</TableCell>
                 <TableCell>{row.action || '-'}</TableCell>
                 <TableCell>
-                  {row.timeStamp 
-                    ? new Date(row.timeStamp).toLocaleString("en-GB", { 
+                  {row.createdAt 
+                    ? new Date(row.createdAt).toLocaleString("en-GB", { 
                         day: "2-digit", 
                         month: "short", 
                         year: "numeric", 
@@ -576,37 +548,7 @@ useEffect(() => {
         />
       </Box>
 
-      {/* Confirmation Dialog */}
-      <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this AuditTrails?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteAuditTrails} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Confirmation Dialog */}
-      <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete these AuditTrails?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationBulkOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteAuditTrails} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+  
       <ToastContainer></ToastContainer>
     </Paper>
   );

@@ -511,10 +511,10 @@ const DataTable: React.FC = () => {
                         backgroundColor: 'white',
                         borderRadius: '10px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
@@ -529,14 +529,32 @@ const DataTable: React.FC = () => {
                         backgroundColor: 'white',
                         borderRadius: '10px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
                       Edit
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/change-organization/${row.orgId}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Change Admin
                     </MenuItem>
                     <MenuItem
                       onClick={() => handleDeleteConfirmation(row.orgId)}
@@ -544,11 +562,11 @@ const DataTable: React.FC = () => {
                         backgroundColor: 'white',
                         borderRadius: '10px',
                         margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        color: 'red', // Red text color for "Delete"
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
+                        justifyContent: 'center',
+                        color: 'red',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
