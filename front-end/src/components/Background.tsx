@@ -58,6 +58,7 @@ const LoadingScreen = () => (
     </Typography>
   </Box>
 );
+import AuditTrail from './AuditTrail';
 
 const Background: React.FC = () => {
   const location = useLocation();
