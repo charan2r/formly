@@ -162,7 +162,7 @@ function CreateOrganization() {
           </IconButton>
           <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
           <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />
-          <Typography sx={{ fontSize: '15px', color: 'textSecondary', fontWeight: 500 }}>
+          <Typography sx={{ fontSize: '15px', color: 'text.secondary', fontWeight: 500 }}>
             Organization Management
           </Typography>
         </Box>
@@ -220,21 +220,12 @@ function CreateOrganization() {
               onChange={handleChange}
               fullWidth
               required
-              placeholder="Choose file"
+              placeholder="Enter Category"
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%',paddingY: '2px', height: '30px' }, // Adjusted height and padding
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton component="label">
-                      <UploadIcon />
-                      <input
-                        type="file"
-                        hidden
-                        name="logo"
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
+                
+                  
+            
               }}
               sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
