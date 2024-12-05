@@ -280,7 +280,7 @@ const DataTable: React.FC = () => {
         <Box display="flex" alignItems="center" gap={1}>
           <CircleIcon sx={{ fontSize: 26, color: 'black' }} />
           <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
-          <Typography sx={{ fontSize: '15px', color: "textSecondary", fontWeight: 500 }}>
+          <Typography sx={{ fontSize: '15px', color: "text.secondary", fontWeight: 500 }}>
           Organizations
           </Typography>
         </Box>
