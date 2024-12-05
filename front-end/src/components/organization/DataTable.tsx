@@ -37,6 +37,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/axios'; // Use the configured axios instance
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 interface Organization {
   orgId: string;
@@ -274,14 +275,12 @@ const DataTable: React.FC = () => {
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
-          <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <CircleIcon style={{ color: 'black' }} />
-          </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
-          <Typography variant="body2" color="textSecondary">
-            Overview
+      <Box display="flex" flexDirection="column" gap={3}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <CircleIcon sx={{ fontSize: 26, color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
+          <Typography sx={{ fontSize: '15px', color: "text.secondary", fontWeight: 500 }}>
+          Organizations
           </Typography>
         </Box>
         <Typography variant="h5" fontWeight="bold">Organization Management</Typography>

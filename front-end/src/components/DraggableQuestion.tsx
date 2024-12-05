@@ -77,12 +77,18 @@ interface DraggableQuestionProps {
       opacity: number;
     };
   };
+  onPageSizeChange?: (newSize: string) => void;
+}
+
+interface PageDimensions {
+  width: number;
+  height: number;
 }
 
 const calculateScale = (selectedSize: string, pageSizes: { [key: string]: { width: number; height: number } }) => {
-  const baseSize = pageSizes['A4']; // Use A4 as reference size
-  const currentSize = pageSizes[selectedSize];
-  return Math.max(baseSize.width / currentSize.width, baseSize.height / currentSize.height);
+  const baseSize = pageSizes['A4'];
+  const targetSize = pageSizes[selectedSize];
+  return baseSize.width / targetSize.width;
 };
 
 const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
@@ -99,11 +105,12 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   fieldStyle,
   borderStyle,
   appearanceSettings,
+  onPageSizeChange,
 }) => {
   const [formFields, setFormFields] = useState<QuestionItem[]>(items);
   const [isDragging, setIsDragging] = useState(false);
 
-  // Add this new useEffect for periodic updates
+  // useEffect for periodic updates
   useEffect(() => {
     const fetchFormFields = async () => {
       try {
@@ -154,8 +161,13 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
 
   const handleDragStop = async (e: any, data: any, item: QuestionItem) => {
     setIsDragging(false);
-    const newX = (data.x / gridSize.width) * pageSizes[selectedSize].width;
-    const newY = (data.y / gridSize.height) * pageSizes[selectedSize].height;
+    
+    // Get the current page dimensions
+    const currentPageSize = pageSizes[selectedSize];
+    
+    // Direct conversion from pixels to document units based on current page size
+    const newX = (data.x / gridSize.width) * currentPageSize.width;
+    const newY = (data.y / gridSize.height) * currentPageSize.height;
 
     setFormFields(prevFields => prevFields.map(field => 
       field.id === item.id 
@@ -180,8 +192,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
     await updateFieldPosition(item.id, updateData);
   };
 
-
-    const handleResizeStop = async (
+  const handleResizeStop = async (
     e: any, 
     direction: any, 
     ref: any, 
@@ -189,23 +200,27 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
     position: any, 
     item: QuestionItem
   ) => {
-    const newWidth = (ref.offsetWidth / gridSize.width) * pageSizes[selectedSize].width;
-    const newHeight = (ref.offsetHeight / gridSize.height) * pageSizes[selectedSize].height;
-    const newX = (position.x / gridSize.width) * pageSizes[selectedSize].width;
-    const newY = (position.y / gridSize.height) * pageSizes[selectedSize].height;
+    // Get the current page dimensions
+    const currentPageSize = pageSizes[selectedSize];
+    
+    // Direct conversion from pixels to document units based on current page size
+    const newWidth = (ref.offsetWidth / gridSize.width) * currentPageSize.width;
+    const newHeight = (ref.offsetHeight / gridSize.height) * currentPageSize.height;
+    const newX = (position.x / gridSize.width) * currentPageSize.width;
+    const newY = (position.y / gridSize.height) * currentPageSize.height;
+    console.log(newWidth, newHeight, newX, newY);
 
-        // Update local state immediately
-        setFormFields(prevFields => prevFields.map(field => 
-          field.id === item.id 
-            ? { 
-                ...field, 
-                width: newWidth,
-                height: newHeight,
-                x: newX,
-                y: newY
-              }
-            : field
-        ));
+    setFormFields(prevFields => prevFields.map(field => 
+      field.id === item.id 
+        ? { 
+            ...field, 
+            width: newWidth,
+            height: newHeight,
+            x: newX,
+            y: newY
+          }
+        : field
+    ));
 
     const updateData = {
       width: newWidth.toString(),
@@ -219,7 +234,6 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
 
     await updateFieldPosition(item.id, updateData);
   };
-
 
   const updateFieldPosition = async (id: string, updateData: any) => {
     try {
@@ -409,6 +423,66 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
         );
     }
   };
+  const handlePageSizeChange = async (newSize: string, oldSize: string) => {
+    try {
+      const oldPageSize = pageSizes[oldSize];
+      const newPageSize = pageSizes[newSize];
+
+      // Calculate scale factors for width and height
+      const scaleX = newPageSize.width / oldPageSize.width;
+      const scaleY = newPageSize.height / oldPageSize.height;
+
+      const updatedFields = formFields.map(item => {
+        // Scale positions and dimensions proportionally
+        const newPosition = {
+          x: item.x * scaleX,
+          y: item.y * scaleY,
+          width: item.width / scaleX,
+          height: item.height / scaleY
+        };
+
+        // Ensure the item stays within page bounds
+        const boundedPosition = {
+          x: Math.max(0, Math.min(newPosition.x, newPageSize.width - newPosition.width)),
+          y: Math.max(0, Math.min(newPosition.y, newPageSize.height - newPosition.height)),
+          width: newPosition.width,
+          height: newPosition.height
+        };
+
+        return {
+          ...item,
+          ...boundedPosition
+        };
+      });
+
+      // Update form fields in the database
+      await Promise.all(updatedFields.map(item => 
+        api.patch(`/form-fields/update?id=${item.id}`, {
+          width: item.width.toString(),
+          height: item.height.toString(),
+          x: item.x.toString(),
+          y: item.y.toString(),
+          question: item.question,
+          type: item.type,
+          color: item.color,
+        })
+      ));
+
+      setFormFields(updatedFields);
+    } catch (error) {
+      console.error('Error updating field positions:', error);
+    }
+  };
+
+  // Add effect to handle page size changes
+  useEffect(() => {
+    console.log('Page size changed to:', selectedSize);
+    if (selectedSize) {
+      const previousSize = localStorage.getItem('previousPageSize') || 'A4';
+      handlePageSizeChange(selectedSize, previousSize);
+      localStorage.setItem('previousPageSize', selectedSize);
+    }
+  }, [selectedSize]);
 
   return (
     <Droppable droppableId="rnd-container">
@@ -434,27 +508,17 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
               }}
               className="draggable-question"
               size={{
-                width: ((item.width / pageSizes[selectedSize].width) * gridSize.width) * calculateScale(selectedSize, pageSizes),
-                height: ((item.height / pageSizes[selectedSize].height) * gridSize.height) * calculateScale(selectedSize, pageSizes)
+                width: (item.width / pageSizes[selectedSize].width) * gridSize.width,
+                height: (item.height / pageSizes[selectedSize].height) * gridSize.height
               }}
               position={{
-                x: ((item.x / pageSizes[selectedSize].width) * gridSize.width) * calculateScale(selectedSize, pageSizes),
-                y: ((item.y / pageSizes[selectedSize].height) * gridSize.height) * calculateScale(selectedSize, pageSizes)
+                x: (item.x / pageSizes[selectedSize].width) * gridSize.width,
+                y: (item.y / pageSizes[selectedSize].height) * gridSize.height
               }}
               onDragStart={handleDragStart}
-              onDragStop={(e, data) => {
-                const scale = calculateScale(selectedSize, pageSizes);
-                const newX = (data.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newY = (data.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                handleDragStop(e, { x: newX, y: newY }, item);
-              }}
+              onDragStop={(e, data) => handleDragStop(e, data, item)}
               onResizeStop={(e, direction, ref, delta, position) => {
-                const scale = calculateScale(selectedSize, pageSizes);
-                const newWidth = (ref.offsetWidth / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newHeight = (ref.offsetHeight / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                const newX = (position.x / (gridSize.width * scale)) * pageSizes[selectedSize].width;
-                const newY = (position.y / (gridSize.height * scale)) * pageSizes[selectedSize].height;
-                handleResizeStop(e, direction, ref, { width: newWidth, height: newHeight }, { x: newX, y: newY }, item);
+                handleResizeStop(e, direction, ref, delta, position, item);
               }}
               bounds="parent"
               dragHandleClassName="drag-handle"

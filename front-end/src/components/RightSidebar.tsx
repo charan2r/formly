@@ -16,6 +16,7 @@ import {
   MenuItem,
   IconButton,
   Radio,
+  SelectChangeEvent,
 } from '@mui/material';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -473,14 +474,19 @@ const EditPageSettings: React.FC = () => {
 
   const handlePageSizeChange = async (event: SelectChangeEvent) => {
     const newSize = event.target.value;
-    const oldSize = selectedSize;
-
+    
     try {
       if (formTemplateId) {
-        // First update the template in database
+        // Update local state
+        setSelectedSize(newSize);
+        setGridSize({
+          width: pageSizes[newSize].width,
+          height: pageSizes[newSize].height
+        });
+
+        // Update template page size in database
         await api.patch(`/form-templates/edit?id=${formTemplateId}`, {
           pageSize: newSize,
-          // Include other fields to prevent them from being lost
           backgroundColor,
           marginTop: gridPadding.top.toString(),
           marginBottom: gridPadding.bottom.toString(),
@@ -492,51 +498,9 @@ const EditPageSettings: React.FC = () => {
           name: templateName,
           description: templateDescription
         });
-
-        // Then update local states
-        setSelectedSize(newSize);
-        setGridSize({
-          width: pageSizes[newSize].width,
-          height: pageSizes[newSize].height
-        });
-
-        // Fix the scaling calculation
-        // When going from A4 to A3, we want items to appear smaller (divide by scale)
-        // When going from A3 to A4, we want items to appear larger (multiply by scale)
-        const scaleX = pageSizes[oldSize].width / pageSizes[newSize].width; // Inverted ratio
-        const scaleY = pageSizes[oldSize].height / pageSizes[newSize].height; // Inverted ratio
-
-        const updatedItems = items.map(item => ({
-          ...item,
-          width: item.width * scaleX,  // Now scales correctly
-          height: item.height * scaleY, // Now scales correctly
-          x: item.x * scaleX,          // Now scales correctly
-          y: item.y * scaleY           // Now scales correctly
-        }));
-
-        // Update form fields in database
-        await Promise.all(updatedItems.map(item => 
-          api.patch(`/form-fields/update?id=${item.id}`, {
-            width: item.width.toString(),
-            height: item.height.toString(),
-            x: item.x.toString(),
-            y: item.y.toString(),
-            question: item.question,
-            type: item.type,
-            color: item.color,
-          })
-        ));
-
-        setItems(updatedItems);
       }
     } catch (error) {
       console.error('Error updating page size:', error);
-      // Revert changes on error
-      setSelectedSize(oldSize);
-      setGridSize({
-        width: pageSizes[oldSize].width,
-        height: pageSizes[oldSize].height
-      });
     }
   };
 

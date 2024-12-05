@@ -25,6 +25,8 @@ import AddRole from './role/AddRole';
 import ViewRole from './role/ViewRole';
 import EditRole from './role/EditRole';
 import FTReset from './authentication/FTReset';
+import ProfileSettings from './ProfileSettings';
+
 
 const LoadingScreen = () => (
   <Box
@@ -126,6 +128,9 @@ const Background: React.FC = () => {
             {/* Protected Routes */}
             {isAuthenticated && (
               <>
+              {/* Common Routes (accessible to both Admin and SuperAdmin) */}
+    <Route path="/profile-settings" element={<ProfileSettings />} />
+
                 {/* Admin Routes */}
                 {isAdmin && (
                   <>

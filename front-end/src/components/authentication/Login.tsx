@@ -37,13 +37,16 @@ const Login = () => {
     try {
       const response = await login(email, password);
 
-      console.log(response);
+      console.log(response.message);
       
       if (response.success === false) {
         // Show error toast immediately for failed login
-        toast.error(response.message, toastConfig);
+        setTimeout(() => {
+          toast.error(response.message, toastConfig);
+        }, 1000);
         return;
       }
+
 
       // Show success toast and wait for it to complete before navigating
       toast.success("Login successful!", toastConfig);
@@ -262,10 +265,10 @@ const Login = () => {
               Login
             </Button>
           </Box>
+          {/* Updated ToastContainer configuration */}
+      
         </Container>
       </Box>
-
-      {/* Updated ToastContainer configuration */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -278,6 +281,7 @@ const Login = () => {
         pauseOnHover
         theme="colored"
       />
+      
     </Box>
   );
 };

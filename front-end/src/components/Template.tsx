@@ -312,6 +312,10 @@ const Template: React.FC = () => {
         setTemplateDetails(null);
     };
 
+    const getCategoryName = (categoryId: string) => {
+        const category = categories.find(cat => cat.categoryId === categoryId);
+        return category?.name || 'N/A';
+    };
 
     const filteredData = templates
         .filter((temp) => {
@@ -689,16 +693,16 @@ const Template: React.FC = () => {
                                     />
                                 </TableCell>
                                 <TableCell>{row.name}</TableCell>
-                                <TableCell>{row.category?.name}</TableCell>
+                                <TableCell>{getCategoryName(row.categoryId)}</TableCell>
                                 <TableCell>
-                                    {new Date(row.createdDate).toLocaleString("en-GB", {
+                                    {new Date(row.createdAt).toLocaleString("en-GB", {
                                         day: "2-digit",
                                         month: "short",
                                         year: "numeric"
                                     })}
                                 </TableCell>
                                 <TableCell>
-                                    {new Date(row.lastModifiedDate).toLocaleString("en-GB", {
+                                    {new Date(row.updatedAt).toLocaleString("en-GB", {
                                         day: "2-digit",
                                         month: "short",
                                         year: "numeric"

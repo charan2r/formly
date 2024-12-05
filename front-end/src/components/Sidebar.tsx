@@ -50,6 +50,13 @@ const Sidebar: React.FC = () => {
     { path: '/roles', label: 'Roles' }
   ] : [];
 
+  const handleProfileSettings = () => {
+    if (location.pathname !== '/profile-settings') {
+      navigate('/profile-settings');
+    }
+    setIsDropdownOpen(false);
+  };
+
   return (
     <Box
       sx={{
@@ -225,7 +232,7 @@ const Sidebar: React.FC = () => {
             </Stack>
             <Box sx={{ borderBottom: '1px solid #E0E0E0', mb: 0.5 }} />
             <List dense sx={{ py: 0.5 }}>
-              <ListItemButton sx={{ py: 0.75 }}>
+              <ListItemButton onClick={handleProfileSettings} sx={{ py: 0.75 }}>
                 <SettingsOutlinedIcon fontSize="small" sx={{ mr: 1, color: 'gray' }} />
                 <ListItemText primary="Profile Settings" primaryTypographyProps={{ fontSize: '0.75rem' }} />
               </ListItemButton>
