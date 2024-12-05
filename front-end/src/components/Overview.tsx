@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import { Bar, Doughnut, Pie } from 'react-chartjs-2';
 import CircleIcon from '@mui/icons-material/Circle';
-import { ArrowForward } from '@mui/icons-material';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/axios';
 import {
@@ -220,7 +220,10 @@ const Overview: React.FC = () => {
           >
             <CircleIcon style={{ color: 'black', fontSize: isMobile ? '1.2rem' : '1.5rem' }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black', fontSize: isMobile ? '1.2rem' : '1.5rem' }} />
+          <ChevronRightIcon sx={{ 
+            color: 'black', 
+            fontSize: isMobile ? '1.2rem' : '1.5rem' 
+          }} />
           <Typography variant={isMobile ? "caption" : "body2"} color="textSecondary">
             Dashboard
           </Typography>
