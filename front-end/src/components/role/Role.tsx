@@ -32,16 +32,20 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import api from '../../utils/axios';  // Import the authenticated axios instance
+import { useAuth } from '../../context/AuthContext';  // Import useAuth
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
+import { useNavigate } from 'react-router-dom';
 
-interface role {
+interface Role {
   roleId: string;
-  name: string;
-  category?: string | null;
+  role: string;
+  description?: string | null;
   lastActive?: string | null;
+  createdAt?: string | null;
+  organizationId: string;
+  status: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -61,7 +65,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 }));
 
 const DataTable: React.FC = () => {
-  const navigate = useNavigate();
+  const { user } = useAuth();  // Get the authenticated user
   const [roles, setRoles] = useState<Role[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRoles, setSelectedRoles] = useState<Record<number, boolean>>({});
@@ -70,31 +74,35 @@ const DataTable: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ name: '', type: '', category: '', lastActive: '' });
+  const [filters, setFilters] = useState({ role: '', description: '', createdAt: '', lastActive: '' });
   const [orderBy, setOrderBy] = useState<keyof Role>('name');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationBulkOpen, setConfirmationBulkOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
+  const navigate = useNavigate();
 
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/role');
-        // Filter role where the status is 'active'
-        const activeRoles = response.data.data.filter(rol => rol.status === 'active');
-        console.log(activeRoles);
-        setRoles(activeRoles);
+        if (!user?.organizationId) return;
+        
+        const response = await api.get(`/roles/organization/${user.organizationId}`);
+        if (response.data.status === 'success') {
+          const activeRoles = response.data.data.filter(
+            (role: Role) => role.status === 'active'
+          );
+          setRoles(activeRoles);
+        }
       } catch (error) {
-        console.error('Error fetching role data:', error);
+        console.error('Error fetching roles:', error);
+        // Handle error appropriately
       }
     };
 
     fetchRoles();
-  }, []);
-
-
+  }, [user?.organizationId]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchor(event.currentTarget);
@@ -115,7 +123,6 @@ const DataTable: React.FC = () => {
 
     setSelectedRoles(newSelectedRoles);
   };
-
 
   const handleSelectRole = (id: number) => {
     setSelectedRoles((prev) => ({
@@ -143,7 +150,7 @@ const DataTable: React.FC = () => {
     }));
   };
 
-  const handleRequestSort = (property: keyof role) => {
+  const handleRequestSort = (property: keyof Role) => {
     const isAsc = orderBy === property && orderDirection === 'asc';
     setOrderDirection(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
@@ -158,109 +165,61 @@ const DataTable: React.FC = () => {
     setConfirmationBulkOpen(true);
   };
 
-
-
   const handleDeleteRoles = async () => {
-
     try {
-      const response = await axios.delete('http://localhost:3001/role/bulk-delete', {
-        data: { ids: Object.keys(selectedRoles) },
+      const selectedRoleIds = Object.keys(selectedRoles).filter(key => selectedRoles[key]);
+      
+      const response = await api.delete('/roles', {
+        data: selectedRoleIds // Send array of IDs directly
       });
 
-      // Filter out the organizations that were deleted
-      setRoles((prevRoles) =>
-        prevRoles.filter(rol => !Object.keys(selectedRoles).includes(rol.roleId))
-      );
-
-      toast.success("Role has been deleted successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
-
-      setSelectedRoles([]);
+      if (response.data.status === 'success') {
+        setRoles(prevRoles => 
+          prevRoles.filter(role => !selectedRoleIds.includes(role.roleId))
+        );
+        toast.success(response.data.message || "Roles deleted successfully!");
+        setSelectedRoles({});
+      } else {
+        throw new Error(response.data.message);
+      }
+      
       setConfirmationBulkOpen(false);
-    } catch (error) {
-      toast.error("Failed to delete the role. Please try again.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
-    };
-  }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to delete roles");
+    }
+  };
 
-  // Method to handle deletion of an organization
   const handleDeleteRole = async () => {
     try {
-      await axios.delete(`http://localhost:3001/role/delete?id=${roleToDelete}`);
-      setRoles((prev) => prev.filter((rol) => rol.roleId !== roleToDelete));
-      setConfirmationOpen(false); // Close confirmation dialog
-      toast.success("Role has been deleted successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
-    } catch (error) {
-      toast.error("Failed to delete the role. Please try again.", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
+      if (!roleToDelete) return;
+
+      const response = await api.delete(`/roles/${roleToDelete}`);
+      
+      if (response.data.status === 'success') {
+        setRoles(prev => prev.filter(role => role.roleId !== roleToDelete));
+        toast.success(response.data.message || "Role deleted successfully!");
+      } else {
+        throw new Error(response.data.message);
+      }
+      
+      setConfirmationOpen(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to delete role");
     }
   };
 
   const filteredData = roles
     .filter((rol) => {
-      const nameMatches = rol.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        rol.name.toLowerCase().includes(filters.name.toLowerCase());
+      const nameMatches = rol.role.toLowerCase().includes(searchTerm.toLowerCase()) &&
+        rol.role.toLowerCase().includes(filters.role.toLowerCase());
 
-      const categoryMatches = rol.category
-        ? rol.category.toLowerCase().includes(filters.category.toLowerCase())
-        : !filters.category; // If org.category is null, match only if filters.category is empty
+      const categoryMatches = rol.description
+        ? rol.description.toLowerCase().includes(filters.description.toLowerCase())
+        : !filters.description; // If org.category is null, match only if filters.category is empty
 
-      const lastActiveMatches = rol.lastActive
-        ? rol.lastActive.toLowerCase().includes(filters.lastActive.toLowerCase())
-        : !filters.lastActive; // If org.lastActive is null, match only if filters.lastActive is empty
+      const lastActiveMatches = rol.createdAt
+        ? rol.createdAt.toLowerCase().includes(filters.createdAt.toLowerCase())
+        : !filters.createdAt; // If org.lastActive is null, match only if filters.lastActive is empty
 
       return nameMatches && categoryMatches && lastActiveMatches;
     })
@@ -273,7 +232,32 @@ const DataTable: React.FC = () => {
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
+  const handleAddRole = () => {
+    if (!user?.organizationId) {
+      toast.error("Organization context not found");
+      return;
+    }
+    navigate('/addrole');
+  };
 
+  const handleEditRole = (roleId: string) => {
+    if (!user?.organizationId) {
+      toast.error("Organization context not found");
+      return;
+    }
+    navigate(`/editrole/${roleId}`);
+  };
+
+  const AddRoleButton = () => (
+    <Button
+      variant="contained"
+      sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px' }}
+      onClick={handleAddRole}
+    >
+      <AddIcon sx={{ marginRight: 1 }} />
+      Add Role
+    </Button>
+  );
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -347,7 +331,7 @@ const DataTable: React.FC = () => {
               <Button
                 variant="contained"
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                onClick={() => navigate('/add-role')}
+                onClick={() => navigate('/addrole')}
               >
                 <AddIcon sx={{ marginRight: 1 }} />
                 Add Role
@@ -465,10 +449,9 @@ const DataTable: React.FC = () => {
             </TableRow>
           </TableHead>
 
-
           <TableBody>
             {paginatedData.map((row) => (
-              <TableRow key={row.id} sx={{ height: '60px' }}>
+              <TableRow key={row.roleId} sx={{ height: '60px' }}>
                 <TableCell padding="checkbox">
                   <Checkbox
                     checked={!!selectedRoles[row.roleId]}  // Toggle specific checkbox
@@ -478,15 +461,15 @@ const DataTable: React.FC = () => {
                 <TableCell padding="checkbox">
                   <Avatar sx={{ width: '34px', height: '34px' }}>O</Avatar>
                 </TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell>{row.category}</TableCell>
-                <TableCell>{row.lastActive ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
+                <TableCell>{row.role}</TableCell>
+                <TableCell>{row.description}</TableCell>
+                <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
-                  <IconButton onClick={(event) => handleMenuOpen(event, row.id)}>
+                  <IconButton onClick={(event) => handleMenuOpen(event, row.roleId)}>
                     <MoreVertIcon />
                   </IconButton>
                   <Popover
-                    open={Boolean(menuAnchor) && selectedRowId === row.id}
+                    open={Boolean(menuAnchor) && selectedRowId === row.roleId}
                     anchorEl={menuAnchor}
                     onClose={handleMenuClose}
                     anchorOrigin={{
@@ -508,7 +491,7 @@ const DataTable: React.FC = () => {
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
-                        navigate(`/view-role/${row.roleId}`);
+                        navigate(`/viewrole/${row.roleId}`);
                       }}
                       sx={{
                         backgroundColor: 'white',
@@ -526,7 +509,7 @@ const DataTable: React.FC = () => {
                     <MenuItem
                       onClick={() => {
                         handleMenuClose();
-                        navigate(`/edit-role/${row.roleId}`);
+                        handleEditRole(row.roleId);
                       }}
                       sx={{
                         backgroundColor: 'white',
@@ -557,12 +540,8 @@ const DataTable: React.FC = () => {
                     >
                       Delete
                     </MenuItem>
-
                   </Popover>
                 </TableCell>
-
-
-
               </TableRow>
             ))}
           </TableBody>

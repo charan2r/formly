@@ -1,19 +1,22 @@
 /* eslint-disable prettier/prettier */
-import { Controller, UseGuards,Get, Delete, Post, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException } from '@nestjs/common';
+import { Controller, UseGuards,Get, Delete, Post, Request, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException, Req} from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';
 import { UpdateOrganizationDto } from './organization.dto';
 //import { CreateOrganizationWithSuperAdminDto } from '../user/create-organization.dto';
 import { User } from 'src/model/user.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from 'src/user/roles.guard';
+import { Roles } from 'src/user/roles.decorator';
 
 @Controller('organization')
-@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
+@UseGuards(AuthGuard('jwt'), RolesGuard) // Protect all routes with JWT authentication
 export class OrganizationController {
     constructor(private readonly organizationService: OrganizationService) {}
 
     // API endpoint to get all organizations
     @Get()
+    @Roles("SuperAdmin")
     async getAll() {
         const organizations = await this.organizationService.getAll();
         return {
@@ -25,16 +28,19 @@ export class OrganizationController {
 
     // API endpoint to get details of a specific organization along with super admin details
     @Get('details')
+    @Roles("SuperAdmin")
     async getOrganizationDetails(
-        @Query('id') orgId: string
+        @Query('id') orgId: string | undefined,
+        @Request() req: any
     ): Promise<{ status: string; message: string; data: { organization: Organization; superAdmin: User | null } }> {
-        const result = await this.organizationService.getOne(orgId);
-        
-        if (!result) {
-            throw new NotFoundException(`Organization with ID "${orgId}" not found`);
-        }
+      const result = await this.organizationService.getOne(orgId);
+      const user: User = req.user;
 
-        return {
+      if (!result) {
+        throw new NotFoundException(`Organization with ID "${orgId}" not found`);
+      }
+
+      return {
             status: 'success',
             message: 'Organization details retrieved successfully',
             data: result,
@@ -43,6 +49,7 @@ export class OrganizationController {
 
     // API endpoint to update details of a specific organization
     @Patch('edit')
+    @Roles("SuperAdmin")
     async updateOrganization(
       @Query('id') orgId: string,
       @Body() updateOrganizationDto: UpdateOrganizationDto,
@@ -60,6 +67,7 @@ export class OrganizationController {
 
     // API endpoint to delete a specific organization
     @Delete('delete')
+    @Roles("SuperAdmin")
     async deleteOne(@Query('id') id: string): Promise<{ status: string; message: string }> {
         const deleted = await this.organizationService.deleteOne(id);
         if (!deleted) {
@@ -73,6 +81,7 @@ export class OrganizationController {
 
     // API endpoint to bulk delete organizations
     @Delete('bulk-delete')
+    @Roles("SuperAdmin")
     async bulkDeleteOrganizations(@Body('ids') orgIds: string[]) {
       if (!orgIds || orgIds.length === 0) {
         throw new BadRequestException('No organization IDs provided for bulk deletion');
@@ -91,6 +100,7 @@ export class OrganizationController {
 
     // API endpoint to create a new organization with super admin
     @Post('create')
+    @Roles("SuperAdmin")
     async createOrganizationWithSuperAdmin(
       @Body('organizationData') organizationData: any,
       @Body('superAdminData') superAdminData: any,
@@ -125,6 +135,7 @@ export class OrganizationController {
     }
 
     @Patch('change-admin')
+    @Roles("SuperAdmin")
     async changeOrganizationAdmin(
       @Query('orgId') orgId: string,
       @Body() adminData: {
@@ -153,9 +164,12 @@ export class OrganizationController {
     }
 
     @Get('user-types-count')
-    async getUserTypesCounts(): Promise<{ status: string; message: string; data: any }> {
+    @Roles("SuperAdmin")
+    async getUserTypesCounts(@Req() request): Promise<{ status: string; message: string; data: any }> {
       try {
-        const counts = await this.organizationService.getUserTypesCounts();
+        const user = request.user;
+        const organizationId = user.userType === 'Admin' ? user.organizationId : null;
+        const counts = await this.organizationService.getUserTypesCounts(user);
         return {
           status: 'success',
           message: 'User types count retrieved successfully',

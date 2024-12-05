@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import 'reflect-metadata';
 import * as cookieParser from 'cookie-parser';
+import { PermissionService } from './permission/permission.service';
 
 //import AppDataSource from 'ormconfig'; 
 
@@ -31,9 +32,6 @@ async function bootstrap() {
   .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
-
-
-
 
   await app.listen(process.env.PORT ?? 3000);
 }

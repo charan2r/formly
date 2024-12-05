@@ -42,7 +42,7 @@ const Sidebar: React.FC = () => {
     : [
         { path: '/overview', label: 'Overview' },
         { path: '/organizations', label: 'Organizations' },
-        { path: '/audit-logs', label: 'Audit Logs' },
+        { path: '/audit-trail', label: 'Audit Logs' },
       ];
 
   const authorizationMenuItems = isUsersPage ? [
@@ -111,18 +111,19 @@ const Sidebar: React.FC = () => {
       </Box>
 
       {/* AUTHORIZATION Menu Items */}
-      <Box ml={2} mt={3}>
-        <Typography variant="caption" color="text.secondary">
-          AUTHORIZATION
-        </Typography>
-        <List disablePadding sx={{ marginLeft: '-14px', marginTop: '7px'}}>
-          {authorizationMenuItems.map(({ path, label }) => (
-            <ListItemButton
-              key={path}
-              component={Link}
-              to={path}
-              sx={{
-                borderRadius: '150px',
+      {authorizationMenuItems.length > 0 && (
+        <Box ml={2} mt={3}>
+          <Typography variant="caption" color="text.secondary">
+            AUTHORIZATION
+          </Typography>
+          <List disablePadding sx={{ marginLeft: '-14px', marginTop: '7px'}}>
+            {authorizationMenuItems.map(({ path, label }) => (
+              <ListItemButton
+                key={path}
+                component={Link}
+                to={path}
+                sx={{
+                  borderRadius: '150px',
                 padding: '1px',
                 margin: '5px',
                 backgroundColor: location.pathname === path ? 'black' : 'transparent',
@@ -136,7 +137,8 @@ const Sidebar: React.FC = () => {
             </ListItemButton>
           ))}
         </List>
-      </Box>
+        </Box>
+      )}
 
       {/* Profile Dropdown */}
       <Box 

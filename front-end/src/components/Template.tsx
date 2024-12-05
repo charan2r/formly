@@ -32,12 +32,13 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-import axios from 'axios';
+import api from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
+import { useAuth } from '../context/AuthContext';
 
 interface Template {
     formTemplateId: string;
@@ -79,6 +80,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const Template: React.FC = () => {
     const navigate = useNavigate();
+    const {user} = useAuth();
     const [templates, setTemplates] = useState<Template[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTemplates, setSelectedTemplates] = useState<string[]>([]);
@@ -116,7 +118,7 @@ const Template: React.FC = () => {
     useEffect(() => {
         const fetchTemplates = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/form-templates');
+                const response = await api.get('/form-templates');
                 console.log(response.data);
                 // Filter Templates where the status is 'active'
                 const activeTemplates = response.data.data
@@ -129,10 +131,10 @@ const Template: React.FC = () => {
 
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/categories/organization/3f1b43a2-8add-4145-a4ec-6c560c7ac766');
-                // Filter categories where status is 'active'
-                const activeCategories = response.data.data.filter((cat: Category) => cat.status === 'active');
-                setCategories(activeCategories);
+                const response = await api.get(`/categories/organization/${user?.organizationId}`);
+                console.log(response.data);
+                setCategories(response.data.data);
+                const activeCategories = response.data.data;
             } catch (error) {
                 console.error('Error fetching categories:', error);
             }
@@ -228,7 +230,7 @@ const Template: React.FC = () => {
     const handleCreateTemplate = async () => {
         try {
             console.log(newTemplate);
-            const response = await axios.post('http://localhost:3001/form-templates/create', {
+            const response = await api.post('/form-templates/create', {
                 ...newTemplate,
                 categoryId: newTemplate.categoryId,
                 pageSize: newTemplate.pageSize,
@@ -251,7 +253,7 @@ const Template: React.FC = () => {
 
     const handleDeleteTemplates = async () => {
         try {
-            await axios.delete('http://localhost:3001/form-templates/bulk-delete', {
+            await api.delete('/form-templates/bulk-delete', {
                 data: { ids: Object.keys(selectedTemplates) },
             });
 
@@ -275,7 +277,7 @@ const Template: React.FC = () => {
             setLoading(true);
             console.log('Deleting template with ID:', templateToDelete);
 
-            const response = await axios.delete(`http://localhost:3001/form-templates/delete?id=${templateToDelete}`);
+            const response = await api.delete(`/form-templates/delete?id=${templateToDelete}`);
             console.log('Single Delete API Response:', response.data);
 
             if (response.data.status === 'success') {
@@ -356,9 +358,8 @@ const Template: React.FC = () => {
 
     const handleEditTemplate = async () => {
         try {
-            const response = await axios.patch(
-                `http://localhost:3001/form-templates/edit?id=${selectedTemplate?.formTemplateId}`,
-                editFormData
+            const response = await api.patch(
+                `/form-templates/edit?id=${selectedTemplate?.formTemplateId}`, editFormData
             );
 
             setTemplates(prevTemplates =>
@@ -379,7 +380,7 @@ const Template: React.FC = () => {
     const handleDelete = async (templateId: string) => {
         try {
             setLoading(true);
-            const response = await axios.delete(`http://localhost:3001/form-templates/delete?id=${templateId}`);
+            const response = await api.delete(`/form-templates/delete?id=${templateId}`);
 
             if (response.data.status === 'success') {
                 toast.success('Template deleted successfully', toastConfig);
@@ -402,7 +403,7 @@ const Template: React.FC = () => {
             setLoading(true);
             console.log('Deleting templates with IDs:', selectedTemplates);
 
-            const response = await axios.delete('http://localhost:3001/form-templates/bulk-delete', {
+            const response = await api.delete('/form-templates/bulk-delete', {
                 data: { ids: selectedTemplates }
             });
             console.log('Bulk Delete API Response:', response.data);

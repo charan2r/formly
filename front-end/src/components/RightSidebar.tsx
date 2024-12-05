@@ -25,7 +25,7 @@ import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import DraggableQuestion from './DraggableQuestion';
 import { useParams, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axios';
 import { useTemplate } from '../context/TemplateContext';
 
 const pageSizes = {
@@ -164,7 +164,7 @@ const EditPageSettings: React.FC = () => {
   useEffect(() => {
     const fetchTemplateData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/form-templates/details?id=${formTemplateId}`);
+        const response = await api.get(`/form-templates/details?id=${formTemplateId}`);
         
         if (response.data.status === 'success') {
           const template = response.data.data;
@@ -385,15 +385,15 @@ const EditPageSettings: React.FC = () => {
         categoryId: templateData?.categoryId
       };
 
-      const response = await axios.patch(
-        `http://localhost:3001/form-templates/edit?id=${formTemplateId}`,
+      const response = await api.patch(
+        `/form-templates/edit?id=${formTemplateId}`,
         updateData
       );
 
       if (response.data.status === 'success') {
         setHasChanges(false);
         // Fetch updated data after successful save
-        const updatedResponse = await axios.get(`http://localhost:3001/form-templates/details?id=${formTemplateId}`);
+        const updatedResponse = await api.get(`/form-templates/details?id=${formTemplateId}`);
         if (updatedResponse.data.status === 'success') {
           setTemplateData(updatedResponse.data.data);
         }
@@ -435,7 +435,7 @@ const EditPageSettings: React.FC = () => {
       try {
         if (!formTemplateId) return;
 
-        const response = await axios.get(`http://localhost:3001/form-fields`, {
+        const response = await api.get(`/form-fields`, {
           params: { formTemplateId: formTemplateId }
         });
 
@@ -478,7 +478,7 @@ const EditPageSettings: React.FC = () => {
     try {
       if (formTemplateId) {
         // First update the template in database
-        await axios.patch(`http://localhost:3001/form-templates/edit?id=${formTemplateId}`, {
+        await api.patch(`/form-templates/edit?id=${formTemplateId}`, {
           pageSize: newSize,
           // Include other fields to prevent them from being lost
           backgroundColor,
@@ -516,7 +516,7 @@ const EditPageSettings: React.FC = () => {
 
         // Update form fields in database
         await Promise.all(updatedItems.map(item => 
-          axios.patch(`http://localhost:3001/form-fields/update?id=${item.id}`, {
+          api.patch(`/form-fields/update?id=${item.id}`, {
             width: item.width.toString(),
             height: item.height.toString(),
             x: item.x.toString(),
@@ -603,7 +603,7 @@ const EditPageSettings: React.FC = () => {
         options: JSON.stringify(item.options)
       };
 
-      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+      await api.patch(`/form-fields/update?id=${itemId}`, updateData);
 
       setItems(prevItems =>
         prevItems.map(item =>
@@ -638,7 +638,7 @@ const EditPageSettings: React.FC = () => {
         color: item.color
       };
 
-      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+      await api.patch(`/form-fields/update?id=${itemId}`, updateData);
 
       setItems(prevItems =>
         prevItems.map(item =>
@@ -688,7 +688,7 @@ const EditPageSettings: React.FC = () => {
         options: JSON.stringify(updatedOptions)
       });
 
-      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+      await api.patch(`/form-fields/update?id=${itemId}`, updateData);
 
       setItems(prevItems =>
         prevItems.map(item =>
@@ -717,7 +717,7 @@ const EditPageSettings: React.FC = () => {
         options: JSON.stringify(updatedOptions)
       });
 
-      await axios.patch(`http://localhost:3001/form-fields/update?id=${itemId}`, updateData);
+      await api.patch(`/form-fields/update?id=${itemId}`, updateData);
 
       setItems(prevItems =>
         prevItems.map(item =>

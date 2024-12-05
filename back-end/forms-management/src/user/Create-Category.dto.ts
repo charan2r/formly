@@ -13,6 +13,10 @@ export class CreateCategoryDto {
   @IsNotEmpty()
   @IsString()
   createdById: string;
+
+  @IsNotEmpty()
+  @IsString()
+  organizationId: string;
 }
 
 

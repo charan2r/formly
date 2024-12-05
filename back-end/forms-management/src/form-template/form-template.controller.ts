@@ -5,6 +5,8 @@ import { CreateFormTemplateDto } from './create-form-template.dto';
 import { FormTemplate } from '../model/form-template.entity';
 import { UpdateTemplateDto } from './update-template.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Roles } from 'src/user/roles.decorator';
+import { Permissions } from 'src/user/permissions.decorator';
 
 interface MetaSchemaResponse<T> {
   status: string;
@@ -20,6 +22,8 @@ export class FormTemplateController {
 
   // API endpoint to create templates
   @Post('create')
+  @Roles("Admin","SubUser")
+  @Permissions("Create Template")
   async createFormTemplate(@Body() createFormTemplateDto: CreateFormTemplateDto): Promise<FormTemplate> {
     console.log(createFormTemplateDto)
     return this.formTemplateService.createTemplate(createFormTemplateDto);
@@ -28,6 +32,8 @@ export class FormTemplateController {
 
   // API endpoint to get all form templates
   @Get()
+  @Roles("Admin","SubUser")
+  @Permissions("view Templates")
   async getAll(): Promise<MetaSchemaResponse<FormTemplate[]>> {
     const templates = await this.formTemplateService.getAll();
     return {
@@ -40,6 +46,8 @@ export class FormTemplateController {
 
   // API endpoint to get a form template by ID
   @Get('details')
+  @Roles("Admin","SubUser")
+  @Permissions("view Template")
   async findOne(@Query('id') formTemplateId: string): Promise<MetaSchemaResponse<FormTemplate | undefined>> {
     const template = await this.formTemplateService.findOne(formTemplateId);
     if (!template) {
@@ -59,6 +67,8 @@ export class FormTemplateController {
 
   // API endpoint to update a form template
   @Patch('edit')
+  @Roles("Admin","SubUser")
+  @Permissions("Edit Templates")
   async updateTemplate(
     @Query('id') id: string,
     @Body() updateTemplateDto: UpdateTemplateDto,
@@ -76,6 +86,8 @@ export class FormTemplateController {
 
   // API endpoint to delete a form template
   @Delete('delete')
+  @Roles("Admin","SubUser")
+  @Permissions("Delete Template")
   async softDelete(@Query('id') id: string): Promise<MetaSchemaResponse<FormTemplate>> {
     const deletedTemplate = await this.formTemplateService.softDelete(id);
     if (!deletedTemplate) {
@@ -90,6 +102,8 @@ export class FormTemplateController {
 
   // API endpoint to bulk delete form templates
   @Delete('bulk-delete')
+  @Roles("Admin","SubUser")
+  @Permissions("Delete Templates")
   async bulkDelete(@Body('ids') ids: string[]): Promise<MetaSchemaResponse<null>> {
     const deletedTemplates = await this.formTemplateService.bulkDelete(ids);
     if (!deletedTemplates.length) {

@@ -15,11 +15,86 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import api from '../../utils/axios';
+import 'react-toastify/dist/ReactToastify.css';
 
 const FTReset = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  // Get token from URL
+  const searchParams = new URLSearchParams(window.location.href.split('?')[1]);
+  const token = searchParams.get('token');
+  console.log(token);
+
+  // Check if this is a verification or reset password
+  const isVerification = location.pathname === '/auth/';
+
+  const handleSetPassword = async () => {
+    try {
+      const endpoint =  '/auth/set-password';
+      const response = await api.post(endpoint, {
+        token,
+        newPassword,
+        confirmPassword
+      });
+      console.log(response);
+
+      if (response.data?.success === false) {
+        toast.error(response.data.message || 'Token validation failed', {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: () => {
+            setTimeout(() => {
+              navigate('/login');
+            }, 500); // Small additional delay after toast closes
+          }
+        });
+        // navigate('/login');
+        return;
+      }
+
+      if (response.data.status === 'success') {
+        toast.success('Password set successfully', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: () => {
+            setTimeout(() => {
+              navigate('/login');
+            }, 500); // Small additional delay after toast closes
+          }
+        });
+        // navigate('/login');
+      }
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to set password', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        onClose: () => {
+          setTimeout(() => {
+            navigate('/login');
+          }, 500); // Small additional delay after toast closes
+        }
+      });
+    }
+  };
 
   // Password validation rules
   const validations = {
@@ -120,13 +195,17 @@ const FTReset = () => {
           borderRadius: "16px",
           boxShadow: 3,
           padding: "32px",
-          position: "relative",
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           textAlign: "center",
           height: "420px",
           display: "flex",
           width: "400px",
           flexDirection: "column",
           justifyContent: "space-between",
+          margin: "auto",
         }}
       >
         {/* Logo and Title */}
@@ -205,6 +284,17 @@ const FTReset = () => {
                 boxShadow: 3,
                 zIndex: 10,
                 backgroundColor: "#f9f9f9",
+                opacity: 0,
+                visibility: "hidden",
+                transition: "opacity 0.2s, visibility 0.2s",
+                "&:hover": {
+                  opacity: 1,
+                  visibility: "visible"
+                },
+                ".MuiTextField-root:hover + &": {
+                  opacity: 1,
+                  visibility: "visible"
+                }
               }}
             >
               <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
@@ -275,6 +365,8 @@ const FTReset = () => {
           <Button
             fullWidth
             variant="contained"
+            onClick={handleSetPassword}
+            disabled={!Object.values(validations).every(Boolean)}
             sx={{
               backgroundColor: "black",
               color: "white",
@@ -288,6 +380,20 @@ const FTReset = () => {
           </Button>
         </Box>
       </Container>
+
+      {/* Add ToastContainer at the bottom */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </Box>
   );
 };

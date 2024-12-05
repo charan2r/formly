@@ -33,11 +33,12 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-import axios from 'axios';
+import api from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { useAuth } from '../context/AuthContext';
 
 interface Category {
     categoryId: string;
@@ -66,6 +67,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const Category: React.FC = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [categories, setCategories] = useState<Category[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategories, setSelectedCategories] = useState<Record<number, boolean>>({});
@@ -86,7 +88,7 @@ const Category: React.FC = () => {
     const [newCategory, setNewCategory] = useState({
         name: '',
         description: '',
-        createdById: '8478937e-17cf-4936-97a8-0e92a33280f9'
+        createdById: user?.organizationId ,
     });
      // Adjust `createdById` as needed
      const [error, setError] = useState<string | null>(null); // Optional: To display errors
@@ -102,7 +104,10 @@ const Category: React.FC = () => {
         setError(null);
       
         try {
-            const response = await axios.post('http://localhost:3001/categories/create', newCategory);
+            console.log(newCategory);
+            const response = await api.post('/categories/create', newCategory);
+            console.log(response);
+
             
             // Add the new category to the existing categories
             setCategories(prevCategories => [...prevCategories, response.data]);
@@ -114,7 +119,7 @@ const Category: React.FC = () => {
             setNewCategory({ 
                 name: '', 
                 description: '', 
-                createdById: '8478937e-17cf-4936-97a8-0e92a33280f9' 
+                createdById: user?.organizationId
             });
 
             // Show success message
@@ -148,9 +153,15 @@ const Category: React.FC = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:3001/categories/organization/8478937e-17cf-4936-97a8-0e92a33280f9`);
-            const activeCategories = response.data.data.filter(cat => cat.status === 'active');
-            setCategories(activeCategories);
+            if (user) {
+                console.log(user.organizationId);
+                const response = await api.get(`/categories/organization/${user.organizationId}`);
+                console.log(response);
+                setCategories(response.data.data);
+            } else {
+                setError('User is not authenticated.');
+            }
+            
         } catch (error) {
             console.error('Error fetching categories:', error);
             setError('Unable to fetch categories. Please try again later.');
@@ -228,47 +239,33 @@ const Category: React.FC = () => {
 
     const handleDeleteCategories = async () => {
         try {
-            // Get array of selected category IDs
             const selectedIds = Object.entries(selectedCategories)
                 .filter(([_, isSelected]) => isSelected)
                 .map(([id, _]) => id);
 
-            await axios.delete('http://localhost:3001/categories/bulk-delete', {
+            await api.delete('/categories/bulk-delete', {
                 data: selectedIds // Send array directly as the request body
             });
 
-            // Filter out the deleted categories
-            setCategories((prevCategories) =>
-                prevCategories.filter(cat => !selectedIds.includes(cat.categoryId.toString()))
-            );
+            if (response.data.status === 'success') {
+                setCategories((prevCategories) =>
+                    prevCategories.filter(cat => !selectedIds.includes(cat.categoryId.toString()))
+                );
 
-            toast.success("Categories have been deleted successfully!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                style: {
-                    backgroundColor: 'black',
-                    color: 'white',
-                    borderRadius: '10px',
-                    fontWeight: 'bold',
-                },
-            });
+                toast.success("Categories have been deleted successfully!", {
+                    style: {
+                        backgroundColor: 'black',
+                        color: 'white',
+                        borderRadius: '10px',
+                        fontWeight: 'bold',
+                    },
+                });
 
-            setSelectedCategories({});
-            setConfirmationBulkOpen(false);
+                setSelectedCategories({});
+                setConfirmationBulkOpen(false);
+            }
         } catch (error) {
             toast.error("Failed to delete categories. Please try again.", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
                 style: {
                     backgroundColor: 'black',
                     color: 'white',
@@ -282,7 +279,7 @@ const Category: React.FC = () => {
     // Method to handle deletion of an category
     const handleDeleteCategory = async () => {
         try {
-            await axios.delete(`http://localhost:3001/categories/delete/${categoryToDelete}`);
+            await api.delete(`/categories/delete/${categoryToDelete}`);
             setCategories((prev) => prev.filter((cat) => cat.categoryId !== categoryToDelete));
             setConfirmationOpen(false);
             toast.success("Category has been deleted successfully!", {
@@ -302,13 +299,6 @@ const Category: React.FC = () => {
             });
         } catch (error) {
             toast.error("Failed to delete the Category. Please try again.", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
                 style: {
                     backgroundColor: 'black',
                     color: 'white',
@@ -374,7 +364,7 @@ const Category: React.FC = () => {
 
     const handleEditCategory = async () => {
         try {
-            await axios.patch(`http://localhost:3001/categories/update/${selectedCategory?.categoryId}`, editFormData);
+            await api.patch(`/categories/update/${selectedCategory?.categoryId}`, editFormData);
             
             // Update the categories list
             setCategories(categories.map(cat => 
@@ -385,13 +375,6 @@ const Category: React.FC = () => {
             
             setEditCategoryOpen(false);
             toast.success("Category has been updated successfully!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: true,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
                 style: {
                     backgroundColor: 'black',
                     color: 'white',

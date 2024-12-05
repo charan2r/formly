@@ -41,4 +41,8 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   readonly organizationId?: string;
+
+  @IsString()
+  @IsOptional()
+  readonly roleId?: string;
 }

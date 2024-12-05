@@ -9,7 +9,7 @@ import CreateOrganization from './organization/CreateOrganization';
 import ViewOrganization from './organization/ViewOrganization';
 import EditOrganization from './organization/EditOrganization';
 import ChangeOrganization from './organization/ChangeOrganization';
-import UserOverview from './UserOverview';
+import UserOverview from './superAdmin/userOverview';
 import Users from './Users';
 import Template from './Template';
 import Category from './Category';
@@ -20,8 +20,11 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { TemplateProvider } from '../context/TemplateContext';
 import Login from './authentication/Login';
 import ProtectedRoute from './authentication/ProtectedRoute';
-import ProfileSettings from './ProfileSettings';
-
+import Role from './role/Role';
+import AddRole from './role/AddRole';
+import ViewRole from './role/ViewRole';
+import EditRole from './role/EditRole';
+import FTReset from './authentication/FTReset';
 
 const LoadingScreen = () => (
   <Box
@@ -55,13 +58,16 @@ const LoadingScreen = () => (
     </Typography>
   </Box>
 );
+import AuditTrail from './AuditTrail';
 
 const Background: React.FC = () => {
   const location = useLocation();
   const { isAuthenticated, isLoading, user } = useAuth();
   
   const isEditTemplate = location.pathname.match(/^\/edittemplate\/[^/]+$/);
-  const isAuthPage = location.pathname === '/login';
+  const isAuthPage = location.pathname === '/login' || 
+                    location.pathname.startsWith('/auth/verify-email') || 
+                    location.pathname.startsWith('/auth/reset-password');
   const isSuperAdmin = user?.userType === 'SuperAdmin';
   const isAdmin = user?.userType === 'Admin';
 
@@ -105,7 +111,6 @@ const Background: React.FC = () => {
             isEditTemplate ? (
               <>
                 <LeftSidebar />
-                <EditPageSettings />
               </>
             ) : (
               <Sidebar />
@@ -113,7 +118,10 @@ const Background: React.FC = () => {
           )}
           
           <Routes>
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/verify-email" element={<FTReset />} />
+            <Route path="/auth/reset-password" element={<FTReset />} />
             
             {/* Protected Routes */}
             {isAuthenticated && (
@@ -130,6 +138,10 @@ const Background: React.FC = () => {
                     <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
                     <Route path="/categories" element={<Category />} />
                     <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
+                    <Route path="/roles" element={<Role />} />
+                    <Route path="/addrole" element={<AddRole />} />
+                    <Route path="/editrole/:roleId" element={<EditRole />} />
+                    <Route path="/viewrole/:roleId" element={<ViewRole />} />
                   </>
                 )}
 
@@ -142,6 +154,7 @@ const Background: React.FC = () => {
                     <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
                     <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
                     <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
+                    <Route path="/audit-trail" element={<AuditTrail />} />
                   </>
                 )}
 

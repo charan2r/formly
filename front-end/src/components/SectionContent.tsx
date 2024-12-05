@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import DragHandle from './DragHandle';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { IconButton } from '@mui/material';
-import axios from 'axios';
+import api from '../utils/axios';
 
 interface SectionContentProps {
   item: any;
@@ -17,7 +17,7 @@ const SectionContent: React.FC<SectionContentProps> = ({
   // Add delete handler
   const handleDeleteFormField = async () => {
     try {
-      const response = await axios.delete(`http://localhost:3001/form-fields/delete?id=${formFieldId}`);
+      const response = await api.delete(`/form-fields/delete?id=${formFieldId}`);
       if (response.data.success) {
         console.log('Section deleted successfully');
       }

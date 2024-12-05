@@ -36,6 +36,8 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await login(email, password);
+
+      console.log(response);
       
       if (response.success === false) {
         // Show error toast immediately for failed login
@@ -46,12 +48,11 @@ const Login = () => {
       // Show success toast and wait for it to complete before navigating
       toast.success("Login successful!", toastConfig);
       
-      // Reduced delay for better UX
-      setTimeout(() => {
-        const from = (location.state as any)?.from?.pathname || 
-          (response.data?.user?.userType === 'Admin' ? '/useroverview' : '/overview');
-        navigate(from, { replace: true });
-      }, 2000); // Reduced from 10000 to 2000ms
+      // // Reduced delay for better UX
+      // setTimeout(() => {
+        
+      //   }, 2000); // Reduced from 10000 to 2000ms
+      //   navigate(from, { replace: true });
 
     } catch (error: any) {
       // Handle specific error messages

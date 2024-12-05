@@ -3,6 +3,7 @@ import { Controller, Post, Body, Query, Res, Get, Req, UseGuards } from '@nestjs
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.strategy';
 import { Response, Request } from 'express';
+import { Roles } from 'src/user/roles.decorator';
 
 interface StandardResponse<T> {
   success: boolean;
@@ -23,7 +24,7 @@ export class AuthController {
     // API endpoint to first-time password creation
     @Post('set-password')
     async setPassword(
-      @Query('token') token: string,
+      @Body('token') token: string,
       @Body('newPassword') newPassword: string,
     ): Promise<StandardResponse<{ passwordSet: boolean }>> {
       try {
@@ -42,8 +43,15 @@ export class AuthController {
       }
     }
 
+    // API endpoint to forgot password
+    @Post('forgot-password')
+    async forgotPassword(@Body('email') email: string): Promise<{ message: string }> {
+      return this.authService.forgotPassword(email);
+    }
+
     // API endpoint to login
     @Post('login')
+    @Roles('Admin')
     async login(
       @Body('email') email: string,
       @Body('password') password: string,
@@ -58,7 +66,7 @@ export class AuthController {
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/',
-          maxAge: 24 * 60 * 60 * 1000 // 24 hours
+          maxAge:   45 * 60 * 1000 // 24 hours
         });
 
         return {

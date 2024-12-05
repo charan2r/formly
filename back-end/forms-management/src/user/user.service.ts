@@ -5,10 +5,16 @@ import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
 import { In } from 'typeorm';
+//import { v4 as uuidv4 } from 'uuid';
+import { EmailService } from 'src/auth/email.service';
+import { TokenService } from 'src/auth/token.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly emailService: EmailService
+  ) {}
 
 // Method to get users for grid view without pagination
 async getUsers(organizationId?: string): Promise<[User[], number]> {
@@ -30,23 +36,49 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
 
   // Fetch user by verification token
   async getUserByVerificationToken(token: string): Promise<User | null> {
+    console.log(token);
     return this.userRepository.findOne({ where: { verificationToken: token } });
   }
   
 
   // Method to add a new user
   async addUser(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create(createUserDto);
+
+    const candidate = await this.getUserByEmail(createUserDto.email);
+    if (candidate) {
+      throw new NotFoundException('User with this email already exists');
+    }
+
+    const {verificationToken, verificationTokenExpires} = TokenService.generateVerificationToken();
+
+    const newUser = this.userRepository.create({
+      ...createUserDto,
+      isVerified: false,
+      passwordHash: '',
+      verificationToken,
+      verificationTokenExpires,
+    });
+    
+    await this.emailService.sendVerificationEmail(createUserDto.email, verificationToken);
     return await this.userRepository.save(newUser);
+    
   }
 
+  // Method to update a user
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const existingUser = await this.userRepository.findOneBy({ id });
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+    console.log(updateUserDto);
 
-    await this.userRepository.update(id, updateUserDto);
+    // Update the existing user entity with new data
+    Object.assign(existingUser, updateUserDto);
+
+    // Save the updated entity back to the database
+    await this.userRepository.save(existingUser);
+
+    // Return the updated user
     return this.userRepository.findOneBy({ id });
   }
 

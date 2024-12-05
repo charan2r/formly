@@ -1,21 +1,39 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Query, NotFoundException, Post, Body, Patch, Delete, UseGuards} from '@nestjs/common';
+import { Controller, Get, Query, NotFoundException, Post, Body, Patch, Delete, UseGuards, ForbiddenException, Request, BadRequestException,ExecutionContext} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { User } from 'src/model/user.entity';
 import { CreateUserDto } from './create-user.dto';
 import { UpdateUserDto } from './update-user.dto';
+import { Roles } from './roles.decorator';
+import { RolesGuard } from './roles.guard';
+import { Permissions } from './decorators/permissions.decorator';
+
 
 @Controller('users')
-@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
+@UseGuards(AuthGuard('jwt'),RolesGuard) // Protect all routes with JWT authentication
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   // API Endpoint to get all users without pagination
   @Get()
+  @Roles("Admin","SubUser")
+  @Permissions("view Users")
   async getUsers(
-    @Query('organizationId') organizationId?: string,
+    @Request() req: any,
+    @Query('organizationId') organizationId?: string
   ){
+    const user = req.user;
+    if (!organizationId) {
+      organizationId = user.organizationId;
+    }
+    
+    if (user.organizationId !== organizationId) {
+      throw new ForbiddenException(
+        `Admins can only view users from their own organization`
+      );
+    }
+  
     const users = await this.userService.getUsers(organizationId);
     return { 
       status: 'success',
@@ -26,6 +44,8 @@ export class UserController {
 
   // API endpoint to get details of a specific user by ID
   @Get('details')
+  @Roles("Admin","SubUser")
+  @Permissions("view user")
   async getUserById(@Query('userId') userId: string): Promise<{ message: string; status: string;data: User }> {
     if (!userId) {
       throw new NotFoundException('User ID query parameter is required');
@@ -44,10 +64,12 @@ export class UserController {
 
   // API endpoint to create a new user
   @Post('create')
+  @Roles("Admin","SubUser")
+  @Permissions('Create Users')
   async addUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<{ message: string; status: string; data: User }> {
-    const newUser = await this.userService.addUser(createUserDto);
+    const newUser: User = await this.userService.addUser(createUserDto);
     return {
       status: 'success',
       message: 'User created successfully',
@@ -58,8 +80,9 @@ export class UserController {
 
   // API endpoint to update a user
   @Patch('edit')
+  @Roles("Admin","SubUser")
   async updateUser(
-    @Query('id') id: string,
+    @Query('userid') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<{ message: string; status: string; data: User }> {
     const updatedUser = await this.userService.updateUser(id, updateUserDto);
@@ -72,25 +95,46 @@ export class UserController {
 
   // API endpoint to delete a user
   @Delete('delete')
-  async deleteUser(@Query('id') id: string): Promise<{ status: string; message: string }> {
-    const result = await this.userService.deleteUser(id);
+  @Roles("Admin","SubUser")
+  @Permissions("Delete User")
+  async deleteUser(
+    @Body() body: { userId: string; organizationId: string }
+  ): Promise<{ status: string; message: string }> {
+    const { userId, organizationId } = body;
+  
+    if (!userId) {
+      throw new BadRequestException('User ID is required');
+    }
+  
+    const result = await this.userService.deleteUser(userId);
+  
     if (!result) {
-      throw new NotFoundException(`User not found`);
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
     return {
       status: 'success',
-      message: `Status of user changed succeessfully`,
+      message: 'Status of user changed successfully'
     };
   }
+  
 
   // API endpoint to bulk delete users
   @Delete('bulk-delete')
-  async bulkDeleteUsers(@Body('ids') ids: string[]): Promise<{ status: string; message: string }> {
-    await this.userService.bulkDeleteUsers(ids);
-    return {
-      status: 'success',
-      message: 'Ststus of users changed successfully',
-    };
+  @Roles("Admin","SubUser")
+  @Permissions("Delete Users")
+  async bulkDeleteUsers(
+    @Body() body: { ids: string[] },
+    @Request() request: any 
+    ): Promise<{ status: string; message: string }> {
+      const { ids } = body;
+      if (!ids || ids.length === 0) {
+        throw new BadRequestException('User IDs are required');
+      }
+      const user = request.user;
+      await this.userService.bulkDeleteUsers(ids);
+      return {
+        status: 'success',
+        message: 'Status of users changed successfully',
+      };
+    }
   }
-
-}

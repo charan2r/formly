@@ -13,7 +13,6 @@ import {
   IconButton,
   Button,
   Typography,
-  Menu,
   MenuItem,
   Avatar,
   Box,
@@ -138,7 +137,7 @@ const DataTable: React.FC = () => {
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     const newSelectedOrganizations = organizations.reduce((acc, org) => {
-      acc[org.orgId] = checked;  // Apply the same checked state to all organizations
+      acc[org.orgId] = checked;  
       return acc;
     }, {} as Record<number, boolean>);
 
@@ -438,7 +437,7 @@ const DataTable: React.FC = () => {
                   direction={orderDirection}
                   onClick={() => handleRequestSort('lastActive')}
                 >
-                  Last Active
+                  Created At
                 </TableSortLabel>
                 {showFilters && (
                   <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
@@ -477,7 +476,7 @@ const DataTable: React.FC = () => {
                 </TableCell>
                 <TableCell>{row.name}</TableCell>
                 <TableCell>{row.category}</TableCell>
-                <TableCell>{row.lastActive ? new Date(row.lastActive).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
+                <TableCell>{row.createdAt ? new Date(row.createdAt).toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ''}</TableCell>
                 <TableCell padding="checkbox">
                   <IconButton onClick={(event) => handleMenuOpen(event, row.orgId)}>
                     <MoreVertIcon />
@@ -503,82 +502,77 @@ const DataTable: React.FC = () => {
                     }}
                   >
                     <MenuItem
-  onClick={() => {
-    handleMenuClose();
-    navigate(`/view-organization/${row.orgId}`);
-  }}
-  sx={{
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    margin: '5px',
-    justifyContent: 'center', // Center align text
-    fontSize: '0.875rem', // Smaller font size
-    minHeight: '30px', // Reduced height
-    minWidth: '100px', // Increased width
-    '&:hover': { backgroundColor: '#f0f0f0' },
-  }}
->
-  View
-</MenuItem>
-<MenuItem
-  onClick={() => {
-    handleMenuClose();
-    navigate(`/edit-organization/${row.orgId}`);
-  }}
-  sx={{
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    margin: '5px',
-    justifyContent: 'center', // Center align text
-    fontSize: '0.875rem', // Smaller font size
-    minHeight: '30px', // Reduced height
-    minWidth: '100px', // Increased width
-    '&:hover': { backgroundColor: '#f0f0f0' },
-  }}
->
-  Edit
-</MenuItem>
-<MenuItem
-  onClick={() => {
-    handleMenuClose();
-    navigate(`/change-organization/${row.orgId}`);
-  }}
-  sx={{
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    margin: '5px',
-    justifyContent: 'center', // Center align text
-    fontSize: '0.875rem', // Smaller font size
-    minHeight: '30px', // Reduced height
-    minWidth: '100px', // Increased width
-    '&:hover': { backgroundColor: '#f0f0f0' },
-  }}
->
-  Change Admin
-</MenuItem>
-<MenuItem
-  onClick={() => handleDeleteConfirmation(row.orgId)}
-  sx={{
-    backgroundColor: 'white',
-    borderRadius: '10px',
-    margin: '5px',
-    justifyContent: 'center', // Center align text
-    color: 'red', // Red text color for "Delete"
-    fontSize: '0.875rem', // Smaller font size
-    minHeight: '30px', // Reduced height
-    minWidth: '100px', // Increased width
-    '&:hover': { backgroundColor: '#f0f0f0' },
-  }}
->
-  Delete
-</MenuItem>
-
-              
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/view-organization/${row.orgId}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      View
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/edit-organization/${row.orgId}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Edit
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        handleMenuClose();
+                        navigate(`/change-organization/${row.orgId}`);
+                      }}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Change Admin
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => handleDeleteConfirmation(row.orgId)}
+                      sx={{
+                        backgroundColor: 'white',
+                        borderRadius: '10px',
+                        margin: '5px',
+                        justifyContent: 'center',
+                        color: 'red',
+                        fontSize: '0.875rem',
+                        minHeight: '30px',
+                        minWidth: '100px',
+                        '&:hover': { backgroundColor: '#f0f0f0' },
+                      }}
+                    >
+                      Delete
+                    </MenuItem>
                   </Popover>
                 </TableCell>
-
-
-
               </TableRow>
             ))}
           </TableBody>

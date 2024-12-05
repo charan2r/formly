@@ -6,6 +6,8 @@ import { CreateFormFieldDto } from '../form-fields/create-form-field.dto';
 import { FormField } from '../model/form-fields.entity';
 import { UpdateFormFieldDto } from './update-form-field.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Permissions } from 'src/user/decorators/permissions.decorator';
+import { Roles } from 'src/user/roles.decorator';
 interface MetaSchemaResponse<T = any> {
   success: boolean;
   message: string;
@@ -19,6 +21,8 @@ export class FormFieldsController {
 
   // API Endpoint to create a new form field
   @Post('create')
+  @Roles("Admin","SubUser")
+  @Permissions("create feilds")
   async addField(@Body() createFormFieldDto: CreateFormFieldDto): Promise<MetaSchemaResponse<FormField>> {
     const field = await this.formFieldsService.addField(createFormFieldDto);
     return {
@@ -30,6 +34,8 @@ export class FormFieldsController {
 
   // API endpoint to get all form fields by template ID
   @Get()
+  @Roles("Admin","SubUser")
+  @Permissions("view Fields")
   async getFields(@Query('formTemplateId') formTemplateId: string): Promise<MetaSchemaResponse<FormField[]>> {
     const fields = await this.formFieldsService.getFields(formTemplateId);
     return {
@@ -41,6 +47,8 @@ export class FormFieldsController {
 
   // API endpoint to get a form field by id
   @Get('details')
+  @Roles("Admin","SubUser")
+  @Permissions("view Field")
   async getFieldById(@Query('id') fieldId: string): Promise<MetaSchemaResponse<FormField>> {
     const field = await this.formFieldsService.getFieldById(fieldId);
     return {
@@ -52,6 +60,8 @@ export class FormFieldsController {
 
   // API endpoint to delete a form field
   @Delete('delete')
+  @Roles("Admin","SubUser")
+  @Permissions("delete Field")
   async deleteField(@Query('id') fieldId: string): Promise<MetaSchemaResponse<null>> {
     await this.formFieldsService.deleteField(fieldId);
     return {
@@ -62,6 +72,8 @@ export class FormFieldsController {
 
   // API endpoint to bulk delete form fields
   @Delete('bulk-delete')
+  @Roles("Admin","SubUser")
+  @Permissions("Delete Fields")
   async bulkDeleteFields(@Body('ids') fieldIds: string[]): Promise<MetaSchemaResponse<null>> {
     await this.formFieldsService.bulkDeleteFields(fieldIds);
     return {
@@ -72,6 +84,8 @@ export class FormFieldsController {
 
   // API endpoint to update a form field
   @Patch('update')
+  @Roles("Admin","SubUser")
+  @Permissions("Edit Fields")
   async updateField(@Query('id') fieldId: string, @Body() updateFormFieldDto: UpdateFormFieldDto): Promise<MetaSchemaResponse<FormField>> {
     const field = await this.formFieldsService.updateField(fieldId, updateFormFieldDto);
     return {

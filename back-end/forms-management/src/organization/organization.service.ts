@@ -33,8 +33,8 @@ export class OrganizationService {
       ...superAdminData,
       organizationId: organization.orgId, // Link admin to organization
     };
-    await this.authService.registerAdmin(adminData);
-    organization.superAdminId = adminData.id; // Link organization to admin
+    const admin = await this.authService.registerAdmin(adminData);
+    organization.superAdminId = admin.data.id; // Link organization to admin
     await this.organizationRepository.save(organization);
 
     return organization;
@@ -115,7 +115,7 @@ export class OrganizationService {
     return this.organizationRepository.save(organizations);
   }
 
-  // Method to find all users by organization, with optional filter if organizationId is provided
+  // Method to find super admin by email
   async findUserByEmail(email: string): Promise<User | null> {
     return this.userRepository.findOne({ where: { email } });
   }
@@ -161,16 +161,22 @@ export class OrganizationService {
     return { organization, newAdmin: newAdmin.data };
   }
 
-  async getUserTypesCounts(): Promise<{ [key: string]: number }> {
-    const users = await this.userRepository.find({
-      where: { isDeleted: false }
-    });
-
+  async getUserTypesCounts(user: { userType: string; organizationId?: string }): Promise<{ [key: string]: number }> {
+    const whereCondition: any = { isDeleted: false };
+  
+    // If the user is an Admin, filter by their organizationId
+    if (user.userType === 'Admin') {
+      whereCondition.organizationId = user.organizationId;
+    }
+  
+    const users = await this.userRepository.find({ where: whereCondition });
+  
     const counts = users.reduce((acc, user) => {
       acc[user.userType] = (acc[user.userType] || 0) + 1;
       return acc;
     }, {});
-
+  
     return counts;
   }
+  
 }
