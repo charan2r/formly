@@ -3,6 +3,7 @@ import { Controller, Post, Body, Query, Res, Get, Req, UseGuards } from '@nestjs
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.strategy';
 import { Response, Request } from 'express';
+import { Roles } from 'src/user/roles.decorator';
 
 interface StandardResponse<T> {
   success: boolean;
@@ -50,6 +51,7 @@ export class AuthController {
 
     // API endpoint to login
     @Post('login')
+    @Roles('Admin')
     async login(
       @Body('email') email: string,
       @Body('password') password: string,

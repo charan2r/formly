@@ -5,10 +5,10 @@ export class AuditTrail {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('text')
+  @Column({ type: 'text', nullable: true })
   tableName: string;
 
-  @Column('text')
+  @Column({ type: 'text', nullable: true })
   action: string; 
 
   @Column('text',{ nullable: true })

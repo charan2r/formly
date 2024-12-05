@@ -37,7 +37,7 @@ const Login = () => {
     try {
       const response = await login(email, password);
 
-      console.log(response.success);
+      console.log(response);
       
       if (response.success === false) {
         // Show error toast immediately for failed login
