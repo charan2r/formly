@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ReactQuill from 'react-quill';
 import { QuestionItem } from '../types/questions';
 import DragHandle from './DragHandle';
-import axios from 'axios';
+import api from '../utils/axios'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 interface QuestionContentProps {
@@ -67,7 +67,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   // Debounced update function
   const debouncedUpdate = useDebounce(async (formFieldsOptionId: string, newContent: string) => {
     try {
-      const response = await axios.patch(`http://localhost:3001/form-fields-options/update`, {
+      const response = await api.patch(`/form-fields-options/update`, {
         optionId: formFieldsOptionId,
         option: newContent,
         formFieldId: formFieldId
@@ -119,7 +119,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/form-fields-options`, {
+        const response = await api.get(`/form-fields-options`, {
           params: { formFieldId: formFieldId }
         });
         if (response.data.success) {
@@ -143,7 +143,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   // Add local handler for adding option
   const handleAddOption = async () => {
     try {
-      const response = await axios.post(`http://localhost:3001/form-fields-options/create`, {
+      const response = await api.post(`/form-fields-options/create`, {
         option: 'New Option',
         formFieldId: formFieldId
       });
@@ -161,7 +161,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   // Add a handler for deleting options
   const handleDeleteOption = async (formFieldsOptionId: string) => {
     try {
-      const response = await axios.delete(`http://localhost:3001/form-fields-options/delete`, {
+      const response = await api.delete(`/form-fields-options/delete`, {
         params: { formFieldsOptionId: formFieldsOptionId }
       });
 
@@ -179,7 +179,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   // Add delete handler
   const handleDeleteFormField = async () => {
     try {
-      const response = await axios.delete(`http://localhost:3001/form-fields/delete?id=${formFieldId}`);
+      const response = await api.delete(`/form-fields/delete?id=${formFieldId}`);
       if (response.data.success) {
         // The parent component will handle removal from UI through polling
         console.log('Form field deleted successfully');

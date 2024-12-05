@@ -4,7 +4,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import ReactQuill from 'react-quill';
 import DragHandle from './DragHandle';
-import axios from 'axios';
+import api from '../utils/axios';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 interface TitleContentProps {
@@ -53,7 +53,7 @@ const TitleContent: React.FC<TitleContentProps> = ({
   useEffect(() => {
     const fetchSubtitles = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/form-fields-options`, {
+        const response = await api.get(`/form-fields-options`, {
           params: { formFieldId: formFieldId }
         });
         if (response.data.success) {
@@ -69,7 +69,7 @@ const TitleContent: React.FC<TitleContentProps> = ({
 
   const handleAddSubtitle = async () => {
     try {
-      const response = await axios.post(`http://localhost:3001/form-fields-options/create`, {
+      const response = await api.post(`/form-fields-options/create`, {
         option: 'New Subtitle',
         formFieldId: formFieldId
       });
@@ -92,13 +92,13 @@ const TitleContent: React.FC<TitleContentProps> = ({
         )
       );
 
-      await axios.patch(`http://localhost:3001/form-fields-options/update?optionId=${formFieldsOptionId}`, {
+      await api.patch(`/form-fields-options/update?optionId=${formFieldsOptionId}`, {
         option: newContent,
         formFieldId: formFieldId
       });
     } catch (error) {
       console.error('Error updating subtitle:', error);
-      const response = await axios.get(`http://localhost:3001/form-fields-options`, {
+      const response = await api.get(`/form-fields-options`, {
         params: { formFieldId: formFieldId }
       });
       if (response.data.success) {
@@ -109,7 +109,7 @@ const TitleContent: React.FC<TitleContentProps> = ({
 
   const handleDeleteSubtitle = async (formFieldsOptionId: string) => {
     try {
-      const response = await axios.delete(`http://localhost:3001/form-fields-options/delete`, {
+      const response = await api.delete(`/form-fields-options/delete`, {
         params: { optionId: formFieldsOptionId }
       });
 
@@ -125,7 +125,7 @@ const TitleContent: React.FC<TitleContentProps> = ({
 
   const handleDeleteFormField = async () => {
     try {
-      const response = await axios.delete(`http://localhost:3001/form-fields/delete?id=${formFieldId}`);
+      const response = await api.delete(`/form-fields/delete?id=${formFieldId}`);
       if (response.data.success) {
         console.log('Form field deleted successfully');
       }

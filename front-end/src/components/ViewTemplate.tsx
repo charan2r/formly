@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axios';
 import {
   Paper,
   Box,
@@ -32,7 +32,7 @@ const ViewTemplate: React.FC = () => {
   useEffect(() => {
     const fetchTemplateData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/form-templates/details?id=${templateId}`);
+        const response = await api.get(`/form-templates/details?id=${templateId}`);
         if (response.data.status === 'success') {
           const template = response.data.data;
           setTemplateData(template);

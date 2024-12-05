@@ -13,7 +13,7 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import TitleIcon from '@mui/icons-material/Title';
 import LabelIcon from '@mui/icons-material/Label';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import axios from 'axios';
+import api from '../utils/axios';
 import { useTemplate } from '../context/TemplateContext';
 
 // Sample Sidebar Data
@@ -81,7 +81,7 @@ const DraggableItem = memo(({ item, index }) => {
         options: JSON.stringify([])
       };
 
-      await axios.post('http://localhost:3001/form-fields/create', newField);
+      await api.post('/form-fields/create', newField);
     } catch (error) {
       console.error('Error creating form field:', error);
     }
@@ -222,7 +222,7 @@ const LeftSidebar: React.FC = () => {
           )
         };
 
-        await axios.post('http://localhost:3001/form-fields', newField);
+        await api.post('/form-fields', newField);
         
         return;
       } catch (error) {

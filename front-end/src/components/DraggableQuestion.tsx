@@ -9,7 +9,7 @@ import DragHandle from './DragHandle';
 import QuestionContent from './QuestionContent';
 import TitleContent from './TitleContent';
 import { TitleItem } from '../types/questions';
-import axios from 'axios'; // dont add this import ^ _ ^
+import api from '../utils/axios';
 import { Droppable } from 'react-beautiful-dnd';
 import { useTemplate } from '../context/TemplateContext';
 import './DraggableQuestion.css';
@@ -109,7 +109,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       try {
         if (!formTemplateId) return;
         
-        const response = await axios.get(`http://localhost:3001/form-fields`, {
+        const response = await api.get(`/form-fields`, {
           params: { formTemplateId }
         });
         
@@ -223,7 +223,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
 
   const updateFieldPosition = async (id: string, updateData: any) => {
     try {
-      await axios.patch(`http://localhost:3001/form-fields/update?id=${id}`, updateData);
+      await api.patch(`/form-fields/update?id=${id}`, updateData);
       // Update local state after successful API call
       setFormFields(prevFields => prevFields.map(field => 
         field.id === id 
@@ -259,7 +259,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
         color: formFields.find(field => field.id === id)?.color,
       };
 
-      await axios.patch(`http://localhost:3001/form-fields/update?id=${id}`, updateData);
+      await api.patch(`/form-fields/update?id=${id}`, updateData);
       
       // Update local state after successful API call
       setFormFields(prevFields => prevFields.map(field => 
@@ -277,7 +277,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
 
   const handleOptionChange = async (itemId: string, optionId: string, newContent: string) => {
     try {
-      await axios.patch(`http://localhost:3001/form-fields-options/update`, {
+      await api.patch(`/form-fields-options/update`, {
         optionId,
         option: newContent,
         formFieldId: itemId
@@ -289,7 +289,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
 
   const handleDeleteOption = async (itemId: string, optionId: string) => {
     try {
-      await axios.delete(`http://localhost:3001/form-fields-options/delete?optionId=${optionId}`);
+      await api.delete(`/delete?optionId=${optionId}`);
     } catch (error) {
       console.error('Error deleting option:', error);
     }
@@ -297,7 +297,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
 
   const handleAddOption = async (itemId: string) => {
     try {
-      await axios.post(`http://localhost:3001/form-fields-options/create`, {
+      await api.post(`/form-fields-options/create`, {
         option: 'New Option',
         formFieldId: itemId
       });

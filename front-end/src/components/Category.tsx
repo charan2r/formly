@@ -33,13 +33,12 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowBack, ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-import axios from 'axios';
+import api from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../context/AuthContext';
-import api from '../utils/axios';
 
 interface Category {
     categoryId: string;
@@ -89,7 +88,7 @@ const Category: React.FC = () => {
     const [newCategory, setNewCategory] = useState({
         name: '',
         description: '',
-        createdById: '8478937e-17cf-4936-97a8-0e92a33280f9'
+        createdById: user?.organizationId ,
     });
      // Adjust `createdById` as needed
      const [error, setError] = useState<string | null>(null); // Optional: To display errors
@@ -105,26 +104,43 @@ const Category: React.FC = () => {
         setError(null);
       
         try {
-            console.log(user?.organizationId);
-            const response = await api.post('/categories/create', {
-                ...newCategory,
-                organizationId: user?.organizationId
-            });
+            console.log(newCategory);
+            const response = await api.post('/categories/create', newCategory);
+
             
-            if (response.data.status === 'success') {
-                setCategories(prevCategories => [...prevCategories, response.data.data]);
-                setCreateCategoryOpen(false);
-                setNewCategory({ name: '', description: '' });
-                
-                toast.success("Category created successfully!", {
-                    style: {
-                        backgroundColor: 'black',
-                        color: 'white',
-                        borderRadius: '10px',
-                        fontWeight: 'bold',
-                    },
-                });
-            }
+            // Add the new category to the existing categories
+            setCategories(prevCategories => [...prevCategories, response.data]);
+            
+            // Close the dialog
+            setCreateCategoryOpen(false);
+            
+            // Reset the form
+            setNewCategory({ 
+                name: '', 
+                description: '', 
+                createdById: user?.organizationId
+            });
+
+            // Show success message
+            toast.success("Category created successfully!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                style: {
+                    backgroundColor: 'black',
+                    color: 'white',
+                    borderRadius: '10px',
+                    fontWeight: 'bold',
+                },
+            });
+
+            // Refresh the categories list
+            fetchCategories();
+
         } catch (err: any) {
             setError(err.response?.data?.message || 'Something went wrong');
             toast.error(err.response?.data?.message || "Failed to create category");
@@ -136,13 +152,13 @@ const Category: React.FC = () => {
     const fetchCategories = async () => {
         try {
             setLoading(true);
-            if (!user?.organizationId) return;
-            
-            const response = await api.get(`/categories/organization/${user.organizationId}`);
-            if (response.data.status === 'success') {
-                const activeCategories = response.data.data.filter(cat => cat.status === 'active');
-                setCategories(activeCategories);
+            if (user) {
+                const response = await api.get(`/categories/organization/${user.organizationId}`);
+                setCategories(response.data.data);
+            } else {
+                setError('User is not authenticated.');
             }
+            
         } catch (error) {
             console.error('Error fetching categories:', error);
             setError('Unable to fetch categories. Please try again later.');
@@ -224,8 +240,8 @@ const Category: React.FC = () => {
                 .filter(([_, isSelected]) => isSelected)
                 .map(([id, _]) => id);
 
-            const response = await api.delete('/categories/bulk-delete', {
-                data: selectedIds
+            await api.delete('/categories/bulk-delete', {
+                data: selectedIds // Send array directly as the request body
             });
 
             if (response.data.status === 'success') {
@@ -260,20 +276,24 @@ const Category: React.FC = () => {
     // Method to handle deletion of an category
     const handleDeleteCategory = async () => {
         try {
-            const response = await api.delete(`/categories/delete/${categoryToDelete}`);
-            
-            if (response.data.status === 'success') {
-                setCategories((prev) => prev.filter((cat) => cat.categoryId !== categoryToDelete));
-                setConfirmationOpen(false);
-                toast.success("Category has been deleted successfully!", {
-                    style: {
-                        backgroundColor: 'black',
-                        color: 'white',
-                        borderRadius: '10px',
-                        fontWeight: 'bold',
-                    },
-                });
-            }
+            await api.delete(`/categories/delete/${categoryToDelete}`);
+            setCategories((prev) => prev.filter((cat) => cat.categoryId !== categoryToDelete));
+            setConfirmationOpen(false);
+            toast.success("Category has been deleted successfully!", {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                style: {
+                    backgroundColor: 'black',
+                    color: 'white',
+                    borderRadius: '10px',
+                    fontWeight: 'bold',
+                },
+            });
         } catch (error) {
             toast.error("Failed to delete the Category. Please try again.", {
                 style: {

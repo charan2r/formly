@@ -76,6 +76,7 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const Users: React.FC = () => {
   const [users, setUsers] = useState<Users[]>([]);
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
@@ -83,7 +84,7 @@ const Users: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '', phoneNumber: '', userType: '', updatedAt: '' });
+  const [filters, setFilters] = useState({ userId: '', firstName: '', lastName: '', email: '', phoneNumber: '', roleId: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [userDetails, setUserDetails] = useState<Users | null>(null);
@@ -98,9 +99,7 @@ const Users: React.FC = () => {
     lastName: '',
     email: '',
     phone: '',
-    roleId: '',
-    userType: 'SubUser',
-    updatedAt: ''
+    roleId: ''
   });
   const [roles, setRoles] = useState<Role[]>([]);
   const { user } = useAuth();
@@ -108,11 +107,9 @@ const Users: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await api.get('/users');
+        const response = await api.get(`/users`);
         console.log(response.data)
-        if (response.data.status === 'success') {
-          setUsers(response.data.data[0]);
-        }
+        setUsers(response.data.data[0]);
       } catch (error) {
         console.error('Error fetching users:', error);
         toast.error("Failed to fetch users");
@@ -204,18 +201,9 @@ const Users: React.FC = () => {
   const handleCreateUser = async () => {
     try {
       const response = await api.post('/users/create', newUser);
-      if (response.data.status === 'success') {
-        setUsers([...users, response.data.data]);
-        setCreateUserOpen(false);
-        toast.success("User created successfully!", {
-          style: {
-            backgroundColor: 'black',
-            color: 'white',
-            borderRadius: '10px',
-            fontWeight: 'bold',
-          },
-        });
-      }
+      setUsers([...users, response.data]);
+      setCreateUserOpen(false);
+      toast.success("User created successfully!");
     } catch (error) {
       toast.error("Failed to create user");
     }
@@ -224,11 +212,9 @@ const Users: React.FC = () => {
   const handleViewUser = async (userId: string) => {
     try {
       const response = await api.get(`/users/details?userId=${userId}`);
-      if (response.data.status === 'success') {
-        setUserDetails(response.data.data);
-        setDialogOpen(true);
-        handleMenuClose();
-      }
+      setUserDetails(response.data);
+      setDialogOpen(true);
+      handleMenuClose();
     } catch (error) {
       console.error(`Error fetching user details for ID ${userId}:`, error);
       toast.error("Failed to fetch user details");
@@ -238,18 +224,15 @@ const Users: React.FC = () => {
   const handleEditUser = async (userId: string) => {
     try {
       const response = await api.get(`/users/details?userId=${userId}`);
-      if (response.data.status === 'success') {
-        const userData = response.data.data;
-        setEditFormData({
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          email: userData.email,
-          phoneNumber: userData.phoneNumber || '',
-          roleId: userData.roleId
-        });
-        setEditDialogOpen(true);
-        handleMenuClose();
-      }
+      setEditFormData({
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
+        email: response.data.email,
+        phoneNumber: response.data.phoneNumber || '',
+        roleId: response.data.roleId || ''
+      });
+      setEditDialogOpen(true);
+      handleMenuClose();
     } catch (error) {
       console.error(`Error fetching user details for ID ${userId}:`, error);
       toast.error("Failed to fetch user details for editing");
@@ -268,17 +251,12 @@ const Users: React.FC = () => {
     if (!editFormData) return;
 
     try {
-      const response = await api.patch(`/users/edit?userId=${editFormData.userId}`, editFormData);
-      if (response.data.status === 'success') {
-        // Refresh the users list
-        const usersResponse = await api.get('/users');
-        if (usersResponse.data.status === 'success') {
-          setUsers(usersResponse.data.data[0]);
-          setEditDialogOpen(false);
-          setEditFormData(null);
-          toast.success("User updated successfully!");
-        }
-      }
+      await api.put(`/users/edit/?id=${editFormData.id}`, editFormData);
+      // Refresh the users list
+      const response = await api.get(`/users?userId=${user.userId}`);
+      setUsers(response.data.data);
+      setEditDialogOpen(false);
+      setEditFormData(null);
     } catch (error) {
       console.error('Error updating user:', error);
       toast.error("Failed to update user");
@@ -293,33 +271,33 @@ const Users: React.FC = () => {
 
   const handleDeleteUser = async () => {
     try {
-      if (!userToDelete || !user?.organizationId) {
-        toast.error("Missing required information for deletion");
-        return;
-      }
-
-      const response = await api.post('/users/dele', {
-        userId: userToDelete,
-        organizationId: user.organizationId
+      await api.delete(`/user/delete?id=${userToDelete}`);
+      setUsers((prev) => prev.filter((org) => org.userId !== userToDelete));
+      setConfirmationOpen(false);
+      toast.success("User has been deleted successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
       });
-
-      if (response.data.status === 'success') {
-        setUsers((prev) => prev.filter((user) => user.userId !== userToDelete));
-        setConfirmationOpen(false);
-        setUserToDelete(null);
-        
-        toast.success("User has been deleted successfully!", {
-          style: {
-            backgroundColor: 'black',
-            color: 'white',
-            borderRadius: '10px',
-            fontWeight: 'bold',
-          },
-        });
-      }
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.message || "Failed to delete the user. Please try again.";
-      toast.error(errorMessage, {
+    } catch (error) {
+      toast.error("Failed to delete the user. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
         style: {
           backgroundColor: 'black',
           color: 'white',
