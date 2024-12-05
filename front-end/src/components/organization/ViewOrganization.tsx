@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Paper, TextField, Typography, Grid, Box, IconButton, Button, CircularProgress } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/axios';
@@ -165,12 +167,22 @@ function ViewOrganization() {
       }}
     >
       <Box display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
-          <IconButton onClick={handleBack}>
-            <CircleIcon style={{ color: 'black' }} />
+        <Box display="flex" alignItems="center" gap={2}>
+          <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={() => navigate(-1)}
+          >
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
-          <Typography variant="body2" color="textSecondary">
+          <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />
+          <Typography sx={{ fontSize: '15px', color: 'black', fontWeight: 500 }}>
             Organization Management
           </Typography>
         </Box>

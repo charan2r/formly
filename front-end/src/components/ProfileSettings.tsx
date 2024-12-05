@@ -2,10 +2,15 @@ import React from 'react';
 import { Box, Typography, Button, Avatar, TextField, Grid, IconButton, Paper } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import CircleIcon from '@mui/icons-material/Circle';
-import ArrowForward from '@mui/icons-material/ArrowForward';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import { useNavigate } from 'react-router-dom';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
 const ProfileSettings: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const commonTextFieldStyles = {
     backgroundColor: 'white',
@@ -30,20 +35,26 @@ const ProfileSettings: React.FC = () => {
       backgroundColor: 'white'
     }}>
       {/* Top Navigation Section */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4.5}>
-        <Box display="flex" alignItems="center" gap={1}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
+        <Box display="flex" alignItems="center" gap={2}>
           <IconButton 
-            sx={{ padding: 0 }}
-            onClick={() => console.log("Back arrow clicked")}
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={() => navigate(-1)}
           >
-            <CircleIcon sx={{ fontSize: 20, color: 'black' }} />
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
           </IconButton>
-          <ArrowForward sx={{ fontSize: 16, color: 'black' }} />
-          <Typography variant="body2" sx={{ color: '#666', fontSize: '14px' }}>
+          <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />
+          <Typography sx={{ fontSize: '15px', color: 'black', fontWeight: 500 }}>
             Account Management
           </Typography>
         </Box>
-       
       </Box>
 
       {/* Welcome and Edit button section */}

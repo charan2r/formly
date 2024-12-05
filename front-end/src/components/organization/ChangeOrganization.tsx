@@ -7,6 +7,8 @@ import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 function ChangeOrganization() {
   const navigate = useNavigate();
@@ -105,12 +107,22 @@ function ChangeOrganization() {
       overflow: 'hidden'
     }}>
       <Box display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
-          <IconButton onClick={handleBack}>
-            <CircleIcon style={{ color: 'black' }} />
+        <Box display="flex" alignItems="center" gap={2}>
+          <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={handleBack}
+          >
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
-          <Typography variant="body2" color="textSecondary">
+          <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />
+          <Typography sx={{ fontSize: '15px', color: 'black', fontWeight: 500 }}>
             Organization Management
           </Typography>
         </Box>
