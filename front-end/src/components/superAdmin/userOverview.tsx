@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { Bar, Doughnut, Pie } from 'react-chartjs-2';
 import CircleIcon from '@mui/icons-material/Circle';
-import { ArrowForward } from '@mui/icons-material';
+import { ArrowForward, ChevronRight as ChevronRightIcon } from '@mui/icons-material';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -281,16 +281,16 @@ const UserOverview: React.FC = () => {
         <IconButton onClick={() => console.log("Back arrow clicked")}>
           <CircleIcon style={{ color: 'black' }} />
         </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
-          <Typography variant="body2" color="#282828">
+        <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
+          <Typography variant="body2" color="textSecondary">
             Organization
           </Typography>
-          <ArrowForward style={{ color: 'black' }} />
-          <Typography variant="body2" color="#181818">
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
+          <Typography variant="body2" color="textSecondary">
             Dashboard
           </Typography>
         </Box>
-        <Typography variant="h4" fontWeight="normal">Dashboard</Typography>
+        <Typography variant="h5" fontWeight="bold">Dashboard</Typography>
         <Typography variant="body2" color="textSecondary" marginBottom="5px" marginTop="-10px">
           Manage your Team members and their account permissions here.
         </Typography>

@@ -35,6 +35,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
 interface Users {
   id: string;
@@ -360,11 +362,11 @@ const Users: React.FC = () => {
           <IconButton onClick={() => console.log("Back arrow clicked")}>
             <CircleIcon style={{ color: 'black' }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             Atlas corp
           </Typography>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             User Management
           </Typography>
@@ -674,14 +676,16 @@ const Users: React.FC = () => {
         <Box sx={{ position: 'relative' }}>
           {/* Back button */}
           <IconButton
-            onClick={() => setEditDialogOpen(false)}
             sx={{
-              position: 'absolute',
-              left: 8,
-              top: 8,
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
             }}
+            onClick={() => setCreateUserOpen(false)}
           >
-            <ArrowBackIcon />
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -869,14 +873,16 @@ const Users: React.FC = () => {
         <Box sx={{ position: 'relative' }}>
           {/* Back button */}
           <IconButton
-            onClick={handleCloseDialog}
             sx={{
-              position: 'absolute',
-              left: 8,
-              top: 8,
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
             }}
+            onClick={handleCloseDialog}
           >
-            <ArrowBackIcon />
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -1001,14 +1007,16 @@ const Users: React.FC = () => {
         <Box sx={{ position: 'relative' }}>
           {/* Back button */}
           <IconButton
-            onClick={() => setEditDialogOpen(false)}
             sx={{
-              position: 'absolute',
-              left: 8,
-              top: 8,
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
             }}
+            onClick={() => setEditDialogOpen(false)}
           >
-            <ArrowBackIcon />
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -1157,10 +1165,16 @@ const Users: React.FC = () => {
       <StyledDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)}>
         <Box sx={{ textAlign: 'center', pb: 2 }}>
           <IconButton
-            sx={{ position: 'absolute', left: 16, top: 16 }}
+            sx={{
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
             onClick={() => setConfirmationOpen(false)}
           >
-            <ArrowBack />
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
             Delete User
