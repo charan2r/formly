@@ -16,6 +16,8 @@ interface QuestionContentProps {
   onDeleteOption: (itemId: string, optionId: string) => void;
   onAddOption: (itemId: string) => void;
   onEditorFocus: (fieldId: string, editorId: string, quill: any) => void;
+  activeFieldId: string | null;
+  activeEditorId: string | null;
 }
 
 interface Option {
@@ -62,11 +64,27 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   onDeleteOption,
   onAddOption,
   onEditorFocus,
+  activeFieldId,
+  activeEditorId,
 }) => {
   const [options, setOptions] = useState<Option[]>([]);
   const [pendingUpdates, setPendingUpdates] = useState<{[key: string]: string}>({});
 
   const questionEditorId = `question-${formFieldId}`;
+  const quillRef = useRef<any>(null);
+
+  // Add effect to watch for active editor changes
+  useEffect(() => {
+    if (activeFieldId === formFieldId) {
+      console.log('🎯 Active Editor in QuestionContent:', {
+        fieldId: formFieldId,
+        editorId: activeEditorId,
+        isQuestionEditor: activeEditorId === questionEditorId,
+        quillInstance: quillRef.current,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [activeFieldId, activeEditorId]);
 
   // Debounced update function
   const debouncedUpdate = useDebounce(async (formFieldsOptionId: string, newContent: string) => {
@@ -193,14 +211,14 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
     }
   };
 
-  const handleEditorFocus = (editorId: string, quill: any) => {
-    console.log('📝 Editor Selected:', {
+  const handleEditorFocus = (editorId: string, quillInstance: any) => {
+    console.log('📝 Editor Focus in QuestionContent:', {
       fieldId: formFieldId,
       editorId,
-      editorType: editorId.startsWith('question') ? 'Question' : 'Option'
+      quillInstance
     });
-
-    onEditorFocus(formFieldId, editorId, quill);
+    
+    onEditorFocus(formFieldId, editorId, quillInstance);
   };
 
   return (
@@ -278,15 +296,26 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
             },
           }}>
             <ReactQuill
+              ref={(el) => {
+                if (el) {
+                  quillRef.current = el;
+                }
+              }}
               value={item.question}
-              onChange={(content) => onQuestionChange(formFieldId, content)}
-              onFocus={(range, source, quill) => handleEditorFocus(questionEditorId, quill)}
+              onChange={(content) => {
+                console.log('📝 Content Change:', {
+                  fieldId: formFieldId,
+                  content
+                });
+                onQuestionChange(formFieldId, content);
+              }}
+              onFocus={(range, source, quill) => handleEditorFocus(questionEditorId, quillRef.current)}
               modules={{
-                toolbar: false, // Disable default toolbar since we're using our global toolbar
-                history: {
-                  delay: 1000,
-                  maxStack: 50,
-                  userOnly: true
+                toolbar: false,
+                keyboard: {
+                  bindings: {
+                    tab: false,
+                  }
                 }
               }}
               style={{
@@ -367,13 +396,13 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                     key={`editor-${option.formFieldsOptionId}`}
                     value={pendingUpdates[option.formFieldsOptionId] || option.option}
                     onChange={(content) => handleOptionChange(option.formFieldsOptionId, content)}
-                    onFocus={(range, source, quill) => handleEditorFocus(optionEditorId, quill)}
+                    onFocus={(range, source, quill) => handleEditorFocus(optionEditorId, option.quillRef)}
                     modules={{
                       toolbar: false,
-                      history: {
-                        delay: 1000,
-                        maxStack: 50,
-                        userOnly: true
+                      keyboard: {
+                        bindings: {
+                          tab: false,
+                        }
                       }
                     }}
                     style={{

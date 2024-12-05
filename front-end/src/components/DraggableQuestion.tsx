@@ -78,6 +78,9 @@ interface DraggableQuestionProps {
     };
   };
   onPageSizeChange?: (newSize: string) => void;
+  activeFieldId: string | null;
+  activeEditorId: string | null;
+  onEditorFocus: (fieldId: string, editorId: string, quill: any) => void;
 }
 
 interface PageDimensions {
@@ -106,6 +109,9 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   borderStyle,
   appearanceSettings,
   onPageSizeChange,
+  activeFieldId,
+  activeEditorId,
+  onEditorFocus,
 }) => {
   const [formFields, setFormFields] = useState<QuestionItem[]>(items);
   const [isDragging, setIsDragging] = useState(false);
@@ -321,12 +327,19 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   };
 
   const renderQuestionComponent = (item: QuestionItem) => {
+    const commonProps = {
+      item,
+      formFieldId: item.id,
+      activeFieldId,
+      activeEditorId,
+      onEditorFocus,
+    };
+
     switch (item.type) {
       case 'label':
         return (
           <LabelQuestion
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
           />
         );
@@ -334,8 +347,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       case 'single-line':
         return (
           <SingleLineQuestion
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
           />
         );
@@ -343,8 +355,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       case 'multiline':
         return (
           <MultiLineQuestion
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
           />
         );
@@ -352,8 +363,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       case 'title':
         return (
           <TitleContent
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
             onSubtitleChange={handleOptionChange}
             onDeleteSubtitle={handleDeleteOption}
@@ -364,16 +374,14 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       case 'section':
         return (
           <SectionContent
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
           />
         );
 
       case 'date':
         return (
           <DateContent
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
             type="date"
           />
@@ -382,8 +390,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       case 'datetime':
         return (
           <DateTimeContent
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
           />
         );
@@ -391,8 +398,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       case 'yes-no':
         return (
           <YesNoContent
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
           />
         );
@@ -400,8 +406,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       case 'checkbox':
         return (
           <CheckboxContent
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
             onOptionChange={handleOptionChange}
             onDeleteOption={handleDeleteOption}
@@ -413,8 +418,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
       default:
         return (
           <QuestionContent
-            item={item}
-            formFieldId={item.id}
+            {...commonProps}
             onQuestionChange={handleQuestionUpdate}
             onOptionChange={handleOptionChange}
             onDeleteOption={handleDeleteOption}
@@ -524,8 +528,17 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
               dragHandleClassName="drag-handle"
             >
               <Box sx={{ width: '100%', height: '100%' }}>
-                {renderQuestionComponent(item)}
-                
+                <QuestionContent
+                  item={item}
+                  formFieldId={item.id}
+                  onEditorFocus={onEditorFocus}
+                  activeFieldId={activeFieldId}
+                  activeEditorId={activeEditorId}
+                  onQuestionChange={handleQuestionUpdate}
+                  onOptionChange={handleOptionChange}
+                  onDeleteOption={handleDeleteOption}
+                  onAddOption={handleAddOption}
+                />
               </Box>
             </Rnd>
           ))}

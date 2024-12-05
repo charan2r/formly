@@ -624,29 +624,25 @@ const EditPageSettings: React.FC = () => {
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [activeEditorId, setActiveEditorId] = useState<string | null>(null);
   const [selectedText, setSelectedText] = useState<string>('');
+  const quillRef = useRef<any>(null);
 
-  const handleEditorFocus = (fieldId: string, editorId: string) => {
-    console.log('🎯 Focus Event:', {
-      fieldId,
-      editorId,
-      timestamp: new Date().toISOString()
-    });
+  const handleEditorFocus = (fieldId: string, editorId: string, quill: any) => {
     setActiveFieldId(fieldId);
     setActiveEditorId(editorId);
+    quillRef.current = quill;
   };
 
   const handleFormatChange = (format: string, value: any) => {
-    // Get the currently selected text
-    const selection = window.getSelection()?.toString() || '';
-    
-    console.log('🎨 Format Applied:', {
-      format,
-      value,
-      activeField: activeFieldId,
-      activeEditor: activeEditorId,
-      selectedText: selection,
-      timestamp: new Date().toISOString()
-    });
+    if (quillRef.current) {
+      quillRef.current.format(format, value);
+      console.log('🔧 Format Applied:', {
+        format,
+        value,
+        activeField: activeFieldId,
+        activeEditor: activeEditorId,
+        timestamp: new Date().toISOString()
+      });
+    }
   };
 
   // Helper function to create update data
