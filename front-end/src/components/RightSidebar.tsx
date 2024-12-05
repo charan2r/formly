@@ -804,12 +804,12 @@ const EditPageSettings: React.FC = () => {
                   </IconButton>
                   <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                   <Typography variant="body2" color="textSecondary">
-                    Atlas Corp. 
+                    Edit Template 
                   </Typography>
                   <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                   <Typography variant="body2" color="textSecondary">
-                    Edit Template
-                  </Typography>
+                {templateData?.name || 'Template'}
+              </Typography>
                   <Box marginLeft="auto" display="flex" gap={1}>
                     <Button
                       variant="outlined"
