@@ -50,6 +50,7 @@ import { UserRoleRepository } from './userRole/userRole.repository';
 import { JwtService } from '@nestjs/jwt';
 import { UserController } from './user/user.controller';
 
+import { FormsModule } from './form/form.module';
 
 @Module({
   imports: [
@@ -85,6 +86,8 @@ import { UserController } from './user/user.controller';
         mount: true
       }
     })
+    FormFieldsOptionsModule,
+    FormsModule
   ],
   controllers: [AppController, OrganizationController, FormTemplateController, FormFieldsController, FormFieldsOptionsController, UserController],
   providers: [AppService, OrganizationService, OrganizationRepository,UserRepository, FormTemplateService, FormTemplateRepository, CategoryRepository, FormFieldsRepository, FormFieldsService, FormFieldsOptionsService, FormFieldsOptionsRepository,RoleRepository,PermissionRepository, RolePermissionRepository,AuditTrailSubscriber,
