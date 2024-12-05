@@ -106,6 +106,7 @@ const Category: React.FC = () => {
         try {
             console.log(newCategory);
             const response = await api.post('/categories/create', newCategory);
+            console.log(response);
 
             
             // Add the new category to the existing categories
@@ -153,7 +154,9 @@ const Category: React.FC = () => {
         try {
             setLoading(true);
             if (user) {
+                console.log(user.organizationId);
                 const response = await api.get(`/categories/organization/${user.organizationId}`);
+                console.log(response);
                 setCategories(response.data.data);
             } else {
                 setError('User is not authenticated.');
