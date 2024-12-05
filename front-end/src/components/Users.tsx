@@ -13,6 +13,7 @@ import {
   IconButton,
   Button,
   Typography,
+  Menu,
   MenuItem,
   Avatar,
   Box,
@@ -20,7 +21,9 @@ import {
   TableSortLabel,
   Popover,
   Dialog,
+  DialogTitle,
   DialogContent,
+  DialogActions,
   Grid,
   DialogActions,
 } from '@mui/material';
@@ -37,6 +40,7 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 
 interface Users {
+  id: string;
   id: string;
   firstName: string;
   lastName: string;
@@ -75,17 +79,21 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 }));
 
 const Users: React.FC = () => {
-  const [users, setUsers] = useState<Users[]>([]);
+  const [organizations, setOrganizations] = useState<Users[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedUsers, setSelectedUsers] = useState<Record<number, boolean>>({});
+  const [selectedOrganizations, setSelectedOrganizations] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '' });
   const [filters, setFilters] = useState({ userId: '', firstName: '', lastName: '', email: '', phoneNumber: '', roleId: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
+  const [userDetails, setUserDetails] = useState<Users | null>(null); // For storing user details
+  const [isDialogOpen, setDialogOpen] = useState(false); // For opening the user details dialog
+
   const [userDetails, setUserDetails] = useState<Users | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
@@ -104,18 +112,21 @@ const Users: React.FC = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchUsers = async () => {
+    const fetchOrganizations = async () => {
       try {
+        const response = await axios.get('http://localhost:3001/users?organizationId=72a53cab-e8a8-4072-bf91-d2643b22851b');
         const response = await api.get(`/users`);
         console.log(response.data)
+        setOrganizations(response.data.data);
         setUsers(response.data.data[0]);
       } catch (error) {
+        console.error('Error fetching organization data:', error);
         console.error('Error fetching users:', error);
         toast.error("Failed to fetch users");
       }
     };
 
-    fetchUsers();
+    fetchOrganizations();
   }, []);
 
   useEffect(() => {
@@ -157,14 +168,19 @@ const Users: React.FC = () => {
 
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
+    const newSelectedOrganizations = organizations.reduce((acc, org) => {
+      acc[org.id] = checked;  // Apply the same checked state to all organizations
     const newSelectedUsers = users.reduce((acc, user) => {
       acc[user.id] = checked;
       return acc;
     }, {} as Record<number, boolean>);
 
-    setSelectedUsers(newSelectedUsers);
+    setSelectedOrganizations(newSelectedOrganizations);
   };
 
+
+  const handleSelectOrganization = (id: number) => {
+    setSelectedOrganizations((prev) => ({
   const handleSelectUser = (id: number) => {
     setSelectedUsers((prev) => ({
       ...prev,
@@ -208,20 +224,28 @@ const Users: React.FC = () => {
     }
   };
 
-  const handleViewUser = async (userId: string) => {
+  const handleDeleteOrganization = async (orgId: string) => {
     try {
+      await axios.delete(`http://localhost:3001/organization/${orgId}`);
+      setOrganizations((prev) => prev.filter((org) => org.orgId !== orgId));
       const response = await api.get(`/users/details?userId=${userId}`);
       setUserDetails(response.data);
       setDialogOpen(true);
       handleMenuClose();
     } catch (error) {
+      console.error(`Error deleting organization with ID ${orgId}:`, error);
       console.error(`Error fetching user details for ID ${userId}:`, error);
       toast.error("Failed to fetch user details");
     }
   };
 
+  const handleViewUser = async (userId: string) => {
   const handleEditUser = async (userId: string) => {
     try {
+      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
+      setUserDetails(response.data); // Store user details
+      setDialogOpen(true); // Open dialog
+      handleMenuClose(); // Close the options menu
       const response = await api.get(`/users/details?userId=${userId}`);
       setEditFormData({
         firstName: response.data.firstName,
@@ -238,6 +262,7 @@ const Users: React.FC = () => {
     }
   };
 
+  const filteredData = organizations
   const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setEditFormData(prev => prev ? {
@@ -314,11 +339,11 @@ const Users: React.FC = () => {
 
       const categoryMatches = org.lastName
         ? org.lastName.toLowerCase().includes(filters.lastName.toLowerCase())
-        : !filters.lastName;
+        : !filters.lastName; // If org.category is null, match only if filters.category is empty
 
       const lastActiveMatches = org.email
         ? org.email.toLowerCase().includes(filters.email.toLowerCase())
-        : !filters.email;
+        : !filters.email; // If org.lastActive is null, match only if filters.lastActive is empty
 
       return nameMatches && categoryMatches && lastActiveMatches;
     })
@@ -328,7 +353,7 @@ const Users: React.FC = () => {
     });
 
 
-  const selectedCount = Object.values(selectedUsers).filter(Boolean).length;
+  const selectedCount = Object.values(selectedOrganizations).filter(Boolean).length;
 
   const paginatedData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
@@ -388,7 +413,7 @@ const Users: React.FC = () => {
                 startAdornment: (
                   <InputAdornment position="start">
                     <IconButton>
-                      <MenuIcon sx={{ color: 'grey.600' }} />
+                      <MenuIcon sx={{ color: 'grey.600' }} /> {/* Hamburger menu icon */}
                     </IconButton>
                   </InputAdornment>
                 ),
@@ -447,6 +472,8 @@ const Users: React.FC = () => {
                   backgroundColor: '#f9f9f9',
                   borderStartStartRadius: '20px',
                   borderEndStartRadius: '20px',
+                  padding: '4px',
+                  position: 'relative', 
                   padding: '1px',
                   position: 'relative',
                 }}
@@ -454,12 +481,12 @@ const Users: React.FC = () => {
                 <Checkbox
                   onChange={handleSelectAll}
                   checked={
-                    users.length > 0 &&
-                    users.every((org) => selectedUsers[org.id])
+                    organizations.length > 0 &&
+                    organizations.every((org) => selectedOrganizations[org.id])
                   }
                   indeterminate={
-                    users.some((org) => selectedUsers[org.id]) &&
-                    !users.every((org) => selectedUsers[org.id])
+                    organizations.some((org) => selectedOrganizations[org.id]) &&
+                    !organizations.every((org) => selectedOrganizations[org.id])
                   }
                 />
               </TableCell>
@@ -551,6 +578,8 @@ const Users: React.FC = () => {
               <TableRow key={row.id}>
                 <TableCell padding="checkbox" >
                   <Checkbox
+                    checked={!!selectedOrganizations[row.orgId]}  // Toggle specific checkbox
+                    onChange={() => handleSelectOrganization(row.orgId)}
                     checked={!!selectedUsers[row.id]}
                     onChange={() => handleSelectUser(row.id)}
                   />
@@ -586,7 +615,7 @@ const Users: React.FC = () => {
                     }}
                     PaperProps={{
                       sx: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.25)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.25)', // Slightly transparent light gray
                         color: 'black',
                         padding: '5px',
                       },
@@ -598,41 +627,42 @@ const Users: React.FC = () => {
                         backgroundColor: 'white',
                         borderRadius: '40px',
                         margin: '5px',
-                        justifyContent: 'center',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
                       View
                     </MenuItem>
                     <MenuItem
-                      onClick={() => handleEditUser(row.id)}
+                      onClick={handleMenuClose}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
                         margin: '5px',
-                        justifyContent: 'center',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
+                        justifyContent: 'center', // Center align text
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
                       Edit
                     </MenuItem>
                     <MenuItem
+                      onClick={() => handleDeleteOrganization(row.id)}
                       onClick={() => handleDeleteClick(row.id)}
                       sx={{
                         backgroundColor: 'white',
                         borderRadius: '40px',
                         margin: '5px',
-                        justifyContent: 'center',
-                        color: 'red',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
+                        justifyContent: 'center', // Center align text
+                        color: 'red', // Red text color for "Delete"
+                        fontSize: '0.875rem', // Smaller font size
+                        minHeight: '30px', // Reduced height
+                        minWidth: '100px', // Increased width
                         '&:hover': { backgroundColor: '#f0f0f0' },
                       }}
                     >
@@ -640,6 +670,9 @@ const Users: React.FC = () => {
                     </MenuItem>
                   </Popover>
                 </TableCell>
+
+
+
               </TableRow>
             ))}
           </TableBody>
@@ -851,223 +884,63 @@ const Users: React.FC = () => {
       </Dialog>
 
       {/* Dialog to display user details */}
-      <Dialog
-        open={isDialogOpen}
-        onClose={handleCloseDialog}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: '20px',
-            padding: '16px 28px 40px',
-            maxWidth: '650px',
-            backgroundColor: '#f9f9f9',
-            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
-          }
-        }}
-      >
-        <Box sx={{ position: 'relative' }}>
-          {/* Back button */}
-          <IconButton
-            onClick={handleCloseDialog}
-            sx={{
-              position: 'absolute',
-              left: 8,
-              top: 8,
-            }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-
-          {/* Header section */}
-          <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
+      <Dialog open={isDialogOpen} onClose={handleCloseDialog} fullWidth sx={{ borderRadius: '60px' }}>
+        <IconButton onClick={handleCloseDialog} sx={{ position: 'absolute', top: '10px', left: '10px' }}>
+          <ArrowBackIcon style={{ color: 'black' }} />
+        </IconButton>
+        <Box sx={{ position: 'relative', padding: '16px', alignContent: 'ceter', borderRadius: '60px' }}>
+          {/* Header with Avatar, Title, and Subtitle */}
+          <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" mb={2} borderRadius='60px' >
             <Avatar
-              sx={{
-                width: 64,
-                height: 64,
-                backgroundColor: '#f5f5f5',
-                color: '#666',
-                marginRight: '30px'
-              }}
+              sx={{ width: 80, height: 80, mr: 2 }}
+              src={userDetails?.avatarUrl || '/default-avatar.png'}
             >
-              {userDetails?.firstName?.[0] || 'U'}
+              {/* Optional initial if avatar URL is not provided */}
+              {userDetails?.firstName ? userDetails.firstName[0] : 'U'}
             </Avatar>
-            <Box sx={{ textAlign: 'left' }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                View user
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
+
+            <Box>
+              <DialogTitle sx={{ fontWeight: 'bold', textAlign: 'left', m: 0 }}>User Details</DialogTitle>
+              <Typography variant="body2" sx={{ textAlign: 'left', color: 'gray' }}>
                 Look through your user's information easily.
               </Typography>
             </Box>
           </Box>
-
-          {/* View Form fields */}
-          <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+          <DialogContent>
             {userDetails ? (
-              <Box display="flex" flexDirection="column" gap={2.5}>
-                <Box display="flex" gap={2} mt={-3} >
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name</Typography>
-                    <TextField
-                      value={userDetails.firstName}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        readOnly: true,
-                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>last Name</Typography>
-                    <TextField
-                      value={userDetails.lastName}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        readOnly: true,
-                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                      }}
-                    />
-                  </Grid>
+              <Box display="flex" flexDirection="column" gap={2}>
+                <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={2} mb={2}>
+                  <TextField
+                    label="Name"
+                    value={`${userDetails.firstName}`}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Name"
+                    value={`${userDetails.lastName}`}
+                    InputProps={{ readOnly: true }}
+                    fullWidth
+                  />
                 </Box>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email</Typography>
-                  <TextField
-                    value={userDetails.email}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      readOnly: true,
-                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
-                  <TextField
-                    value={userDetails.phoneNumber || ''}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    InputProps={{
-                      readOnly: true,
-                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Role</Typography>
-                  <TextField
-                    value={userDetails.userType || ''}
-                    fullWidth
-                    variant="outlined"
-                    size="small"
-                    inputProps={{
-                      readOnly: true,
-                      sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                    }}
-                  />
-                </Grid>
-              </Box>
-
-            ) : (
-              <Typography>Loading user details...</Typography>
-            )}
-          </DialogContent>
-        </Box>
-      </Dialog>
-
-      {/* Add Edit User Dialog */}
-      <Dialog
-        open={isEditDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: '20px',
-            padding: '16px 28px 40px',
-            maxWidth: '650px',
-            backgroundColor: '#f9f9f9',
-            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
-          }
-        }}
-      >
-        <Box sx={{ position: 'relative' }}>
-          {/* Back button */}
-          <IconButton
-            onClick={() => setEditDialogOpen(false)}
-            sx={{
-              position: 'absolute',
-              left: 8,
-              top: 8,
-            }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
-
-          {/* Header section */}
-          <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-            <Avatar
-              sx={{
-                width: 64,
-                height: 64,
-                backgroundColor: '#f5f5f5',
-                color: '#666',
-                marginRight: '30px'
-              }}
-            >
-              {editFormData?.firstName?.[0] || 'U'}
-            </Avatar>
-            <Box sx={{ textAlign: 'left' }}>
-              <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                Edit user
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Modify users and keep the database updated
-              </Typography>
-            </Box>
-          </Box>
-
-          <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
-            {editFormData ? (
-              <Box display="flex" flexDirection="column" gap={2.5}>
-                {/* First Name and Last Name row */}
-                <Box display="flex" gap={2} mt={-3} >
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>First Name</Typography>
-                    <TextField
-                      name="firstName"
-                      value={editFormData.firstName}
-                      onChange={handleEditFormChange}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Last Name</Typography>
-                    <TextField
-                      name="lastName"
-                      value={editFormData.lastName}
-                      onChange={handleEditFormChange}
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      InputProps={{
-                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                      }}
-                    />
-                  </Grid>
-                </Box>
+                <TextField
+                  label="Email"
+                  value={userDetails.email}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="Phone Number"
+                  value={userDetails.phoneNumber}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
+                <TextField
+                  label="Role"
+                  value={userDetails.userType}
+                  InputProps={{ readOnly: true }}
+                  fullWidth
+                />
 
                 {/* Email field */}
                 <Grid item xs={12}>
@@ -1203,4 +1076,3 @@ const Users: React.FC = () => {
 };
 
 export default Users;
-
