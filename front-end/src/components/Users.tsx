@@ -76,7 +76,6 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const Users: React.FC = () => {
   const [users, setUsers] = useState<Users[]>([]);
-  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
