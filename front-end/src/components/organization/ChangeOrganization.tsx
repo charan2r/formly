@@ -122,7 +122,7 @@ function ChangeOrganization() {
           </IconButton>
           <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
           <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />
-          <Typography sx={{ fontSize: '15px', color: 'black', fontWeight: 500 }}>
+          <Typography sx={{ fontSize: '15px', color: 'textSecondary', fontWeight: 500 }}>
             Organization Management
           </Typography>
         </Box>
