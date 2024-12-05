@@ -15,6 +15,7 @@ interface QuestionContentProps {
   onOptionChange: (itemId: string, optionId: string, newContent: string) => void;
   onDeleteOption: (itemId: string, optionId: string) => void;
   onAddOption: (itemId: string) => void;
+  onEditorFocus: (fieldId: string, editorId: string, quill: any) => void;
 }
 
 interface Option {
@@ -60,9 +61,12 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
   onOptionChange,
   onDeleteOption,
   onAddOption,
+  onEditorFocus,
 }) => {
   const [options, setOptions] = useState<Option[]>([]);
   const [pendingUpdates, setPendingUpdates] = useState<{[key: string]: string}>({});
+
+  const questionEditorId = `question-${formFieldId}`;
 
   // Debounced update function
   const debouncedUpdate = useDebounce(async (formFieldsOptionId: string, newContent: string) => {
@@ -189,6 +193,16 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
     }
   };
 
+  const handleEditorFocus = (editorId: string, quill: any) => {
+    console.log('📝 Editor Selected:', {
+      fieldId: formFieldId,
+      editorId,
+      editorType: editorId.startsWith('question') ? 'Question' : 'Option'
+    });
+
+    onEditorFocus(formFieldId, editorId, quill);
+  };
+
   return (
     <Box 
       sx={{ 
@@ -266,7 +280,15 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
             <ReactQuill
               value={item.question}
               onChange={(content) => onQuestionChange(formFieldId, content)}
-              modules={quillModules}
+              onFocus={(range, source, quill) => handleEditorFocus(questionEditorId, quill)}
+              modules={{
+                toolbar: false, // Disable default toolbar since we're using our global toolbar
+                history: {
+                  delay: 1000,
+                  maxStack: 50,
+                  userOnly: true
+                }
+              }}
               style={{
                 backgroundColor: '#ffffff',
                 borderRadius: '4px',
@@ -284,88 +306,99 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
             opacity: 1,
           },
         }}>
-          {options.map((option) => (
-            <Box
-              key={option.formFieldsOptionId}
-              sx={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 1.5,
-                p: 1,
-                borderRadius: '8px',
-                border: '1px solid #e0e0e0',
-                backgroundColor: '#ffffff',
-                position: 'relative',
-                '&:hover .delete-icon': {  // Show delete icon on hover
-                  opacity: 1,
-                },
-              }}
-            >
-              <Radio
-                size="small"
+          {options.map((option) => {
+            const optionEditorId = `option-${option.formFieldsOptionId}`;
+            return (
+              <Box
+                key={option.formFieldsOptionId}
                 sx={{
-                  color: '#757575',
-                  '&.Mui-checked': {
-                    color: '#2196f3',
-                  },
-                }}
-              />
-              <Box sx={{ 
-                flex: 1,
-                position: 'relative',
-                '& .ql-toolbar': {
                   display: 'flex',
-                  position: 'absolute',
-                  right: '-35px',
-                  top: 0,
-                  zIndex: 1000,
-                  backgroundColor: '#fff',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  borderRadius: '4px',
-                  padding: '8px 4px',
-                  flexDirection: 'column',
-                  opacity: 0,
-                  visibility: 'hidden',
-                  transition: 'opacity 0.3s ease, visibility 0.3s ease',
-                  '& .ql-formats': {
-                    margin: '4px 0',
-                  }
-                },
-                '&:hover .ql-toolbar': {
-                  opacity: 1,
-                  visibility: 'visible',
-                },
-                '& .ql-container': {
-                  border: 'none',
-                },
-              }}>
-                <ReactQuill
-                  key={`editor-${option.formFieldsOptionId}`}
-                  value={pendingUpdates[option.formFieldsOptionId] || option.option}
-                  onChange={(content) => handleOptionChange(option.formFieldsOptionId, content)}
-                  modules={quillModules}
-                  style={{
-                    backgroundColor: '#ffffff',
-                  }}
-                />
-              </Box>
-              <IconButton 
-                className="delete-icon"
-                size="small" 
-                onClick={() => handleDeleteOption(option.formFieldsOptionId)}
-                sx={{ 
-                  color: '#757575',
-                  opacity: 0,  // Hidden by default
-                  transition: 'opacity 0.2s ease',  // Smooth transition
-                  '&:hover': { 
-                    color: '#f44336'  // Red color on hover
+                  alignItems: 'flex-start',
+                  gap: 1.5,
+                  p: 1,
+                  borderRadius: '8px',
+                  border: '1px solid #e0e0e0',
+                  backgroundColor: '#ffffff',
+                  position: 'relative',
+                  '&:hover .delete-icon': {  // Show delete icon on hover
+                    opacity: 1,
                   },
                 }}
               >
-                <DeleteOutlineIcon fontSize="small" />
-              </IconButton>
-            </Box>
-          ))}
+                <Radio
+                  size="small"
+                  sx={{
+                    color: '#757575',
+                    '&.Mui-checked': {
+                      color: '#2196f3',
+                    },
+                  }}
+                />
+                <Box sx={{ 
+                  flex: 1,
+                  position: 'relative',
+                  '& .ql-toolbar': {
+                    display: 'flex',
+                    position: 'absolute',
+                    right: '-35px',
+                    top: 0,
+                    zIndex: 1000,
+                    backgroundColor: '#fff',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    borderRadius: '4px',
+                    padding: '8px 4px',
+                    flexDirection: 'column',
+                    opacity: 0,
+                    visibility: 'hidden',
+                    transition: 'opacity 0.3s ease, visibility 0.3s ease',
+                    '& .ql-formats': {
+                      margin: '4px 0',
+                    }
+                  },
+                  '&:hover .ql-toolbar': {
+                    opacity: 1,
+                    visibility: 'visible',
+                  },
+                  '& .ql-container': {
+                    border: 'none',
+                  },
+                }}>
+                  <ReactQuill
+                    key={`editor-${option.formFieldsOptionId}`}
+                    value={pendingUpdates[option.formFieldsOptionId] || option.option}
+                    onChange={(content) => handleOptionChange(option.formFieldsOptionId, content)}
+                    onFocus={(range, source, quill) => handleEditorFocus(optionEditorId, quill)}
+                    modules={{
+                      toolbar: false,
+                      history: {
+                        delay: 1000,
+                        maxStack: 50,
+                        userOnly: true
+                      }
+                    }}
+                    style={{
+                      backgroundColor: '#ffffff',
+                    }}
+                  />
+                </Box>
+                <IconButton 
+                  className="delete-icon"
+                  size="small" 
+                  onClick={() => handleDeleteOption(option.formFieldsOptionId)}
+                  sx={{ 
+                    color: '#757575',
+                    opacity: 0,  // Hidden by default
+                    transition: 'opacity 0.2s ease',  // Smooth transition
+                    '&:hover': { 
+                      color: '#f44336'  // Red color on hover
+                    },
+                  }}
+                >
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            );
+          })}
           
           <Button
             className="add-option"

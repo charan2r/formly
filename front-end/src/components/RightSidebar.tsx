@@ -28,6 +28,8 @@ import DraggableQuestion from './DraggableQuestion';
 import { useParams, useLocation } from 'react-router-dom';
 import api from '../utils/axios';
 import { useTemplate } from '../context/TemplateContext';
+import GlobalQuillToolbar from './GlobalQuillToolbar';
+
 
 const pageSizes = {
   A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
@@ -619,6 +621,34 @@ const EditPageSettings: React.FC = () => {
     }
   };
 
+  const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
+  const [activeEditorId, setActiveEditorId] = useState<string | null>(null);
+  const [selectedText, setSelectedText] = useState<string>('');
+
+  const handleEditorFocus = (fieldId: string, editorId: string) => {
+    console.log('🎯 Focus Event:', {
+      fieldId,
+      editorId,
+      timestamp: new Date().toISOString()
+    });
+    setActiveFieldId(fieldId);
+    setActiveEditorId(editorId);
+  };
+
+  const handleFormatChange = (format: string, value: any) => {
+    // Get the currently selected text
+    const selection = window.getSelection()?.toString() || '';
+    
+    console.log('🎨 Format Applied:', {
+      format,
+      value,
+      activeField: activeFieldId,
+      activeEditor: activeEditorId,
+      selectedText: selection,
+      timestamp: new Date().toISOString()
+    });
+  };
+
   // Helper function to create update data
   const createUpdateData = (item: any, partialUpdate: any) => {
     return {
@@ -933,6 +963,11 @@ const EditPageSettings: React.FC = () => {
                   )}
                 </Typography>
               </Box>
+<GlobalQuillToolbar 
+  onFormatChange={handleFormatChange}
+  isEnabled={!!activeFieldId && !!activeEditorId}
+/>
+
 
              <div
   style={{
@@ -953,6 +988,7 @@ const EditPageSettings: React.FC = () => {
     marginRight: 0,
   }}
 >
+
   <div 
     ref={rndContainerRef} 
     style={{ 
@@ -975,6 +1011,9 @@ const EditPageSettings: React.FC = () => {
       onDeleteOption={handleDeleteOption}
       onAddOption={handleAddOption}
       appearanceSettings={appearanceSettings}
+      onEditorFocus={handleEditorFocus}
+      activeFieldId={activeFieldId}
+      activeEditorId={activeEditorId}
     />
   </div>
 </div>
