@@ -15,7 +15,7 @@ interface MetaSchemaResponse<T> {
 }
 
 @Controller('form-templates')
-@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
+//@UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
 export class FormTemplateController {
   constructor(private readonly formTemplateService: FormTemplateService) {}
 

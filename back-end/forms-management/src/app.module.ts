@@ -85,7 +85,7 @@ import { FormsModule } from './form/form.module';
        middleware: {
         mount: true
       }
-    })
+    }),
     FormFieldsOptionsModule,
     FormsModule
   ],

@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FormsRepository } from './form.repository';
 import { CreateFormDto } from './create-form.dto'; 
@@ -11,8 +12,9 @@ export class FormsService {
 
   // Method to create a form
   async create(createFormDto: CreateFormDto): Promise<Form> {
-    const field = this.formsRepository.create(createFormDto);
-        return this.formsRepository.save(field);
+    const {status = 'active', ...otherData} = createFormDto;
+    const form= this.formsRepository.create({status, ...otherData});
+    return this.formsRepository.save(form);
   }
 
   // Method to get all forms

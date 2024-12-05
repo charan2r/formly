@@ -11,7 +11,7 @@ interface MetaSchemaResponse<T> {
   data?: T;
 }
 
-@Controller('api/forms')
+@Controller('forms')
 export class FormsController {
   constructor(private readonly formsService: FormsService) {}
 
