@@ -67,6 +67,32 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
     },
 }));
 
+const CustomDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialog-paper': {
+        borderRadius: '20px',
+        padding: '16px',
+        maxWidth: '550px',
+        backgroundColor: '#f9f9f9',
+        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+    }
+}));
+
+const DialogHeader = styled(Box)({
+    display: 'flex',
+    alignItems: 'left',
+    marginBottom: '16px',
+    marginTop: '8px',
+    paddingLeft: '40px'
+});
+
+const BackButton = styled(IconButton)({
+    backgroundColor: '#f5f5f5',
+    color: 'black',
+    '&:hover': {
+        backgroundColor: '#e0e0e0',
+    }
+});
+
 const Category: React.FC = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -355,15 +381,6 @@ const Category: React.FC = () => {
         setDialogOpen(false);
         setCategoryDetails(null);
     };
-
-    const StyledDialog = styled(Dialog)(({ theme }) => ({
-        '& .MuiDialog-paper': {
-          borderRadius: '16px',
-          padding: '32px',
-          maxWidth: '500px',
-          width: '100%'
-        }
-      }));
 
     const handleEditCategory = async () => {
         try {
@@ -702,7 +719,7 @@ const Category: React.FC = () => {
             </Box>
 
             {/* Single Delete Confirmation Dialog */}
-            <StyledDialog 
+            <CustomDialog 
                 open={confirmationOpen}
                 onClose={() => {
                     setConfirmationOpen(false);
@@ -760,7 +777,7 @@ const Category: React.FC = () => {
                         </Button>
                     </Box>
                 </Box>
-            </StyledDialog>
+            </CustomDialog>
 
             {/* Bulk Confirmation Dialog */}
             <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
@@ -779,44 +796,20 @@ const Category: React.FC = () => {
             </Dialog>
 
             {/* Create category Dialog */}
-            <Dialog
+            <CustomDialog
                 open={createCategoryOpen}
                 onClose={() => setCreateCategoryOpen(false)}
                 fullWidth
                 maxWidth="sm"
-                PaperProps={{
-                    sx: {
-                        borderRadius: '20px',
-                        padding: '16px',
-                        maxWidth: '550px',
-                        backgroundColor: '#f9f9f9',
-                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
-                    }
-                }}
             >
                 <Box sx={{ position: 'relative' }}>
                     {/* Back button */}
-                    <IconButton
-                        sx={{
-                            backgroundColor: '#f5f5f5',
-                            color: 'black',
-                            '&:hover': {
-                              backgroundColor: '#e0e0e0',
-                            },
-                        }}
-                        onClick={() => setCreateCategoryOpen(false)}
-                    >
+                    <BackButton onClick={() => setCreateCategoryOpen(false)}>
                         <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </IconButton>
+                    </BackButton>
 
                     {/* Header section */}
-                    <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'left', 
-                        mb: 2,
-                        mt: 1,
-                        pl: 5
-                    }}>
+                    <DialogHeader>
                         <Box sx={{ textAlign: 'left' }}>
                             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                                 Create a Category
@@ -825,7 +818,7 @@ const Category: React.FC = () => {
                                 Boost your employee's productivity with digital forms.
                             </Typography>
                         </Box>
-                    </Box>
+                    </DialogHeader>
 
                     {/* Form Content */}
                     <DialogContent sx={{ px: 2, py: 1 }}>
@@ -927,50 +920,32 @@ const Category: React.FC = () => {
                         </Button>
                     </DialogActions>
                 </Box>
-            </Dialog>
+            </CustomDialog>
 
             {/* View Category Dialog */}
-            <Dialog
+            <CustomDialog
                 open={viewCategoryOpen}
                 onClose={() => setViewCategoryOpen(false)}
                 fullWidth
                 maxWidth="sm"
-                PaperProps={{
-                    sx: {
-                        borderRadius: '20px',
-                        padding: '16px 28px 40px',
-                        maxWidth: '650px',
-                        backgroundColor: '#f9f9f9',
-                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
-                    }
-                }}
             >
                 <Box sx={{ position: 'relative' }}>
-                    <IconButton
-                        sx={{
-                            backgroundColor: '#f5f5f5',
-                            color: 'black',
-                            '&:hover': {
-                              backgroundColor: '#e0e0e0',
-                            },
-                        }}
-                        onClick={() => setViewCategoryOpen(false)}
-                    >
+                    <BackButton onClick={() => setViewCategoryOpen(false)}>
                         <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </IconButton>
+                    </BackButton>
 
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    <DialogHeader>
+                        <Box sx={{ textAlign: 'left' }}>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                                 View Category
                             </Typography>
                             <Typography variant="body2" sx={{ color: '#666' }}>
                                 Category details
                             </Typography>
                         </Box>
-                    </Box>
+                    </DialogHeader>
 
-                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                    <DialogContent sx={{ px: 2, py: 1 }}>
                         <Box display="flex" flexDirection="column" gap={3.5}>
                             <Grid item xs={12} sm={6} mt={-3}>
                                 <Typography variant="subtitle2" gutterBottom sx={{ 
@@ -1026,50 +1001,32 @@ const Category: React.FC = () => {
                         </Box>
                     </DialogContent>
                 </Box>
-            </Dialog>
+            </CustomDialog>
 
             {/* Edit Category Dialog */}
-            <Dialog
+            <CustomDialog
                 open={editCategoryOpen}
                 onClose={() => setEditCategoryOpen(false)}
                 fullWidth
                 maxWidth="sm"
-                PaperProps={{
-                    sx: {
-                        borderRadius: '20px',
-                        padding: '16px 28px 40px',
-                        maxWidth: '650px',
-                        backgroundColor: '#f9f9f9',
-                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
-                    }
-                }}
             >
                 <Box sx={{ position: 'relative' }}>
-                    <IconButton
-                        sx={{
-                            backgroundColor: '#f5f5f5',
-                            color: 'black',
-                            '&:hover': {
-                              backgroundColor: '#e0e0e0',
-                            },
-                        }}
-                        onClick={() => setEditCategoryOpen(false)}
-                    >
+                    <BackButton onClick={() => setEditCategoryOpen(false)}>
                         <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </IconButton>
+                    </BackButton>
 
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
+                    <DialogHeader>
+                        <Box sx={{ textAlign: 'left' }}>
+                            <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                                 Edit Category
                             </Typography>
                             <Typography variant="body2" sx={{ color: '#666' }}>
                                 Update category details
                             </Typography>
                         </Box>
-                    </Box>
+                    </DialogHeader>
 
-                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
+                    <DialogContent sx={{ px: 2, py: 1 }}>
                         <Box display="flex" flexDirection="column" gap={3.5}>
                             <Grid item xs={12} sm={6} mt={-3}>
                                 <Typography variant="subtitle2" gutterBottom sx={{ 
@@ -1129,7 +1086,7 @@ const Category: React.FC = () => {
                         </Box>
                     </DialogContent>
 
-                    <DialogActions sx={{ p: 3, justifyContent: 'right' }}>
+                    <DialogActions sx={{ p: 2, justifyContent: 'right' }}>
                         <Button
                             variant="contained"
                             onClick={handleEditCategory}
@@ -1137,11 +1094,8 @@ const Category: React.FC = () => {
                                 backgroundColor: '#1a1a1a',
                                 color: 'white',
                                 borderRadius: '25px',
-                                width: '35%',
-                                padding: '10px 25px',
-                                marginTop: '-15px',
-                                marginBottom: '-20px',
-                                marginRight: '80px',
+                                width: '120px',
+                                padding: '8px 16px',
                                 fontSize: '0.95rem',
                                 fontWeight: 500,
                                 textTransform: 'none',
@@ -1157,7 +1111,7 @@ const Category: React.FC = () => {
                         </Button>
                     </DialogActions>
                 </Box>
-            </Dialog>
+            </CustomDialog>
             <ToastContainer></ToastContainer>
         </Paper >
     );
