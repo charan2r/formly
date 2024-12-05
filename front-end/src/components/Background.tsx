@@ -25,6 +25,7 @@ import AddRole from './role/AddRole';
 import ViewRole from './role/ViewRole';
 import EditRole from './role/EditRole';
 import FTReset from './authentication/FTReset';
+import ProfileSettings from './ProfileSettings';
 
 const LoadingScreen = () => (
   <Box
