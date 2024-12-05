@@ -39,6 +39,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
 import { useAuth } from '../context/AuthContext';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
 interface Template {
     formTemplateId: string;
@@ -433,11 +435,11 @@ const Template: React.FC = () => {
                     <IconButton onClick={() => console.log("Back arrow clicked")}>
                         <CircleIcon style={{ color: 'black' }} />
                     </IconButton>
-                    <ArrowForward style={{ color: 'black' }} />
+                    <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                     <Typography variant="body2" color="textSecondary">
                         Atlas corp.
                     </Typography>
-                    <ArrowForward style={{ color: 'black' }} />
+                    <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                     <Typography variant="body2" color="textSecondary">
                         Template repository
                     </Typography>
@@ -812,10 +814,19 @@ const Template: React.FC = () => {
                 }}>
                 <Box sx={{ textAlign: 'center', pb: 2 }}>
                     <IconButton
-                        sx={{ position: 'absolute', left: 16, top: 16 }}
-                        onClick={() => setConfirmationOpen(false)}
+                        sx={{ 
+                            backgroundColor: '#f5f5f5',
+                            color: 'black',
+                            '&:hover': {
+                                backgroundColor: '#e0e0e0',
+                            },
+                        }}
+                        onClick={() => {
+                            setConfirmationOpen(false);
+                            setTemplateToDelete(null);
+                        }}
                     >
-                        <ArrowBack />
+                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
                     </IconButton>
                     <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
                         Delete Template
@@ -907,14 +918,16 @@ const Template: React.FC = () => {
                 <Box sx={{ position: 'relative' }}>
                     {/* Back button */}
                     <IconButton
-                        onClick={handleCloseDialog}
-                        sx={{
-                            position: 'absolute',
-                            left: 8,
-                            top: 8,
+                        sx={{ 
+                            backgroundColor: '#f5f5f5',
+                            color: 'black',
+                            '&:hover': {
+                                backgroundColor: '#e0e0e0',
+                            },
                         }}
+                        onClick={() => setCreateTemplateOpen(false)}
                     >
-                        <ArrowBackIcon />
+                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
                     </IconButton>
 
                     {/* Header section */}
@@ -1137,7 +1150,18 @@ const Template: React.FC = () => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setEditTemplateOpen(false)}>Cancel</Button>
+                    <Button
+                        sx={{ 
+                            backgroundColor: '#f5f5f5',
+                            color: 'black',
+                            '&:hover': {
+                                backgroundColor: '#e0e0e0',
+                            },
+                        }}
+                        onClick={() => setEditTemplateOpen(false)}
+                    >
+                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+                    </Button>
                     <Button
                         onClick={handleEditTemplate}
                         sx={{
