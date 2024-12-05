@@ -43,7 +43,7 @@ const Login = () => {
         // Show error toast immediately for failed login
         setTimeout(() => {
           toast.error(response.message, toastConfig);
-        }, 3000);
+        }, 1000);
         return;
       }
 
