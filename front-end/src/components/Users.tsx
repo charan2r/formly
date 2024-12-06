@@ -23,7 +23,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   Grid,
   DialogActions,
 } from '@mui/material';
@@ -40,7 +39,6 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 
 interface Users {
-  id: string;
   id: string;
   firstName: string;
   lastName: string;
@@ -87,15 +85,14 @@ const Users: React.FC = () => {
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({ id: '', firstName: '', lastName: '', email: '' });
+  
   const [filters, setFilters] = useState({ userId: '', firstName: '', lastName: '', email: '', phoneNumber: '', roleId: '' });
   const [orderBy, setOrderBy] = useState<keyof Users>('email');
   const [orderDirection, setOrderDirection] = useState<'asc' | 'desc'>('asc');
   const [userDetails, setUserDetails] = useState<Users | null>(null); // For storing user details
   const [isDialogOpen, setDialogOpen] = useState(false); // For opening the user details dialog
 
-  const [userDetails, setUserDetails] = useState<Users | null>(null);
-  const [isDialogOpen, setDialogOpen] = useState(false);
+  
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState<EditUserForm | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -114,7 +111,7 @@ const Users: React.FC = () => {
   useEffect(() => {
     const fetchOrganizations = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/users?organizationId=72a53cab-e8a8-4072-bf91-d2643b22851b');
+        
         const response = await api.get(`/users`);
         console.log(response.data)
         setOrganizations(response.data.data);
@@ -125,7 +122,8 @@ const Users: React.FC = () => {
         toast.error("Failed to fetch users");
       }
     };
-
+      
+    
     fetchOrganizations();
   }, []);
 
@@ -170,27 +168,32 @@ const Users: React.FC = () => {
     const checked = event.target.checked;
     const newSelectedOrganizations = organizations.reduce((acc, org) => {
       acc[org.id] = checked;  // Apply the same checked state to all organizations
-    const newSelectedUsers = users.reduce((acc, user) => {
-      acc[user.id] = checked;
-      return acc;
-    }, {} as Record<number, boolean>);
+        acc[org.id] = checked;
+        return acc;
+      }, {} as Record<number, boolean>);
+  
+      setSelectedOrganizations(newSelectedOrganizations);
+    };
 
-    setSelectedOrganizations(newSelectedOrganizations);
-  };
 
-
-  const handleSelectOrganization = (id: number) => {
-    setSelectedOrganizations((prev) => ({
-  const handleSelectUser = (id: number) => {
-    setSelectedUsers((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value);
-  };
+    const handleSelectUser = (id: number) => {
+    const handleSelectUser = (id: number) => {
+      setSelectedOrganizations((prev) => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+    };
+  
+    const handleSelectOrganization = (id: number) => {
+      setSelectedOrganizations((prev) => ({
+        ...prev,
+        [id]: !prev[id],
+      }));
+    };
+  
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(event.target.value);
+    };
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -226,7 +229,7 @@ const Users: React.FC = () => {
 
   const handleDeleteOrganization = async (orgId: string) => {
     try {
-      await axios.delete(`http://localhost:3001/organization/${orgId}`);
+      
       setOrganizations((prev) => prev.filter((org) => org.orgId !== orgId));
       const response = await api.get(`/users/details?userId=${userId}`);
       setUserDetails(response.data);
@@ -240,12 +243,20 @@ const Users: React.FC = () => {
   };
 
   const handleViewUser = async (userId: string) => {
-  const handleEditUser = async (userId: string) => {
+  const handleViewUser = async (userId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3001/users/details?userId=${userId}`);
+      const response = await api.get(`/users/details?userId=${userId}`);
       setUserDetails(response.data); // Store user details
       setDialogOpen(true); // Open dialog
       handleMenuClose(); // Close the options menu
+    } catch (error) {
+      console.error(`Error fetching user details for ID ${userId}:`, error);
+      toast.error("Failed to fetch user details");
+    }
+  };
+
+  const handleEditUser = async (userId: string) => {
+    try {
       const response = await api.get(`/users/details?userId=${userId}`);
       setEditFormData({
         firstName: response.data.firstName,
@@ -261,8 +272,7 @@ const Users: React.FC = () => {
       toast.error("Failed to fetch user details for editing");
     }
   };
-
-  const filteredData = organizations
+  
   const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setEditFormData(prev => prev ? {
@@ -1074,5 +1084,5 @@ const Users: React.FC = () => {
     </Paper>
   );
 };
-
+}} 
 export default Users;

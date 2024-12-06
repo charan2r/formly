@@ -33,17 +33,17 @@ import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
 import { ArrowForward, Delete } from '@mui/icons-material';
 import MenuIcon from '@mui/icons-material/Menu';
-import axios from 'axios';
+import api from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import sampleFormData from './formData';
 import CloseIcon from '@mui/icons-material/Close';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PrintIcon from '@mui/icons-material/Print';
 import EmailIcon from '@mui/icons-material/Email';
+import { useAuth } from '../context/AuthContext';
 
 interface form {
   templateId: number;
@@ -84,7 +84,8 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
 
 const FormTable: React.FC = () => {
   const navigate = useNavigate();
-  const [forms, setForms] = useState<form[]>(sampleFormData);
+  const {user} = useAuth();
+  const [forms, setForms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedForms, setSelectedForms] = useState<Record<number, boolean>>({});
   const [page, setPage] = useState(1);
@@ -127,42 +128,6 @@ const FormTable: React.FC = () => {
     }));
   };
 
-   // Handler for form submission
-   const handleUpdateForm = async () => {
-    try {
-      // Update the form in your forms array
-      setForms(prevForms => prevForms.map(form => 
-        form.templateId === selectedRowId
-          ? {
-              ...form,
-              name: editFormData.name,
-              category: editFormData.type,
-              lastModifiedDate: new Date().toISOString(),
-              lastModifiedBy: 'Current User' // Replace with actual user name
-            }
-          : form
-      ));
-
-      setEditDialogOpen(false);
-      toast.success("Form updated successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
-    } catch (error) {
-      toast.error("Failed to update form");
-    }
-  };
 
   const handleEditClick = (form: form | undefined) => {
     if (!form) return;
@@ -246,12 +211,75 @@ const FormTable: React.FC = () => {
     setConfirmationBulkOpen(true);
   };
 
+  // Method to get forms 
+  useEffect(() => {
+    const fetchForms = async () => {
+      try {
+        const response = await api.get('/forms');
+        setForms(response.data.data);
+      } catch (error) {
+        console.error('Failed to fetch forms:', error);
+      }
+    };
 
+    fetchForms();
+  }, []);
 
-  const handleDeleteForms = async () => {
-
+  // Method to handle form update
+  const handleUpdateForm = async () => {
     try {
-      const response = await axios.delete('http://localhost:3001/form/bulk-delete', {
+      const response = await api.patch(`/forms/${selectedRowId}`, editFormData);
+      setForms(prevForms => prevForms.map(form => 
+        form.templateId === selectedRowId
+          ? {
+              ...form,
+              name: editFormData.name,
+              category: editFormData.type,
+              lastModifiedDate: new Date().toISOString(),
+              lastModifiedBy: 'Current User' // Replace with actual user name
+            }
+          : form
+      ));
+
+      setEditDialogOpen(false);
+      toast.success("Form updated successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to update form");
+    }
+  };
+
+
+  // Method to handle form creation
+  const handleCreateForm = async () => {
+    try {
+        const response = await api.post('/forms/create', newForm);
+        setForms([...forms, response.data]);
+        setCreateFormOpen(false);
+        toast.success("Form created successfully!");
+    } catch (error) {
+        toast.error("Failed to create form");
+    }
+  };
+
+
+  // Method to handle bulk-deletion of forms
+  const handleDeleteForms = async () => {
+    try {
+      const response = await api.delete('/forms/bulk-delete', {
         data: { ids: Object.keys(selectedForms) },
       });
 
@@ -297,27 +325,11 @@ const FormTable: React.FC = () => {
     };
   }
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setFormDetails(null);
-  };
-  
 
-  const handleCreateForm = async () => {
-    try {
-        const response = await axios.post('http://localhost:3001/form', newForm);
-        setForms([...forms, response.data]);
-        setCreateFormOpen(false);
-        toast.success("Form created successfully!");
-    } catch (error) {
-        toast.error("Failed to create form");
-    }
-  };
-
-  // Method to handle deletion of an organization
+  // Method to handle deletion of form
   const handleDeleteForm = async () => {
     try {
-      await axios.delete(`http://localhost:3001/form/delete?id=${formToDelete}`);
+      await api.delete(`/forms/delete?id=${formToDelete}`);
       setForms((prev) => prev.filter((frm) => frm.formId !== formToDelete));
       setConfirmationOpen(false); // Close confirmation dialog
       toast.success("Form has been deleted successfully!", {
@@ -352,6 +364,11 @@ const FormTable: React.FC = () => {
         },
       });
     }
+  };
+
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setFormDetails(null);
   };
 
   const filteredData = forms
@@ -427,10 +444,10 @@ const FormTable: React.FC = () => {
           </IconButton>
           <ArrowForward style={{ color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
-          Form Repostory
+          Forms Repository
           </Typography>
         </Box>
-        <Typography variant="h5" fontWeight="bold">Form Repostory</Typography>
+        <Typography variant="h5" fontWeight="bold">Forms Repository</Typography>
         <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
         Manage your forms here.
         </Typography>
@@ -499,6 +516,7 @@ const FormTable: React.FC = () => {
           </Box>
         </Box>
       </Box>
+
       <TableContainer sx={{ maxHeight: '400px', overflow: 'auto' }}>
                 <Table stickyHeader sx={{ marginTop: '25px' }}>
                     <TableHead>
@@ -735,8 +753,8 @@ const FormTable: React.FC = () => {
                     </TableHead>
 
                     <TableBody>
-                        {paginatedData.map((row) => (
-                            <TableRow key={row.templateId} sx={{ height: '60px' }}>
+                        {paginatedData.map((row, index) => (
+                            <TableRow key={row.templateId || index} sx={{ height: '60px' }}>
                                 <TableCell padding="checkbox">
                                     <Checkbox
                                         checked={!!selectedForms[row.templateId]}
@@ -849,14 +867,12 @@ const FormTable: React.FC = () => {
                                         </MenuItem>
                                     </Menu>
                                 </TableCell>
-
-
-
-              </TableRow>
+                </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+
       <Box display="flex" justifyContent="center" alignItems="center" mt={2}>
         <SquarePagination
           count={Math.ceil(filteredData.length / rowsPerPage)}

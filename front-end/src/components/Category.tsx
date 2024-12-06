@@ -400,10 +400,10 @@ const Category: React.FC = () => {
                     </Typography>
                     <ArrowForward style={{ color: 'black' }} />
                     <Typography variant="body2" color="textSecondary">
-                        Category management
+                        Category Management
                     </Typography>
                 </Box>
-                <Typography variant="h5" fontWeight="bold">Category Managment</Typography>
+                <Typography variant="h5" fontWeight="bold">Category Management</Typography>
                 <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
                     Manage your categories here.
                 </Typography>

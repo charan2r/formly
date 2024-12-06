@@ -443,10 +443,10 @@ const Template: React.FC = () => {
                     </Typography>
                     <ArrowForward style={{ color: 'black' }} />
                     <Typography variant="body2" color="textSecondary">
-                        Template repository
+                        Templates Repository
                     </Typography>
                 </Box>
-                <Typography variant="h5" fontWeight="bold">Template repository</Typography>
+                <Typography variant="h5" fontWeight="bold">Templates Repository</Typography>
                 <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
                     Manage your templates here.
                 </Typography>
