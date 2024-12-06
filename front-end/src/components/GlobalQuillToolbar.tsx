@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, IconButton, Divider, Tooltip } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, IconButton, Divider, Tooltip, Select, MenuItem, Popover, Button } from '@mui/material';
 import {
   FormatBold,
   FormatItalic,
@@ -24,6 +24,7 @@ import {
   Undo,
   Redo
 } from '@mui/icons-material';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 interface GlobalQuillToolbarProps {
   onFormatChange: (format: string, value: any) => void;
@@ -31,6 +32,13 @@ interface GlobalQuillToolbarProps {
 }
 
 const GlobalQuillToolbar: React.FC<GlobalQuillToolbarProps> = ({ onFormatChange, isEnabled }) => {
+  const [textColorAnchor, setTextColorAnchor] = useState<null | HTMLElement>(null);
+  const [bgColorAnchor, setBgColorAnchor] = useState<null | HTMLElement>(null);
+  const [selectedTextColor, setSelectedTextColor] = useState('#000000');
+  const [selectedBgColor, setSelectedBgColor] = useState('#ffffff');
+  const [imageAnchor, setImageAnchor] = useState<null | HTMLElement>(null);
+  const [imageUrl, setImageUrl] = useState<string>('');
+
   const handleFormatClick = (format: string, value: any) => {
     console.log('🔧 Toolbar Action:', {
       format,
@@ -40,6 +48,19 @@ const GlobalQuillToolbar: React.FC<GlobalQuillToolbarProps> = ({ onFormatChange,
     });
     
     onFormatChange(format, value);
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        handleFormatClick('image', imageUrl);
+        setImageAnchor(null);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -87,13 +108,49 @@ const GlobalQuillToolbar: React.FC<GlobalQuillToolbarProps> = ({ onFormatChange,
 
       <Divider orientation="vertical" flexItem />
 
-      {/* Headers and Scripts */}
+      {/* Headers Dropdown */}
       <Box sx={{ display: 'flex', gap: 0.5 }}>
-        <Tooltip title="Heading 1">
-          <IconButton size="small" onClick={() => handleFormatClick('header', 1)}>
-            <Title fontSize="small" />
-          </IconButton>
+        <Tooltip title="Heading Style">
+          <Select
+            size="small"
+            defaultValue="normal"
+            onChange={(e) => handleFormatClick('header', e.target.value === 'normal' ? false : Number(e.target.value))}
+            sx={{
+              minWidth: '120px',
+              height: '32px',
+              '.MuiSelect-select': {
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                py: 0.5,
+              }
+            }}
+            IconComponent={KeyboardArrowDownIcon}
+          >
+            <MenuItem value="normal" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Title fontSize="small" sx={{ textDecoration: 'line-through' }} />
+              <span>Normal</span>
+            </MenuItem>
+            <MenuItem value="1" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Title fontSize="small" />
+              <span>Heading 1</span>
+            </MenuItem>
+            <MenuItem value="2" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Title fontSize="small" sx={{ transform: 'scale(0.9)' }} />
+              <span>Heading 2</span>
+            </MenuItem>
+            <MenuItem value="3" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Title fontSize="small" sx={{ transform: 'scale(0.8)' }} />
+              <span>Heading 3</span>
+            </MenuItem>
+          </Select>
         </Tooltip>
+      </Box>
+
+      <Divider orientation="vertical" flexItem />
+
+      {/* Scripts */}
+      <Box sx={{ display: 'flex', gap: 0.5 }}>
         <Tooltip title="Subscript">
           <IconButton size="small" onClick={() => handleFormatClick('script', 'sub')}>
             <Subscript fontSize="small" />
@@ -111,17 +168,26 @@ const GlobalQuillToolbar: React.FC<GlobalQuillToolbarProps> = ({ onFormatChange,
       {/* Alignment */}
       <Box sx={{ display: 'flex', gap: 0.5 }}>
         <Tooltip title="Align Left">
-          <IconButton size="small" onClick={() => handleFormatClick('align', 'left')}>
+          <IconButton 
+            size="small" 
+            onClick={() => handleFormatClick('align', '')}
+          >
             <FormatAlignLeft fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Align Center">
-          <IconButton size="small" onClick={() => handleFormatClick('align', 'center')}>
+          <IconButton 
+            size="small" 
+            onClick={() => handleFormatClick('align', 'center')}
+          >
             <FormatAlignCenter fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Align Right">
-          <IconButton size="small" onClick={() => handleFormatClick('align', 'right')}>
+          <IconButton 
+            size="small" 
+            onClick={() => handleFormatClick('align', 'right')}
+          >
             <FormatAlignRight fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -163,15 +229,86 @@ const GlobalQuillToolbar: React.FC<GlobalQuillToolbarProps> = ({ onFormatChange,
       {/* Colors */}
       <Box sx={{ display: 'flex', gap: 0.5 }}>
         <Tooltip title="Text Color">
-          <IconButton size="small" onClick={() => handleFormatClick('color', true)}>
+          <IconButton 
+            size="small" 
+            onClick={(e) => setTextColorAnchor(e.currentTarget)}
+          >
             <FormatColorText fontSize="small" />
           </IconButton>
         </Tooltip>
+        <Popover
+          open={Boolean(textColorAnchor)}
+          anchorEl={textColorAnchor}
+          onClose={() => setTextColorAnchor(null)}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
+          <Box sx={{ p: 1 }}>
+            <input
+              type="color"
+              value={selectedTextColor}
+              onChange={(e) => {
+                setSelectedTextColor(e.target.value);
+                handleFormatClick('color', e.target.value);
+                setTextColorAnchor(null);
+              }}
+              style={{
+                width: '200px',
+                height: '40px',
+                padding: '0',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            />
+          </Box>
+        </Popover>
+
         <Tooltip title="Background Color">
-          <IconButton size="small" onClick={() => handleFormatClick('background', true)}>
-            <FormatColorFill fontSize="small" />
+          <IconButton 
+            size="small" 
+            onClick={(e) => setBgColorAnchor(e.currentTarget)}
+          >
+            <FormatColorFill fontSize="small"  />
           </IconButton>
         </Tooltip>
+        <Popover
+          open={Boolean(bgColorAnchor)}
+          anchorEl={bgColorAnchor}
+          onClose={() => setBgColorAnchor(null)}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
+          <Box sx={{ p: 1 }}>
+            <input
+              type="color"
+              value={selectedBgColor}
+              onChange={(e) => {
+                setSelectedBgColor(e.target.value);
+                handleFormatClick('background', e.target.value);
+                setBgColorAnchor(null);
+              }}
+              style={{
+                width: '200px',
+                height: '40px',
+                padding: '0',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+            />
+          </Box>
+        </Popover>
       </Box>
 
       <Divider orientation="vertical" flexItem />
@@ -184,10 +321,74 @@ const GlobalQuillToolbar: React.FC<GlobalQuillToolbarProps> = ({ onFormatChange,
           </IconButton>
         </Tooltip>
         <Tooltip title="Insert Image">
-          <IconButton size="small" onClick={() => handleFormatClick('image', true)}>
+          <IconButton 
+            size="small" 
+            onClick={(e) => setImageAnchor(e.currentTarget)}
+          >
             <Image fontSize="small" />
           </IconButton>
         </Tooltip>
+        <Popover
+          open={Boolean(imageAnchor)}
+          anchorEl={imageAnchor}
+          onClose={() => setImageAnchor(null)}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left',
+          }}
+        >
+          <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', gap: 1, width: '300px' }}>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <input
+                type="text"
+                placeholder="Image URL"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                style={{
+                  padding: '8px',
+                  borderRadius: '4px',
+                  border: '1px solid #ddd',
+                  flex: 1
+                }}
+              />
+              <IconButton 
+                size="small"
+                onClick={() => {
+                  if (imageUrl) {
+                    handleFormatClick('image', imageUrl);
+                    setImageUrl('');
+                    setImageAnchor(null);
+                  }
+                }}
+              >
+                <Image fontSize="small" />
+              </IconButton>
+            </Box>
+            <Divider sx={{ my: 1 }}>OR</Divider>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: 'none' }}
+              id="image-upload"
+            />
+            <label htmlFor="image-upload">
+              <Button
+                component="span"
+                variant="outlined"
+                size="small"
+                fullWidth
+                startIcon={<Image />}
+              >
+                Upload Image
+              </Button>
+            </label>
+          </Box>
+        </Popover>
       </Box>
 
       <Divider orientation="vertical" flexItem />

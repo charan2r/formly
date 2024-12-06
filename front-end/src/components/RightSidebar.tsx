@@ -624,9 +624,9 @@ const EditPageSettings: React.FC = () => {
   const [activeFieldId, setActiveFieldId] = useState<string | null>(null);
   const [activeEditorId, setActiveEditorId] = useState<string | null>(null);
   const [selectedText, setSelectedText] = useState<string>('');
-  const quillRef = useRef<any>(null);
+  const quillRef = useRef<ReactQuill | null>(null);
 
-  const handleEditorFocus = (fieldId: string, editorId: string, quill: any) => {
+  const handleEditorFocus = (fieldId: string, editorId: string, quill: ReactQuill) => {
     setActiveFieldId(fieldId);
     setActiveEditorId(editorId);
     quillRef.current = quill;
@@ -634,14 +634,17 @@ const EditPageSettings: React.FC = () => {
 
   const handleFormatChange = (format: string, value: any) => {
     if (quillRef.current) {
-      quillRef.current.format(format, value);
-      console.log('🔧 Format Applied:', {
-        format,
-        value,
-        activeField: activeFieldId,
-        activeEditor: activeEditorId,
-        timestamp: new Date().toISOString()
-      });
+      const editor = quillRef.current.getEditor();
+      if (editor) {
+        editor.format(format, value);
+        console.log('🔧 Format Applied:', {
+          format,
+          value,
+          activeField: activeFieldId,
+          activeEditor: activeEditorId,
+          timestamp: new Date().toISOString()
+        });
+      }
     }
   };
 

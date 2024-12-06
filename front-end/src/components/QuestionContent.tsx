@@ -72,6 +72,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
 
   const questionEditorId = `question-${formFieldId}`;
   const quillRef = useRef<any>(null);
+  const editorRef = useRef<ReactQuill>(null);
 
   // Add effect to watch for active editor changes
   useEffect(() => {
@@ -221,6 +222,12 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
     onEditorFocus(formFieldId, editorId, quillInstance);
   };
 
+  const handleFocus = () => {
+    if (editorRef.current) {
+      onEditorFocus(formFieldId, 'question', editorRef.current);
+    }
+  };
+
   return (
     <Box 
       sx={{ 
@@ -296,11 +303,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
             },
           }}>
             <ReactQuill
-              ref={(el) => {
-                if (el) {
-                  quillRef.current = el;
-                }
-              }}
+              ref={editorRef}
               value={item.question}
               onChange={(content) => {
                 console.log('📝 Content Change:', {
@@ -309,7 +312,7 @@ const QuestionContent: React.FC<QuestionContentProps> = ({
                 });
                 onQuestionChange(formFieldId, content);
               }}
-              onFocus={(range, source, quill) => handleEditorFocus(questionEditorId, quillRef.current)}
+              onFocus={handleFocus}
               modules={{
                 toolbar: false,
                 keyboard: {

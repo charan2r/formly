@@ -33,7 +33,6 @@
 }
 
 .draggable-question:hover {
-  overflow: auto !important;
   scrollbar-width: thin;
   scrollbar-color: #bdbdbd transparent;
 }
