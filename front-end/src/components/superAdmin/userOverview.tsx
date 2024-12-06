@@ -274,9 +274,8 @@ const UserOverview: React.FC = () => {
   }, [user?.organizationId]);
 
   return (
-    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden'  }}>
-      <Box display="flex" flexDirection="column" gap={2} mt={-3}>
-        {/* Header Section */}
+    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'auto' }}>
+    <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
         <IconButton onClick={() => console.log("Back arrow clicked")}>
           <CircleIcon style={{ color: 'black' }} />

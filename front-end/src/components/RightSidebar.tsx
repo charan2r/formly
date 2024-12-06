@@ -17,6 +17,8 @@ import {
   IconButton,
   Radio,
   SelectChangeEvent,
+  Snackbar,
+  Alert
 } from '@mui/material';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -32,6 +34,8 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 import GlobalQuillToolbar from './GlobalQuillToolbar';
 
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const pageSizes = {
   A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
@@ -457,19 +461,48 @@ const EditPageSettings: React.FC = () => {
 
       if (response.data.status === 'success') {
         setHasChanges(false);
+        // Show success toast
+        toast.success("Changes saved successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+        
         // Fetch updated data after successful save
         const updatedResponse = await api.get(`/form-templates/details?id=${formTemplateId}`);
         if (updatedResponse.data.status === 'success') {
           setTemplateData(updatedResponse.data.data);
         }
-        console.log('Template updated successfully');
       }
     } catch (error) {
-      console.error('Error updating template:', error);
+      // Show error toast
+      toast.error("Error saving changes", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     }
   };
-
-
 
   const calculateGridSize = () => {
     if (paperRef.current) {
@@ -857,12 +890,12 @@ const EditPageSettings: React.FC = () => {
                   </IconButton>
                   <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                   <Typography variant="body2" color="textSecondary">
-                    Atlas Corp. 
+                    Edit Template 
                   </Typography>
                   <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                   <Typography variant="body2" color="textSecondary">
-                    Edit Template
-                  </Typography>
+                {templateData?.name || 'Template'}
+              </Typography>
                   <Box marginLeft="auto" display="flex" gap={1}>
                     <Button
                       variant="outlined"
@@ -1480,6 +1513,8 @@ const EditPageSettings: React.FC = () => {
             <ArrowForward />
           </IconButton>
         )}
+
+        <ToastContainer />
       </>
   );
 };

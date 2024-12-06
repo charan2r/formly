@@ -275,9 +275,11 @@ const DataTable: React.FC = () => {
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
-      <Box display="flex" flexDirection="column" gap={3}>
-        <Box display="flex" alignItems="center" gap={1}>
-          <CircleIcon sx={{ fontSize: 26, color: 'black' }} />
+      <Box display="flex" flexDirection="column" gap={2}>
+        <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
+        <IconButton onClick={() => console.log("Back arrow clicked")}>
+            <CircleIcon style={{ color: 'black' }} />
+          </IconButton>
           <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography sx={{ fontSize: '15px', color: "text.secondary", fontWeight: 500 }}>
           Organizations

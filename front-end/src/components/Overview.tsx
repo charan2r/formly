@@ -208,7 +208,7 @@ const Overview: React.FC = () => {
         margin: { xs: '8px', sm: '12px', md: '16px' },
         width: '100%', 
         borderRadius: 3, 
-        overflow: 'hidden' 
+        overflow: 'auto' 
       }}
     >
       <Box display="flex" flexDirection="column" gap={2}>
