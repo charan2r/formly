@@ -33,12 +33,11 @@ export class FormTemplateService {
  
   // Method to get all form templates
   async getAll(): Promise<FormTemplate[]> {
-    return this.formTemplateRepository.find();
+    return this.formTemplateRepository.find({ where: { status: 'active' } });
   }
-
   // Method to get a form template by ID
   async findOne(id: string): Promise<FormTemplate | undefined> {
-    return this.formTemplateRepository.findOne({ where: { formTemplateId: id } });
+    return this.formTemplateRepository.findOne({ where: { formTemplateId: id, status: 'active' } });
   }
 
   // Method to update a form template

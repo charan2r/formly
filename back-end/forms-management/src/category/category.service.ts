@@ -56,7 +56,7 @@ export class CategoryService {
     status: string;
   }> {
     const category = await this.categoryRepository.findOne({
-      where: { categoryId },
+      where: { categoryId, status: 'active' },
       relations: ['createdBy'],
     });
     if (!category) {
@@ -76,6 +76,7 @@ export class CategoryService {
   // Get all categories
   async getAllCategories() {
     const categories = await this.categoryRepository.find({
+      where: { status: 'active' },
       relations: ['createdBy'], // Ensure related entities are fetched
     });
   
@@ -90,7 +91,7 @@ export class CategoryService {
 
   async getCategoriesByOrganization(organizationId: string) {
     const categories = await this.categoryRepository.find({
-      where: { organization: { orgId: organizationId } }, // Use relations to filter by organization
+      where: { organization: { orgId: organizationId }, status: 'active' }, // Use relations to filter by organization
       relations: ['organization'], // Ensures the relationship is loaded
     });
 

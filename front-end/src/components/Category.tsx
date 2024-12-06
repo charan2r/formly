@@ -243,7 +243,7 @@ const Category: React.FC = () => {
                 .filter(([_, isSelected]) => isSelected)
                 .map(([id, _]) => id);
 
-            await api.delete('/categories/bulk-delete', {
+            const response = await api.delete('/categories/bulk-delete', {
                 data: selectedIds // Send array directly as the request body
             });
 
