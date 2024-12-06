@@ -1,12 +1,12 @@
-import React, { useRef, useEffect } from 'react';
-import { Box, TextField, IconButton } from '@mui/material';
+import React, { useState, useRef, useEffect } from 'react';
+import { Box, Radio, IconButton, FormControlLabel, RadioGroup } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ReactQuill from 'react-quill';
 import { QuestionItem } from '../../types/questions';
 import DragHandle from '../DragHandle';
 import api from '../../utils/axios';
 
-interface MultiLineQuestionProps {
+interface YesNoContentProps {
   item: QuestionItem;
   formFieldId: string;
   onQuestionChange: (itemId: string, newContent: string) => void;
@@ -15,7 +15,7 @@ interface MultiLineQuestionProps {
   activeEditorId: string | null;
 }
 
-const MultiLineQuestion: React.FC<MultiLineQuestionProps> = ({
+const YesNoContent: React.FC<YesNoContentProps> = ({
   item,
   formFieldId,
   onQuestionChange,
@@ -25,10 +25,11 @@ const MultiLineQuestion: React.FC<MultiLineQuestionProps> = ({
 }) => {
   const questionEditorId = `question-${formFieldId}`;
   const editorRef = useRef<ReactQuill>(null);
+  const [selectedValue, setSelectedValue] = useState<string>('');
 
   useEffect(() => {
     if (activeFieldId === formFieldId) {
-      console.log('🎯 Active Editor in MultiLineQuestion:', {
+      console.log('🎯 Active Editor in YesNoContent:', {
         fieldId: formFieldId,
         editorId: activeEditorId,
         isQuestionEditor: activeEditorId === questionEditorId,
@@ -150,27 +151,50 @@ const MultiLineQuestion: React.FC<MultiLineQuestionProps> = ({
           </Box>
         </Box>
 
-        <TextField
-          fullWidth
-          multiline
-          rows={4}
-          placeholder="Multi-line answer"
-          disabled
-          sx={{ 
+        <RadioGroup
+          value={selectedValue}
+          onChange={(e) => setSelectedValue(e.target.value)}
+          sx={{
             mt: 2,
-            '& .MuiInputBase-input': {
-              color: '#666',
-              cursor: 'default',
-              '-webkit-text-fill-color': '#666',
-            },
-            '& .MuiOutlinedInput-root': {
-              backgroundColor: '#f5f5f5',
+            '& .MuiFormControlLabel-root': {
+              marginY: 0.5,
             }
           }}
-        />
+        >
+          <FormControlLabel
+            value="yes"
+            control={
+              <Radio 
+                size="small"
+                sx={{
+                  color: '#757575',
+                  '&.Mui-checked': {
+                    color: '#2196f3',
+                  },
+                }}
+              />
+            }
+            label="Yes"
+          />
+          <FormControlLabel
+            value="no"
+            control={
+              <Radio 
+                size="small"
+                sx={{
+                  color: '#757575',
+                  '&.Mui-checked': {
+                    color: '#2196f3',
+                  },
+                }}
+              />
+            }
+            label="No"
+          />
+        </RadioGroup>
       </Box>
     </Box>
   );
 };
 
-export default MultiLineQuestion; 
+export default YesNoContent; 

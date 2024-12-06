@@ -3,9 +3,9 @@ import { Box, Typography, Button, Radio, IconButton } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import AddIcon from '@mui/icons-material/Add';
 import ReactQuill from 'react-quill';
-import { QuestionItem } from '../types/questions';
-import DragHandle from './DragHandle';
-import api from '../utils/axios'
+import { QuestionItem } from '../../types/questions';
+import DragHandle from '../DragHandle';
+import api from '../../utils/axios'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 interface QuestionContentProps {

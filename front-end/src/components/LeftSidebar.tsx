@@ -25,7 +25,7 @@ const initialElements = [
       { label: 'Title', icon: <TitleIcon />, type: 'title' }, 
       { label: 'Label', icon: <LabelIcon />, type: 'label' }, 
       { label: 'Sections', icon: <ViewModuleIcon />, type: 'section' }, 
-      { label: 'Tables', icon: <TableChartIcon />, type: 'table' }
+      // { label: 'Tables', icon: <TableChartIcon />, type: 'table' }
     ] 
   },
   { 

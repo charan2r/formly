@@ -1,34 +1,36 @@
 import React, { useRef, useEffect } from 'react';
-import { Box, TextField, IconButton } from '@mui/material';
+import { Box, IconButton, TextField } from '@mui/material';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import ReactQuill from 'react-quill';
 import { QuestionItem } from '../../types/questions';
 import DragHandle from '../DragHandle';
 import api from '../../utils/axios';
 
-interface MultiLineQuestionProps {
+interface DateContentProps {
   item: QuestionItem;
   formFieldId: string;
   onQuestionChange: (itemId: string, newContent: string) => void;
   onEditorFocus: (fieldId: string, editorId: string, quill: any) => void;
   activeFieldId: string | null;
   activeEditorId: string | null;
+  type?: 'date' | 'datetime';
 }
 
-const MultiLineQuestion: React.FC<MultiLineQuestionProps> = ({
+const DateContent: React.FC<DateContentProps> = ({
   item,
   formFieldId,
   onQuestionChange,
   onEditorFocus,
   activeFieldId,
   activeEditorId,
+  type = 'date'
 }) => {
   const questionEditorId = `question-${formFieldId}`;
   const editorRef = useRef<ReactQuill>(null);
 
   useEffect(() => {
     if (activeFieldId === formFieldId) {
-      console.log('🎯 Active Editor in MultiLineQuestion:', {
+      console.log('🎯 Active Editor in DateContent:', {
         fieldId: formFieldId,
         editorId: activeEditorId,
         isQuestionEditor: activeEditorId === questionEditorId,
@@ -151,20 +153,15 @@ const MultiLineQuestion: React.FC<MultiLineQuestionProps> = ({
         </Box>
 
         <TextField
-          fullWidth
-          multiline
-          rows={4}
-          placeholder="Multi-line answer"
+          type={type === 'datetime' ? 'datetime-local' : 'date'}
           disabled
-          sx={{ 
+          fullWidth
+          sx={{
             mt: 2,
             '& .MuiInputBase-input': {
               color: '#666',
               cursor: 'default',
               '-webkit-text-fill-color': '#666',
-            },
-            '& .MuiOutlinedInput-root': {
-              backgroundColor: '#f5f5f5',
             }
           }}
         />
@@ -173,4 +170,4 @@ const MultiLineQuestion: React.FC<MultiLineQuestionProps> = ({
   );
 };
 
-export default MultiLineQuestion; 
+export default DateContent; 

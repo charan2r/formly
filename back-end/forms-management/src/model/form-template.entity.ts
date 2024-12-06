@@ -9,6 +9,7 @@ export enum BorderStyle {
   DASHED = 'dashed',
   DOTTED = 'dotted',
   DOUBLE = 'double',
+  NONE = 'none',
 }
 
 @Entity('form_template')

@@ -1,26 +1,24 @@
-import React,{useState, useEffect} from 'react';
-import { Rnd } from "react-rnd";
-import { Box, Typography, Button, Radio, IconButton, TextField } from '@mui/material';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import AddIcon from '@mui/icons-material/Add';
-import ReactQuill from 'react-quill';
+import React, { useRef, useEffect, useState } from 'react';
+import { Box } from '@mui/material';
+import { Rnd } from 'react-rnd';
+import QuestionContent from './questions/QuestionContent';
+import CheckboxContent from './questions/CheckboxContent';
 import { QuestionItem } from '../types/questions';
 import DragHandle from './DragHandle';
-import QuestionContent from './QuestionContent';
-import TitleContent from './TitleContent';
+import TitleContent from './questions/TitleContent';
 import { TitleItem } from '../types/questions';
 import api from '../utils/axios';
 import { Droppable } from 'react-beautiful-dnd';
-import { useTemplate } from '../context/TemplateContext';
 import './DraggableQuestion.css';
-import SectionContent from './SectionContent';
 import SingleLineQuestion from './questions/SingleLineQuestion';
 import MultiLineQuestion from './questions/MultiLineQuestion';
 import LabelQuestion from './questions/LabelQuestion';
-import DateContent from './DateContent';
-import DateTimeContent from './DateTimeContent';
-import YesNoContent from './YesNoContent';
-import CheckboxContent from './CheckboxContent';
+import DateContent from './questions/DateContent';
+import DateTimeContent from './questions/DateTimeContent';
+import YesNoContent from './questions/YesNoContent';
+import { useTemplate } from '../context/TemplateContext';
+import './DraggableQuestion.css';
+import SectionContent from './questions/SectionContent';
 
 interface DraggableQuestionProps {
   formTemplateId: string;
@@ -81,6 +79,7 @@ interface DraggableQuestionProps {
   activeFieldId: string | null;
   activeEditorId: string | null;
   onEditorFocus: (fieldId: string, editorId: string, quill: any) => void;
+  onAlignmentChange: (itemId: string, alignment: string) => void;
 }
 
 interface PageDimensions {
@@ -112,6 +111,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
   activeFieldId,
   activeEditorId,
   onEditorFocus,
+  onAlignmentChange,
 }) => {
   const [formFields, setFormFields] = useState<QuestionItem[]>(items);
   const [isDragging, setIsDragging] = useState(false);
@@ -330,33 +330,33 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
     const commonProps = {
       item,
       formFieldId: item.id,
+      onQuestionChange: handleQuestionUpdate,
+      onEditorFocus,
       activeFieldId,
       activeEditorId,
-      onEditorFocus,
     };
 
     switch (item.type) {
-      case 'label':
+      case 'section':
         return (
-          <LabelQuestion
+          <SectionContent
             {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
-          />
-        );
-
-      case 'single-line':
-        return (
-          <SingleLineQuestion
-            {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
-          />
-        );
-
-      case 'multiline':
-        return (
-          <MultiLineQuestion
-            {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
+            modules={{
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': ['', 'center', 'right'] }],
+                  ['clean']
+                ],
+              },
+              keyboard: {
+                bindings: {
+                  tab: false,
+                }
+              }
+            }}
           />
         );
 
@@ -364,17 +364,26 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
         return (
           <TitleContent
             {...commonProps}
-            onTitleChange={(itemId, newContent) => handleQuestionUpdate(itemId, newContent)}
+            onTitleChange={handleQuestionUpdate}
             onSubtitleChange={handleOptionChange}
             onDeleteSubtitle={handleDeleteOption}
             onAddSubtitle={handleAddOption}
-          />
-        );
-
-      case 'section':
-        return (
-          <SectionContent
-            {...commonProps}
+            modules={{
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': ['', 'center', 'right'] }],
+                  ['clean']
+                ],
+              },
+              keyboard: {
+                bindings: {
+                  tab: false,
+                }
+              }
+            }}
           />
         );
 
@@ -382,8 +391,22 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
         return (
           <DateContent
             {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
-            type="date"
+            modules={{
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': ['', 'center', 'right'] }],
+                  ['clean']
+                ],
+              },
+              keyboard: {
+                bindings: {
+                  tab: false,
+                }
+              }
+            }}
           />
         );
 
@@ -391,35 +414,111 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
         return (
           <DateTimeContent
             {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
+            modules={{
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': ['', 'center', 'right'] }],
+                  ['clean']
+                ],
+              },
+              keyboard: {
+                bindings: {
+                  tab: false,
+                }
+              }
+            }}
           />
         );
 
       case 'yes-no':
-        return (
-          <YesNoContent
-            {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
-          />
-        );
-
+        return <YesNoContent {...commonProps} />;
+      
       case 'checkbox':
         return (
           <CheckboxContent
             {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
             onOptionChange={handleOptionChange}
             onDeleteOption={handleDeleteOption}
             onAddOption={handleAddOption}
           />
         );
-
-      // Add other cases for different question types
+      
+      case 'multiline':
+        return (
+          <MultiLineQuestion
+            {...commonProps}
+            modules={{
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': ['', 'center', 'right'] }],
+                  ['clean']
+                ],
+              },
+              keyboard: {
+                bindings: {
+                  tab: false,
+                }
+              }
+            }}
+          />
+        );
+      
+      case 'single-line':
+        return (
+          <SingleLineQuestion
+            {...commonProps}
+            modules={{
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': ['', 'center', 'right'] }],
+                  ['clean']
+                ],
+              },
+              keyboard: {
+                bindings: {
+                  tab: false,
+                }
+              }
+            }}
+          />
+        );
+      
+      case 'label':
+        return (
+          <LabelQuestion
+            {...commonProps}
+            modules={{
+              toolbar: {
+                container: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline'],
+                  [{ 'color': [] }, { 'background': [] }],
+                  [{ 'align': ['', 'center', 'right'] }],
+                  ['clean']
+                ],
+              },
+              keyboard: {
+                bindings: {
+                  tab: false,
+                }
+              }
+            }}
+          />
+        );
+      
       default:
         return (
           <QuestionContent
             {...commonProps}
-            onQuestionChange={handleQuestionUpdate}
             onOptionChange={handleOptionChange}
             onDeleteOption={handleDeleteOption}
             onAddOption={handleAddOption}
@@ -528,17 +627,7 @@ const DraggableQuestion: React.FC<DraggableQuestionProps> = ({
               dragHandleClassName="drag-handle"
             >
               <Box sx={{ width: '100%', height: '100%' }}>
-                <QuestionContent
-                  item={item}
-                  formFieldId={item.id}
-                  onEditorFocus={onEditorFocus}
-                  activeFieldId={activeFieldId}
-                  activeEditorId={activeEditorId}
-                  onQuestionChange={handleQuestionUpdate}
-                  onOptionChange={handleOptionChange}
-                  onDeleteOption={handleDeleteOption}
-                  onAddOption={handleAddOption}
-                />
+                {renderQuestionComponent(item)}
               </Box>
             </Rnd>
           ))}

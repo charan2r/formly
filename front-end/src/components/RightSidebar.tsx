@@ -155,8 +155,8 @@ const EditPageSettings: React.FC = () => {
   // Add these state declarations at the top
   const [appearanceSettings, setAppearanceSettings] = useState({
     border: {
-      width: 1,
-      style: 'solid',
+      width: 0,
+      style: 'none',
       color: '#e0e0e0',
       radius: 12
     },
@@ -200,10 +200,10 @@ const EditPageSettings: React.FC = () => {
           // Initialize appearance settings
           setAppearanceSettings({
             border: {
-              width: template.borderWidth ?? 1,
-              radius: template.borderRadius ?? 12,
-              style: template.borderStyle ?? 'solid',
-              color: template.borderColor ?? '#e0e0e0'
+              width: template.borderWidth === 0 ? undefined : template.borderWidth,
+              radius: template.borderRadius,
+              style: template.borderStyle,
+              color: template.borderColor
             },
             boxShadow: {
               x: template.boxShadowX ?? 0,
@@ -1292,6 +1292,7 @@ const EditPageSettings: React.FC = () => {
                     }))}
                     fullWidth
                   >
+                    <MenuItem value="none">None</MenuItem>
                     <MenuItem value="solid">Solid</MenuItem>
                     <MenuItem value="dashed">Dashed</MenuItem>
                     <MenuItem value="dotted">Dotted</MenuItem>
