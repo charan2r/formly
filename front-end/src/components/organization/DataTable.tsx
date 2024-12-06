@@ -591,35 +591,121 @@ const DataTable: React.FC = () => {
       </Box>
 
       {/* Confirmation Dialog */}
-      <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this organization?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteOrganization} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
+      <Dialog 
+        open={confirmationOpen} 
+        onClose={() => setConfirmationOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            padding: '24px',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            Delete Organization
+          </Typography>
+          <Typography sx={{ mb: 4, color: 'text.secondary' }}>
+            Are you sure you want to delete?
+          </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="contained"
+              onClick={() => setConfirmationOpen(false)}
+              sx={{
+                bgcolor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+              }}
+            >
+              No, Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleDeleteOrganization}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { 
+                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  borderColor: 'black'
+                }
+              }}
+            >
+              Yes, Delete
+            </Button>
+          </Box>
+        </Box>
       </Dialog>
 
-      {/* Confirmation Dialog */}
-      <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete these organizations?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationBulkOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteOrganizations} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog 
+        open={confirmationBulkOpen} 
+        onClose={() => setConfirmationBulkOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            padding: '24px',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            Delete Organizations
+          </Typography>
+          <Typography sx={{ mb: 4, color: 'text.secondary' }}>
+            Are you sure you want to delete these organizations?
+          </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="contained"
+              onClick={() => setConfirmationBulkOpen(false)}
+              sx={{
+                bgcolor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+              }}
+            >
+              No, Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleDeleteOrganizations}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { 
+                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  borderColor: 'black'
+                }
+              }}
+            >
+              Yes, Delete
+            </Button>
+          </Box>
+        </Box>
       </Dialog>
       <ToastContainer></ToastContainer>
     </Paper>
