@@ -15,13 +15,13 @@ interface MetaSchemaResponse<T = any> {
 }
 
 @Controller('form-fields')
+@Roles("Admin","SubUser")
 @UseGuards(AuthGuard('jwt')) // Protect all routes with JWT authentication
 export class FormFieldsController {
   constructor(private readonly formFieldsService: FormFieldsService) {}
 
   // API Endpoint to create a new form field
   @Post('create')
-  @Roles("Admin","SubUser")
   @Permissions("create feilds")
   async addField(@Body() createFormFieldDto: CreateFormFieldDto): Promise<MetaSchemaResponse<FormField>> {
     const field = await this.formFieldsService.addField(createFormFieldDto);
@@ -34,7 +34,6 @@ export class FormFieldsController {
 
   // API endpoint to get all form fields by template ID
   @Get()
-  @Roles("Admin","SubUser")
   @Permissions("view Fields")
   async getFields(@Query('formTemplateId') formTemplateId: string): Promise<MetaSchemaResponse<FormField[]>> {
     const fields = await this.formFieldsService.getFields(formTemplateId);
@@ -47,7 +46,6 @@ export class FormFieldsController {
 
   // API endpoint to get a form field by id
   @Get('details')
-  @Roles("Admin","SubUser")
   @Permissions("view Field")
   async getFieldById(@Query('id') fieldId: string): Promise<MetaSchemaResponse<FormField>> {
     const field = await this.formFieldsService.getFieldById(fieldId);
@@ -60,7 +58,6 @@ export class FormFieldsController {
 
   // API endpoint to delete a form field
   @Delete('delete')
-  @Roles("Admin","SubUser")
   @Permissions("delete Field")
   async deleteField(@Query('id') fieldId: string): Promise<MetaSchemaResponse<null>> {
     await this.formFieldsService.deleteField(fieldId);
@@ -72,7 +69,6 @@ export class FormFieldsController {
 
   // API endpoint to bulk delete form fields
   @Delete('bulk-delete')
-  @Roles("Admin","SubUser")
   @Permissions("Delete Fields")
   async bulkDeleteFields(@Body('ids') fieldIds: string[]): Promise<MetaSchemaResponse<null>> {
     await this.formFieldsService.bulkDeleteFields(fieldIds);
@@ -84,7 +80,6 @@ export class FormFieldsController {
 
   // API endpoint to update a form field
   @Patch('update')
-  @Roles("Admin","SubUser")
   @Permissions("Edit Fields")
   async updateField(@Query('id') fieldId: string, @Body() updateFormFieldDto: UpdateFormFieldDto): Promise<MetaSchemaResponse<FormField>> {
     const field = await this.formFieldsService.updateField(fieldId, updateFormFieldDto);

@@ -13,6 +13,14 @@ import UserOverview from './superAdmin/userOverview';
 import Users from './Users';
 import Template from './Template';
 import Category from './Category';
+import Role from '../components/role/Role';
+import AddRole from '../components/role/AddRole';
+import ViewRole from '../components/role/ViewRole';
+import EditRole from '../components/role/EditRole';
+import Form from './Form';
+//import AddForm from './AddForm';
+
+
 import LeftSidebar from './LeftSidebar';
 import EditPageSettings from './RightSidebar';
 import ViewTemplate from './ViewTemplate';
@@ -20,10 +28,7 @@ import { DragDropContext } from 'react-beautiful-dnd';
 import { TemplateProvider } from '../context/TemplateContext';
 import Login from './authentication/Login';
 import ProtectedRoute from './authentication/ProtectedRoute';
-import Role from './role/Role';
-import AddRole from './role/AddRole';
-import ViewRole from './role/ViewRole';
-import EditRole from './role/EditRole';
+
 import FTReset from './authentication/FTReset';
 import ProfileSettings from './ProfileSettings';
 
@@ -106,72 +111,91 @@ const Background: React.FC = () => {
   };
 
   return (
-    <TemplateProvider>
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
-          {isAuthenticated && !isAuthPage && (
-            isEditTemplate ? (
-              <>
-                <LeftSidebar />
-              </>
-            ) : (
-              <Sidebar />
-            )
-          )}
-          
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/auth/verify-email" element={<FTReset />} />
-            <Route path="/auth/reset-password" element={<FTReset />} />
-            
-            {/* Protected Routes */}
-            {isAuthenticated && (
-              <>
-              {/* Common Routes (accessible to both Admin and SuperAdmin) */}
-    <Route path="/profile-settings" element={<ProfileSettings />} />
-
-                {/* Admin Routes */}
-                {isAdmin && (
-                  <>
-                    <Route path="/useroverview" element={<UserOverview />} />
-                    <Route path="/users" element={<Users />} />
-                    <Route path="/templates" element={<Template />} />
-                    <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
-                    <Route path="/categories" element={<Category />} />
-                    <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
-                    <Route path="/roles" element={<Role />} />
-                    <Route path="/addrole" element={<AddRole />} />
-                    <Route path="/editrole/:roleId" element={<EditRole />} />
-                    <Route path="/viewrole/:roleId" element={<ViewRole />} />
-                  </>
-                )}
-
-                {/* SuperAdmin Routes */}
-                {isSuperAdmin && (
-                  <>
-                    <Route path="/overview" element={<Overview />} />
-                    <Route path="/organizations" element={<DataTable />} />
-                    <Route path="/create-organization" element={<CreateOrganization />} />
-                    <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
-                    <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
-                    <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
-                    <Route path="/audit-trail" element={<AuditTrail />} />
-                  </>
-                )}
-
-                {/* Catch-all redirect */}
-                <Route path="*" element={
-                  isAdmin ? 
-                    <Navigate to="/useroverview" replace /> :
-                    <Navigate to="/overview" replace />
-                } />
-              </>
+    <><Box sx={{ display: 'flex', backgroundColor: '#F9F9F9', width: '100vw', height: '100vh' }}>
+      <Sidebar />
+      <Routes>
+        <Route path="/" element={<Navigate to="/overview" replace />} />
+        <Route path="/overview" element={<Overview />} />
+        <Route path="/useroverview" element={<UserOverview />} />
+        <Route path="/organizations" element={<DataTable />} />
+        <Route path="/users" element={<Users />} />
+        <Route path='/templates' element={<Template />} />
+        <Route path='/categories' element={<Category />} />
+        <Route path='/roles' element={<Role />} />
+        <Route path='/forms' element={<Form />} />
+        <Route path="/create-organization" element={<CreateOrganization />} />
+        <Route path="/add-role" element={<AddRole />} />
+        <Route path="/view-organization/:orgId" element={<ViewOrganization></ViewOrganization>} />
+        <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
+        <Route path="/view-role/:roleId" element={<ViewRole />} />
+        <Route path="/edit-role/:roleId" element={<EditRole />} />
+      </Routes>
+      
+    </Box><TemplateProvider>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
+            {isAuthenticated && !isAuthPage && (
+              isEditTemplate ? (
+                <>
+                  <LeftSidebar />
+                </>
+              ) : (
+                <Sidebar />
+              )
             )}
-          </Routes>
-        </Box>
-      </DragDropContext>
-    </TemplateProvider>
+
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/auth/verify-email" element={<FTReset />} />
+              <Route path="/auth/reset-password" element={<FTReset />} />
+
+              {/* Protected Routes */}
+              {isAuthenticated && (
+                <>
+                  {/* Common Routes (accessible to both Admin and SuperAdmin) */}
+                  <Route path="/profile-settings" element={<ProfileSettings />} />
+
+                  {/* Admin Routes */}
+                  {isAdmin && (
+                    <>
+                      <Route path="/useroverview" element={<UserOverview />} />
+                      <Route path="/users" element={<Users />} />
+                      <Route path="/forms" element={<Form />} />
+                      <Route path="/templates" element={<Template />} />
+                      <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
+                      <Route path="/categories" element={<Category />} />
+                      <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
+                      <Route path="/roles" element={<Role />} />
+                      <Route path="/addrole" element={<AddRole />} />
+                      <Route path="/editrole/:roleId" element={<EditRole />} />
+                      <Route path="/viewrole/:roleId" element={<ViewRole />} />
+                    </>
+                  )}
+
+                  {/* SuperAdmin Routes */}
+                  {isSuperAdmin && (
+                    <>
+                      <Route path="/overview" element={<Overview />} />
+                      <Route path="/organizations" element={<DataTable />} />
+                      <Route path="/create-organization" element={<CreateOrganization />} />
+                      <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
+                      <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
+                      <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
+                      <Route path="/audit-trail" element={<AuditTrail />} />
+                    </>
+                  )}
+
+                  {/* Catch-all redirect */}
+                  <Route path="*" element={isAdmin ?
+                    <Navigate to="/useroverview" replace /> :
+                    <Navigate to="/overview" replace />} />
+                </>
+              )}
+            </Routes>
+          </Box>
+        </DragDropContext>
+      </TemplateProvider></>
   );
 };
 

@@ -90,8 +90,8 @@ const Category: React.FC = () => {
         description: '',
         createdById: user?.organizationId ,
     });
-     // Adjust `createdById` as needed
-     const [error, setError] = useState<string | null>(null); // Optional: To display errors
+    // Adjust `createdById` as needed
+    const [error, setError] = useState<string | null>(null); // Optional: To display errors
 
     const [loading, setLoading] = useState(false); // Optional: To handle button loading state
     const [viewCategoryOpen, setViewCategoryOpen] = useState(false);
@@ -102,7 +102,7 @@ const Category: React.FC = () => {
     const handleCreateCategory = async () => {
         setLoading(true);
         setError(null);
-      
+
         try {
             console.log(newCategory);
             const response = await api.post('/categories/create', newCategory);
@@ -111,10 +111,10 @@ const Category: React.FC = () => {
             
             // Add the new category to the existing categories
             setCategories(prevCategories => [...prevCategories, response.data]);
-            
+
             // Close the dialog
             setCreateCategoryOpen(false);
-            
+
             // Reset the form
             setNewCategory({ 
                 name: '', 
@@ -330,7 +330,7 @@ const Category: React.FC = () => {
         })
         .sort((a, b) => {
             const orderMultiplier = orderDirection === 'asc' ? 1 : -1;
-            
+
             // Handle different field types appropriately
             switch (orderBy) {
                 case 'name':
@@ -355,24 +355,24 @@ const Category: React.FC = () => {
 
     const StyledDialog = styled(Dialog)(({ theme }) => ({
         '& .MuiDialog-paper': {
-          borderRadius: '16px',
-          padding: '32px',
-          maxWidth: '500px',
-          width: '100%'
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '100%'
         }
-      }));
+    }));
 
     const handleEditCategory = async () => {
         try {
             await api.patch(`/categories/update/${selectedCategory?.categoryId}`, editFormData);
             
             // Update the categories list
-            setCategories(categories.map(cat => 
-                cat.categoryId === selectedCategory?.categoryId 
+            setCategories(categories.map(cat =>
+                cat.categoryId === selectedCategory?.categoryId
                     ? { ...cat, ...editFormData }
                     : cat
             ));
-            
+
             setEditCategoryOpen(false);
             toast.success("Category has been updated successfully!", {
                 style: {
@@ -400,10 +400,10 @@ const Category: React.FC = () => {
                     </Typography>
                     <ArrowForward style={{ color: 'black' }} />
                     <Typography variant="body2" color="textSecondary">
-                        Category management
+                        Category Management
                     </Typography>
                 </Box>
-                <Typography variant="h5" fontWeight="bold">Category Managment</Typography>
+                <Typography variant="h5" fontWeight="bold">Category Management</Typography>
                 <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
                     Manage your categories here.
                 </Typography>
@@ -485,7 +485,7 @@ const Category: React.FC = () => {
                                     padding: '4px',
                                     position: 'relative',
                                 }}
-                            >     
+                            >
                                 <Checkbox
                                     onChange={handleSelectAll}
                                     checked={
@@ -525,7 +525,7 @@ const Category: React.FC = () => {
                                     </div>
                                 )}
                             </TableCell>
-                            
+
                             <TableCell sx={{ backgroundColor: '#f9f9f9', padding: '4px', position: 'relative' }}>
                                 <TableSortLabel
                                     active={orderBy === 'description'}
@@ -598,7 +598,7 @@ const Category: React.FC = () => {
                                     month: "short",
                                     year: "numeric"
                                 })}</TableCell>
-                                                                <TableCell padding="checkbox">
+                                <TableCell padding="checkbox">
                                     <IconButton onClick={(event) => handleMenuOpen(event, row.categoryId)}>
                                         <MoreVertIcon />
                                     </IconButton>
@@ -632,10 +632,10 @@ const Category: React.FC = () => {
                                                 backgroundColor: 'white',
                                                 borderRadius: '10px',
                                                 margin: '5px',
-                                                justifyContent: 'center', 
+                                                justifyContent: 'center',
                                                 fontSize: '0.875rem',
-                                                minHeight: '30px', 
-                                                minWidth: '100px', 
+                                                minHeight: '30px',
+                                                minWidth: '100px',
                                                 '&:hover': { backgroundColor: '#f0f0f0' },
                                             }}
                                         >
@@ -655,10 +655,10 @@ const Category: React.FC = () => {
                                                 backgroundColor: 'white',
                                                 borderRadius: '10px',
                                                 margin: '5px',
-                                                justifyContent: 'center', 
-                                                fontSize: '0.875rem', 
-                                                minHeight: '30px', 
-                                                minWidth: '100px', 
+                                                justifyContent: 'center',
+                                                fontSize: '0.875rem',
+                                                minHeight: '30px',
+                                                minWidth: '100px',
                                                 '&:hover': { backgroundColor: '#f0f0f0' },
                                             }}
                                         >
@@ -670,10 +670,10 @@ const Category: React.FC = () => {
                                                 backgroundColor: 'white',
                                                 borderRadius: '10px',
                                                 margin: '5px',
-                                                justifyContent: 'center', 
+                                                justifyContent: 'center',
                                                 color: 'red',
-                                                fontSize: '0.875rem', 
-                                                minHeight: '30px', 
+                                                fontSize: '0.875rem',
+                                                minHeight: '30px',
                                                 minWidth: '100px',
                                                 '&:hover': { backgroundColor: '#f0f0f0' },
                                             }}
@@ -699,7 +699,7 @@ const Category: React.FC = () => {
             </Box>
 
             {/* Single Delete Confirmation Dialog */}
-            <StyledDialog 
+            <StyledDialog
                 open={confirmationOpen}
                 onClose={() => {
                     setConfirmationOpen(false);
@@ -799,14 +799,14 @@ const Category: React.FC = () => {
                     </IconButton>
 
                     {/* Header section */}
-                    <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'left', 
-                        mb: 2,
-                        mt: 1,
-                        pl: 5
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'left',
+                        justifyContent: 'center',
+                        mb: 4,
+                        mt: 2,
                     }}>
-                        <Box sx={{ textAlign: 'left' }}>
+                        <Box sx={{ textAlign: 'left', marginRight: '40px' }}>
                             <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
                                 Create a Category
                             </Typography>
@@ -817,24 +817,19 @@ const Category: React.FC = () => {
                     </Box>
 
                     {/* Form Content */}
-                    <DialogContent sx={{ px: 2, py: 1 }}>
-                        <Box display="flex" flexDirection="column" gap={2}>
-                            <Grid item xs={12}>
-                                <Typography variant="subtitle2" gutterBottom sx={{ 
-                                    mb: 0.5,
-                                    color: '#555',
-                                    fontWeight: 500 
-                                }}>
-                                    Name
-                                </Typography>
+                    <DialogContent sx={{ px: 3, ml: 6, mr: 6 }}>
+                        <Box display="flex" flexDirection="column" gap={2.5}>
+                            <Grid item xs={12} sm={6} mt={-2.5}>
+                                <Typography variant="body2" gutterBottom sx={{ marginBottom: '1px' }}>Name</Typography>
                                 <TextField
                                     value={newCategory.name}
                                     onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
                                     fullWidth
+                                    placeholder='Enter type name'
                                     variant="outlined"
                                     size="small"
                                     inputProps={{
-                                        sx: { 
+                                        sx: {
                                             backgroundColor: '#ffffff',
                                             borderRadius: '8px',
                                             padding: '8px 12px',
@@ -847,26 +842,19 @@ const Category: React.FC = () => {
                             </Grid>
 
                             <Grid item xs={12}>
-                                <Typography variant="subtitle2" gutterBottom sx={{
-                                    mb: 0.5,
-                                    color: '#555',
-                                    fontWeight: 500
-                                }}>
-                                    Description
-                                </Typography>
+                                <Typography variant="body2" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
                                 <TextField
                                     fullWidth
                                     multiline
                                     rows={3}
                                     value={newCategory.description}
+                                    placeholder='Enter type description'
                                     onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
                                     InputProps={{
                                         sx: {
                                             backgroundColor: '#ffffff',
                                             borderRadius: '8px',
-                                            '& .MuiOutlinedInput-input': {
-                                                padding: '8px 12px'
-                                            },
+                                            
                                             '&:focus-within': {
                                                 boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
                                             }
@@ -878,9 +866,9 @@ const Category: React.FC = () => {
                     </DialogContent>
 
                     {/* Actions */}
-                    <DialogActions sx={{ 
-                        p: 2,
-                        justifyContent: 'right' 
+                    <DialogActions sx={{
+                        p: 3, 
+                        justifyContent: 'right'
                     }}>
                         <Button
                             variant="contained"
@@ -890,8 +878,10 @@ const Category: React.FC = () => {
                                 backgroundColor: '#1a1a1a',
                                 color: 'white',
                                 borderRadius: '25px',
-                                width: '120px',
-                                padding: '8px 16px',
+                                width: '30%',
+                                marginTop: '-20px',
+                                marginBottom: '-25px',
+                                marginRight:'50px',                                                           
                                 fontSize: '0.95rem',
                                 fontWeight: 500,
                                 textTransform: 'none',
@@ -943,7 +933,7 @@ const Category: React.FC = () => {
                             top: 8,
                             transition: 'transform 0.2s',
                             '&:hover': {
-                              transform: 'scale(1.1)'
+                                transform: 'scale(1.1)'
                             }
                         }}
                     >
@@ -951,7 +941,7 @@ const Category: React.FC = () => {
                     </IconButton>
 
                     <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
+                        <Box sx={{ textAlign: 'left', marginRight: '40px' }}>
                             <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                                 View Category
                             </Typography>
@@ -964,10 +954,10 @@ const Category: React.FC = () => {
                     <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
                         <Box display="flex" flexDirection="column" gap={3.5}>
                             <Grid item xs={12} sm={6} mt={-3}>
-                                <Typography variant="subtitle2" gutterBottom sx={{ 
-                                  marginBottom: '8px',
-                                  color: '#555',
-                                  fontWeight: 500 
+                                <Typography variant="subtitle2" gutterBottom sx={{
+                                    marginBottom: '8px',
+                                    color: '#555',
+                                    fontWeight: 500
                                 }}>
                                     Name
                                 </Typography>
@@ -978,22 +968,22 @@ const Category: React.FC = () => {
                                     size="small"
                                     InputProps={{
                                         readOnly: true,
-                                        sx: { 
-                                          backgroundColor: '#ffffff', 
-                                          borderRadius: '8px',
-                                          '& .MuiOutlinedInput-input': {
-                                            padding: '12px 15px'
-                                          }
+                                        sx: {
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            '& .MuiOutlinedInput-input': {
+                                                padding: '12px 15px'
+                                            }
                                         }
                                     }}
                                 />
                             </Grid>
 
                             <Grid item xs={12} sm={6} mt={-1}>
-                                <Typography variant="subtitle2" gutterBottom sx={{ 
-                                  marginBottom: '8px',
-                                  color: '#555',
-                                  fontWeight: 500 
+                                <Typography variant="subtitle2" gutterBottom sx={{
+                                    marginBottom: '8px',
+                                    color: '#555',
+                                    fontWeight: 500
                                 }}>
                                     Description
                                 </Typography>
@@ -1004,12 +994,12 @@ const Category: React.FC = () => {
                                     rows={4}
                                     InputProps={{
                                         readOnly: true,
-                                        sx: { 
-                                          backgroundColor: '#ffffff', 
-                                          borderRadius: '8px',
-                                          '& .MuiOutlinedInput-input': {
-                                            padding: '12px 15px'
-                                          }
+                                        sx: {
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            '& .MuiOutlinedInput-input': {
+                                                padding: '12px 15px'
+                                            }
                                         }
                                     }}
                                 />
@@ -1044,7 +1034,7 @@ const Category: React.FC = () => {
                             top: 8,
                             transition: 'transform 0.2s',
                             '&:hover': {
-                              transform: 'scale(1.1)'
+                                transform: 'scale(1.1)'
                             }
                         }}
                     >
@@ -1052,7 +1042,7 @@ const Category: React.FC = () => {
                     </IconButton>
 
                     <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left', marginRight:'40px' }}>
+                        <Box sx={{ textAlign: 'left', marginRight: '40px' }}>
                             <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
                                 Edit Category
                             </Typography>
@@ -1065,10 +1055,10 @@ const Category: React.FC = () => {
                     <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
                         <Box display="flex" flexDirection="column" gap={3.5}>
                             <Grid item xs={12} sm={6} mt={-3}>
-                                <Typography variant="subtitle2" gutterBottom sx={{ 
-                                  marginBottom: '8px',
-                                  color: '#555',
-                                  fontWeight: 500 
+                                <Typography variant="subtitle2" gutterBottom sx={{
+                                    marginBottom: '8px',
+                                    color: '#555',
+                                    fontWeight: 500
                                 }}>
                                     Name
                                 </Typography>
@@ -1079,23 +1069,23 @@ const Category: React.FC = () => {
                                     variant="outlined"
                                     size="small"
                                     inputProps={{
-                                        sx: { 
-                                          backgroundColor: '#ffffff', 
-                                          borderRadius: '8px',
-                                          padding: '12px 15px',
-                                          '&:focus': {
-                                            boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
-                                          }
+                                        sx: {
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            padding: '12px 15px',
+                                            '&:focus': {
+                                                boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                            }
                                         }
                                     }}
                                 />
                             </Grid>
 
                             <Grid item xs={12} sm={6} mt={-1}>
-                                <Typography variant="subtitle2" gutterBottom sx={{ 
-                                  marginBottom: '8px',
-                                  color: '#555',
-                                  fontWeight: 500 
+                                <Typography variant="subtitle2" gutterBottom sx={{
+                                    marginBottom: '8px',
+                                    color: '#555',
+                                    fontWeight: 500
                                 }}>
                                     Description
                                 </Typography>
@@ -1106,15 +1096,15 @@ const Category: React.FC = () => {
                                     multiline
                                     rows={4}
                                     InputProps={{
-                                        sx: { 
-                                          backgroundColor: '#ffffff', 
-                                          borderRadius: '8px',
-                                          '& .MuiOutlinedInput-input': {
-                                            padding: '12px 15px'
-                                          },
-                                          '&:focus-within': {
-                                            boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
-                                          }
+                                        sx: {
+                                            backgroundColor: '#ffffff',
+                                            borderRadius: '8px',
+                                            '& .MuiOutlinedInput-input': {
+                                                padding: '12px 15px'
+                                            },
+                                            '&:focus-within': {
+                                                boxShadow: '0 0 0 2px rgba(0,0,0,0.1)'
+                                            }
                                         }
                                     }}
                                 />
