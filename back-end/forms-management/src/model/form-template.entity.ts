@@ -4,6 +4,13 @@ import { Form } from './form.entity';
 import { Category } from './category.entity';
 import { FormField } from './form-fields.entity';
 
+export enum BorderStyle {
+  SOLID = 'solid',
+  DASHED = 'dashed',
+  DOTTED = 'dotted',
+  DOUBLE = 'double',
+}
+
 @Entity('form_template')
 export class FormTemplate {
   @PrimaryGeneratedColumn('uuid')
@@ -56,6 +63,41 @@ export class FormTemplate {
 
   @Column('varchar', { length: 255, nullable: true, default: '10' })
   marginRight: number;
+
+  @Column('int', { nullable: true, default: 0 })
+  borderWidth: number;
+
+  @Column('int', { nullable: true, default: 0 })
+  borderRadius: number;
+
+  @Column({
+    type: 'enum',
+    enum: BorderStyle,
+    nullable: true,
+    default: BorderStyle.SOLID,
+  })
+  borderStyle: BorderStyle;
+
+  @Column('varchar', { length: 7, nullable: true, default: '#000000' })
+  borderColor: string;
+
+  @Column('int', { nullable: true, default: 0 })
+  boxShadowX: number;
+
+  @Column('int', { nullable: true, default: 0 })
+  boxShadowY: number;
+
+  @Column('int', { nullable: true, default: 0 })
+  boxShadowBlur: number;
+
+  @Column('int', { nullable: true, default: 0 })
+  boxShadowSpread: number;
+
+  @Column('varchar', { length: 7, nullable: true, default: '#000000' })
+  boxShadowColor: string;
+
+  @Column('float', { nullable: true, default: 1.0 })
+  boxShadowOpacity: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -45,6 +45,16 @@ const initialItems = [
 
 
 interface TemplateData {
+  borderWidth: number;
+  borderRadius: number;
+  borderStyle: string;
+  borderColor: string;
+  boxShadowX: number;
+  boxShadowY: number;
+  boxShadowBlur: number;
+  boxShadowSpread: number;
+  boxShadowColor: string;
+  boxShadowOpacity: number;
   formTemplateId: string;
   name: string;
   description: string;
@@ -171,7 +181,8 @@ const EditPageSettings: React.FC = () => {
         
         if (response.data.status === 'success') {
           const template = response.data.data;
-          console.log("temasd awd Adplate", template);
+          console.log("Template data received:", template); // Debug log
+
           setTemplateData(template);
           setTemplateId(template.formTemplateId);
           // Initialize states with template data
@@ -185,6 +196,31 @@ const EditPageSettings: React.FC = () => {
           });
           setTemplateName(template.name);
           setTemplateDescription(template.description);
+
+          // Initialize appearance settings
+          setAppearanceSettings({
+            border: {
+              width: template.borderWidth ?? 1,
+              radius: template.borderRadius ?? 12,
+              style: template.borderStyle ?? 'solid',
+              color: template.borderColor ?? '#e0e0e0'
+            },
+            boxShadow: {
+              x: template.boxShadowX ?? 0,
+              y: template.boxShadowY ?? 4,
+              blur: template.boxShadowBlur ?? 12,
+              spread: template.boxShadowSpread ?? 0,
+              color: template.boxShadowColor ?? 'rgba(0, 0, 0, 0.1)',
+              enabled: true
+            },
+            background: {
+              color: template.backgroundColor ?? '#ffffff',
+              opacity: ((template.boxShadowOpacity ?? 1) * 100)
+            }
+          });
+
+          // Log the initialized appearance settings
+          console.log("Initialized appearance settings:", appearanceSettings);
         }
       } catch (error) {
         console.error('Error fetching template data:', error);
@@ -209,15 +245,26 @@ const EditPageSettings: React.FC = () => {
   // Modify the hasChanges useEffect to include name and description changes
   useEffect(() => {
     if (templateData) {
-      const hasSettingsChanged = 
+      const hasSettingsChanged = (
         backgroundColor !== templateData.backgroundColor ||
         selectedSize !== templateData.pageSize ||
         gridPadding.top !== parseInt(templateData.marginTop) ||
         gridPadding.bottom !== parseInt(templateData.marginBottom) ||
         gridPadding.left !== parseInt(templateData.marginLeft) ||
         gridPadding.right !== parseInt(templateData.marginRight) ||
-        templateName !== templateData.name ||  // Add name check
-        templateDescription !== templateData.description;  // Add description check
+        templateName !== templateData.name ||
+        templateDescription !== templateData.description ||
+        appearanceSettings.border.width !== templateData.borderWidth ||
+        appearanceSettings.border.radius !== templateData.borderRadius ||
+        appearanceSettings.border.style !== templateData.borderStyle ||
+        appearanceSettings.border.color !== templateData.borderColor ||
+        appearanceSettings.boxShadow.x !== templateData.boxShadowX ||
+        appearanceSettings.boxShadow.y !== templateData.boxShadowY ||
+        appearanceSettings.boxShadow.blur !== templateData.boxShadowBlur ||
+        appearanceSettings.boxShadow.spread !== templateData.boxShadowSpread ||
+        appearanceSettings.boxShadow.color !== templateData.boxShadowColor ||
+        (appearanceSettings.background.opacity / 100) !== templateData.boxShadowOpacity
+      );
 
       setHasChanges(hasSettingsChanged);
     }
@@ -226,8 +273,9 @@ const EditPageSettings: React.FC = () => {
     selectedSize, 
     gridPadding, 
     templateData, 
-    templateName,     // Add to dependency array
-    templateDescription  // Add to dependency array
+    templateName,
+    templateDescription,
+    appearanceSettings
   ]);
 
   // Modify the name and description handlers to use the main save button
@@ -385,7 +433,18 @@ const EditPageSettings: React.FC = () => {
         marginRight: gridPadding.right.toString(),
         version: templateData?.version,
         status: templateData?.status,
-        categoryId: templateData?.categoryId
+        categoryId: templateData?.categoryId,
+        // New appearance settings
+        borderWidth: appearanceSettings.border.width,
+        borderRadius: appearanceSettings.border.radius,
+        borderStyle: appearanceSettings.border.style,
+        borderColor: appearanceSettings.border.color,
+        boxShadowX: appearanceSettings.boxShadow.x,
+        boxShadowY: appearanceSettings.boxShadow.y,
+        boxShadowBlur: appearanceSettings.boxShadow.blur,
+        boxShadowSpread: appearanceSettings.boxShadow.spread,
+        boxShadowColor: appearanceSettings.boxShadow.color,
+        boxShadowOpacity: appearanceSettings.background.opacity / 100, // Convert percentage to decimal
       };
 
       const response = await api.patch(
@@ -498,7 +557,8 @@ const EditPageSettings: React.FC = () => {
           status: templateData?.status,
           categoryId: templateData?.categoryId,
           name: templateName,
-          description: templateDescription
+          description: templateDescription,
+          borderWidth: appearanceSettings.border.width
         });
       }
     } catch (error) {
@@ -1155,10 +1215,7 @@ const EditPageSettings: React.FC = () => {
                   />
                 </Box>
               ))}
-            </Box>
-
-            
-
+            </Box>            
             {/* Background Color Picker */}
             <Typography variant="body1" sx={{ fontWeight: 'medium', marginBottom: '15px' }}>
               Background Color
@@ -1170,60 +1227,6 @@ const EditPageSettings: React.FC = () => {
                   value={backgroundColor}
                   onChange={handleBackgroundColorChange}
                   style={{ width: '100%', height: '30px', border: 'none', cursor: 'pointer', borderRadius: '6px' }}
-                />
-              </Box>
-            </Box>
-
-            <Typography variant="body1" sx={{ fontWeight: 'medium', marginTop: '20px', marginBottom: '15px' }}>
-              Form Fields Border
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, backgroundColor: '#fff', p: 2, borderRadius: 1, boxShadow: 1 }}>
-              {/* Border Width */}
-              <Box>
-                <Typography variant="body2" sx={{ mb: 1 }}>Border Width</Typography>
-                <TextField
-                  type="number"
-                  size="small"
-                  value={borderStyle.width}
-                  onChange={(e) => setBorderStyle(prev => ({
-                    ...prev,
-                    width: Number(e.target.value)
-                  }))}
-                  inputProps={{ min: 0, max: 10 }}
-                  fullWidth
-                />
-              </Box>
-
-              {/* Border Style */}
-              <Box>
-                <Typography variant="body2" sx={{ mb: 1 }}>Border Style</Typography>
-                <Select
-                  size="small"
-                  value={borderStyle.style}
-                  onChange={(e) => setBorderStyle(prev => ({
-                    ...prev,
-                    style: e.target.value
-                  }))}
-                  fullWidth
-                >
-                  <MenuItem value="solid">Solid</MenuItem>
-                  <MenuItem value="dashed">Dashed</MenuItem>
-                  <MenuItem value="dotted">Dotted</MenuItem>
-                  <MenuItem value="double">Double</MenuItem>
-                </Select>
-              </Box>
-
-              {/* Border Color */}
-              <Box>
-                <Typography variant="body2" sx={{ mb: 1 }}>Border Color</Typography>
-                <input
-                  type="color"
-                  value={borderStyle.color}
-                  onChange={(e) => setBorderStyle(prev => ({
-                    ...prev,
-                    color: e.target.value
-                  }))}
-                  style={{ width: '100%', height: '30px', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
                 />
               </Box>
             </Box>

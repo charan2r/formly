@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
-import { IsNotEmpty, IsOptional, IsString, IsInt, IsUUID, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsInt, IsUUID, IsNumber, IsEnum } from 'class-validator';
+import { BorderStyle } from 'src/model/form-template.entity';
 
 export class CreateFormTemplateDto {
   @IsNotEmpty()
@@ -69,4 +70,44 @@ export class CreateFormTemplateDto {
   @IsOptional()
   @IsNumber()
   marginRight?: number; // Margin on the right
+
+  @IsOptional()
+  @IsNumber()
+  borderWidth?: number;
+
+  @IsOptional()
+  @IsNumber()
+  borderRadius?: number;
+
+  @IsOptional()
+  @IsEnum(BorderStyle)
+  borderStyle?: BorderStyle;
+  
+  @IsOptional()
+  @IsString()
+  borderColor?: string;
+
+  @IsOptional()
+  @IsNumber()
+  boxShadowX?: number;
+
+  @IsOptional()
+  @IsNumber()
+  boxShadowY?: number;
+
+  @IsOptional()
+  @IsNumber()
+  boxShadowBlur?: number;
+
+  @IsOptional()
+  @IsNumber()
+  boxShadowSpread?: number;
+
+  @IsOptional()
+  @IsString()
+  boxShadowColor?: string;
+
+  @IsOptional()
+  @IsNumber()
+  boxShadowOpacity?: number;
 }
