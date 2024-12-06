@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/axios';
-import { toast } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   Paper, Typography, Box, Checkbox, Divider, IconButton, TextField, Button, Grid
 } from '@mui/material';
@@ -137,7 +138,6 @@ function AddRole() {
 
   const handleSubmit = async () => {
     try {
-      // First create the role
       const roleResponse = await api.post<RoleResponse>('/roles', {
         role: formData.roleName,
         description: formData.description,
@@ -149,8 +149,6 @@ function AddRole() {
       }
 
       const roleId = roleResponse.data.data.roleId;
-
-      // Get selected permission IDs
       const selectedPermissionIds = Object.entries(selectedPermissions)
         .filter(([_, isSelected]) => isSelected)
         .map(([permissionId]) => permissionId);
@@ -159,7 +157,6 @@ function AddRole() {
         throw new Error('Please select at least one permission');
       }
 
-      // Then assign permissions to the role
       const permissionResponse = await api.post<RolePermissionResponse>(
         `/role-permissions/${roleId}`,
         {
@@ -168,15 +165,35 @@ function AddRole() {
       );
 
       if (permissionResponse.data.status !== 'success') {
-        // If permissions assignment fails, we might want to delete the role
-        // or handle this case appropriately
         throw new Error(permissionResponse.data.message);
       }
 
-      toast.success('Role and permissions created successfully!');
+      toast.success("Role created successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+        },
+      });
+      
       navigate('/roles');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || error.message || 'Failed to create role');
+      toast.error(error.response?.data?.message || error.message || 'Failed to create role', {
+        style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+        },
+      });
     }
   };
 
@@ -245,10 +262,24 @@ function AddRole() {
           ...prev,
           [permissionId]: false
         }));
-        toast.success('Permission removed successfully');
+        toast.success("Permission removed successfully!", {
+          style: {
+              backgroundColor: 'black',
+              color: 'white',
+              borderRadius: '10px',
+              fontWeight: 'bold',
+          },
+        });
       }
     } catch (error: any) {
-      toast.error('Failed to remove permission');
+      toast.error("Failed to remove permission", {
+        style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+        },
+      });
     }
   };
 
@@ -404,6 +435,7 @@ function AddRole() {
           <Divider />
         </React.Fragment>
       ))}
+      <ToastContainer />
     </Paper>
   );
 }

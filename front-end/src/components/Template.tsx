@@ -806,35 +806,32 @@ const Template: React.FC = () => {
             </Box>
 
             {/* Single Delete Confirmation Dialog */}
-            <StyledDialog
+            <Dialog
                 open={confirmationOpen}
                 onClose={() => {
                     setConfirmationOpen(false);
                     setTemplateToDelete(null);
-                }}>
-                <Box sx={{ textAlign: 'center', pb: 2 }}>
-                    <IconButton
-                        sx={{ 
-                            backgroundColor: '#f5f5f5',
-                            color: 'black',
-                            '&:hover': {
-                                backgroundColor: '#e0e0e0',
-                            },
-                        }}
-                        onClick={() => {
-                            setConfirmationOpen(false);
-                            setTemplateToDelete(null);
-                        }}
-                    >
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </IconButton>
-                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+                }}
+                PaperProps={{
+                    sx: {
+                        borderRadius: '16px',
+                        padding: '24px',
+                        minWidth: '400px'
+                    }
+                }}
+            >
+                <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
                         Delete Template
                     </Typography>
-                    <Typography sx={{ mt: 2, mb: 3 }}>
+                    <Typography sx={{ mb: 4, color: 'text.secondary' }}>
                         Are you sure you want to delete this template?
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        gap: 2, 
+                        justifyContent: 'center'
+                    }}>
                         <Button
                             variant="contained"
                             onClick={() => {
@@ -845,7 +842,8 @@ const Template: React.FC = () => {
                                 bgcolor: 'black',
                                 color: 'white',
                                 borderRadius: '20px',
-                                px: 4,
+                                px: 3,
+                                py: 1,
                                 '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
                             }}
                         >
@@ -859,44 +857,78 @@ const Template: React.FC = () => {
                                 borderColor: 'black',
                                 color: 'black',
                                 borderRadius: '20px',
-                                px: 4,
-                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                                px: 3,
+                                py: 1,
+                                '&:hover': { 
+                                    bgcolor: 'rgba(0, 0, 0, 0.04)',
+                                    borderColor: 'black'
+                                }
                             }}
                         >
                             {loading ? 'Deleting...' : 'Yes, Delete'}
                         </Button>
                     </Box>
                 </Box>
-            </StyledDialog>
+            </Dialog>
 
             {/* Bulk Delete Confirmation Dialog */}
             <Dialog
                 open={confirmationBulkOpen}
                 onClose={() => setConfirmationBulkOpen(false)}
+                PaperProps={{
+                    sx: {
+                        borderRadius: '16px',
+                        padding: '24px',
+                        minWidth: '400px'
+                    }
+                }}
             >
-                <DialogTitle>Confirm Bulk Deletion</DialogTitle>
-                <DialogContent>
-                    <Typography>
+                <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                        Delete Templates
+                    </Typography>
+                    <Typography sx={{ mb: 4, color: 'text.secondary' }}>
                         Are you sure you want to delete {selectedTemplates.length} selected template{selectedTemplates.length > 1 ? 's' : ''}?
                     </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setConfirmationBulkOpen(false)}>
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={handleBulkDelete}
-                        disabled={loading}
-                        sx={{
-                            color: 'white',
-                            backgroundColor: 'black',
-                            borderRadius: '10px',
-                            '&:hover': { backgroundColor: '#333' }
-                        }}
-                    >
-                        {loading ? 'Deleting...' : 'Delete'}
-                    </Button>
-                </DialogActions>
+                    <Box sx={{ 
+                        display: 'flex', 
+                        gap: 2, 
+                        justifyContent: 'center'
+                    }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => setConfirmationBulkOpen(false)}
+                            sx={{
+                                bgcolor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                px: 3,
+                                py: 1,
+                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+                            }}
+                        >
+                            No, Cancel
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={handleBulkDelete}
+                            disabled={loading}
+                            sx={{
+                                borderColor: 'black',
+                                color: 'black',
+                                borderRadius: '20px',
+                                px: 3,
+                                py: 1,
+                                '&:hover': { 
+                                    bgcolor: 'rgba(0, 0, 0, 0.04)',
+                                    borderColor: 'black'
+                                }
+                            }}
+                        >
+                            {loading ? 'Deleting...' : 'Yes, Delete'}
+                        </Button>
+                    </Box>
+                </Box>
             </Dialog>
 
             {/* Dialog to add template details */}

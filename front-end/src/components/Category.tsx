@@ -726,18 +726,6 @@ const Category: React.FC = () => {
                     setCategoryToDelete(null);
                 }}>
                 <Box sx={{ textAlign: 'center', pb: 2 }}>
-                    <IconButton
-                        sx={{
-                            backgroundColor: '#f5f5f5',
-                            color: 'black',
-                            '&:hover': {
-                              backgroundColor: '#e0e0e0',
-                            },
-                        }}
-                        onClick={() => setConfirmationOpen(false)}
-                    >
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </IconButton>
                     <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
                         Delete Category
                     </Typography>
@@ -779,21 +767,49 @@ const Category: React.FC = () => {
                 </Box>
             </CustomDialog>
 
-            {/* Bulk Confirmation Dialog */}
-            <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
-                <DialogContent>
-                    <Typography>Are you sure you want to delete these categories?</Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setConfirmationBulkOpen(false)} color="black">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteCategories} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            {/* Bulk Delete Confirmation Dialog */}
+            <CustomDialog 
+                open={confirmationBulkOpen} 
+                onClose={() => setConfirmationBulkOpen(false)}
+            >
+                <Box sx={{ textAlign: 'center', pb: 2 }}>
+                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+                        Delete Categories
+                    </Typography>
+                    <Typography sx={{ mt: 2, mb: 3 }}>
+                        Are you sure you want to delete these categories?
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                        <Button
+                            variant="contained"
+                            onClick={() => setConfirmationBulkOpen(false)}
+                            sx={{
+                                bgcolor: 'black',
+                                color: 'white',
+                                borderRadius: '20px',
+                                px: 4,
+                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+                            }}
+                        >
+                            No, Cancel
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={handleDeleteCategories}
+                            disabled={loading}
+                            sx={{
+                                borderColor: 'black',
+                                color: 'black',
+                                borderRadius: '20px',
+                                px: 4,
+                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                            }}
+                        >
+                            {loading ? 'Deleting...' : 'Yes, Delete'}
+                        </Button>
+                    </Box>
+                </Box>
+            </CustomDialog>
 
             {/* Create category Dialog */}
             <CustomDialog

@@ -309,6 +309,57 @@ const Users: React.FC = () => {
     }
   };
 
+  const handleBulkDeleteUsers = async () => {
+    try {
+      const userIdsToDelete = Object.entries(selectedUsers)
+        .filter(([_, isSelected]) => isSelected)
+        .map(([id]) => id);
+
+      // Make API call to delete multiple users
+      await Promise.all(
+        userIdsToDelete.map(id => api.delete(`/user/delete?id=${id}`))
+      );
+
+      // Update local state
+      setUsers(prev => prev.filter(user => !userIdsToDelete.includes(user.id)));
+      setSelectedUsers({});
+      setConfirmationOpen(false);
+
+      toast.success("Users have been deleted successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+    } catch (error) {
+      console.error('Error deleting users:', error);
+      toast.error("Failed to delete users. Please try again.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
+    }
+  };
+
   const filteredData = users
     .filter((org) => {
       const nameMatches = org.firstName.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -421,6 +472,7 @@ const Users: React.FC = () => {
             {selectedCount > 0 ? (
               <Button
                 variant="contained"
+                onClick={() => setConfirmationOpen(true)}
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
               >
                 <Delete sx={{ marginRight: 1 }} />
@@ -1161,28 +1213,30 @@ const Users: React.FC = () => {
         </Box>
       </Dialog>
 
-      {/* Confirmation Dialog for Delete User */}
-      <StyledDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)}>
-        <Box sx={{ textAlign: 'center', pb: 2 }}>
-          <IconButton
-            sx={{
-              backgroundColor: '#f5f5f5',
-              color: 'black',
-              '&:hover': {
-                backgroundColor: '#e0e0e0',
-              },
-            }}
-            onClick={() => setConfirmationOpen(false)}
-          >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-          </IconButton>
-          <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
+      {/* Confirmation Dialog for Single Delete */}
+      <Dialog 
+        open={confirmationOpen} 
+        onClose={() => setConfirmationOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            padding: '24px',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
             Delete User
           </Typography>
-          <Typography sx={{ mt: 2, mb: 3 }}>
+          <Typography sx={{ mb: 4, color: 'text.secondary' }}>
             Are you sure you want to delete?
           </Typography>
-          <Box sx={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center'
+          }}>
             <Button
               variant="contained"
               onClick={() => setConfirmationOpen(false)}
@@ -1190,7 +1244,8 @@ const Users: React.FC = () => {
                 bgcolor: 'black',
                 color: 'white',
                 borderRadius: '20px',
-                px: 4,
+                px: 3,
+                py: 1,
                 '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
               }}
             >
@@ -1203,15 +1258,78 @@ const Users: React.FC = () => {
                 borderColor: 'black',
                 color: 'black',
                 borderRadius: '20px',
-                px: 4,
-                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
+                px: 3,
+                py: 1,
+                '&:hover': { 
+                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  borderColor: 'black'
+                }
               }}
             >
               Yes, Delete
             </Button>
           </Box>
         </Box>
-      </StyledDialog>
+      </Dialog>
+
+      {/* Add this new Dialog for Bulk Delete */}
+      <Dialog 
+        open={selectedCount > 0 && confirmationOpen} 
+        onClose={() => setConfirmationOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            padding: '24px',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            Delete Users
+          </Typography>
+          <Typography sx={{ mb: 4, color: 'text.secondary' }}>
+            Are you sure you want to delete these users?
+          </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="contained"
+              onClick={() => setConfirmationOpen(false)}
+              sx={{
+                bgcolor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+              }}
+            >
+              No, Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleBulkDeleteUsers}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { 
+                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  borderColor: 'black'
+                }
+              }}
+            >
+              Yes, Delete
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
     </Paper>
   );
 };
