@@ -25,9 +25,11 @@ import AddIcon from '@mui/icons-material/Add';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import DraggableQuestion from './DraggableQuestion';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import api from '../utils/axios';
 import { useTemplate } from '../context/TemplateContext';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 import GlobalQuillToolbar from './GlobalQuillToolbar';
 
 
@@ -84,6 +86,7 @@ interface FormField {
 }
 
 const EditPageSettings: React.FC = () => {
+  const navigate = useNavigate();
   const [pageSize, setPageSize] = useState<string>('Letter');
   const [orientation, setOrientation] = useState<string>('Portrait');
   const [backgroundColor, setBackgroundColor] = useState<string>('#ffffff');
@@ -837,14 +840,26 @@ const EditPageSettings: React.FC = () => {
             <Grid item xs={12}>
               <Box display="flex" flexDirection="column" gap={2} marginBottom={'3%'}>
                 <Box display="flex" alignItems="center" gap={1}>
+                <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={() => navigate(-1)}
+          >
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+          </IconButton>
                   <IconButton onClick={() => console.log('Back arrow clicked')}>
                     <CircleIcon style={{ color: 'black' }} />
                   </IconButton>
-                  <ArrowForward style={{ color: 'black' }} />
+                  <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                   <Typography variant="body2" color="textSecondary">
                     Atlas Corp. 
                   </Typography>
-                  <ArrowForward style={{ color: 'black' }} />
+                  <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
                   <Typography variant="body2" color="textSecondary">
                     Edit Template
                   </Typography>

@@ -37,6 +37,7 @@ import { useAuth } from '../../context/AuthContext';  // Import useAuth
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import CSS for react-toastify
 import { useNavigate } from 'react-router-dom';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 interface Role {
   roleId: string;
@@ -266,7 +267,7 @@ const DataTable: React.FC = () => {
           <IconButton onClick={() => console.log("Back arrow clicked")}>
             <CircleIcon style={{ color: 'black' }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
           Role Management
           </Typography>

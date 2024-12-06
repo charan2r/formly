@@ -7,6 +7,9 @@ import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
 import api from '../../utils/axios';
 import { toast } from 'react-toastify';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+
 
 interface Permissions {
   userManagement: boolean;
@@ -106,10 +109,22 @@ function ViewRole() {
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
-          <IconButton onClick={handleBack}>
+        <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={() => navigate(-1)}
+          >
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+          </IconButton>
+          <IconButton onClick={() => console.log("Back arrow clicked")}>
             <CircleIcon style={{ color: 'black' }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             Role Management
           </Typography>

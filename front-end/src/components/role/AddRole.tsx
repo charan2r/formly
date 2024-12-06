@@ -6,8 +6,9 @@ import { toast } from 'react-toastify';
 import {
   Paper, Typography, Box, Checkbox, Divider, IconButton, TextField, Button, Grid
 } from '@mui/material';
-import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
 interface Role {
   roleId: string;
@@ -256,14 +257,26 @@ function AddRole() {
       {/* Top Navigation Section */}
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
+        <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={() => navigate(-1)}
+          >
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+          </IconButton>
           <IconButton onClick={() => console.log("Back arrow clicked")}>
             <CircleIcon style={{ color: 'black' }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             Atlas corp.
           </Typography>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             Create a Role
           </Typography>

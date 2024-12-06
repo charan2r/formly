@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/axios';
 import {
   Paper,
@@ -9,8 +9,10 @@ import {
   IconButton,
 } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
-import ArrowForward from '@mui/icons-material/ArrowForward';
 import DraggableQuestion from './DraggableQuestion';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+
 
 const pageSizes = {
   A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
@@ -19,6 +21,7 @@ const pageSizes = {
 };
 
 const ViewTemplate: React.FC = () => {
+  const navigate = useNavigate();
   const location = useLocation();
   const { templateId } = useParams();
   const [templateData, setTemplateData] = useState<any>(null);
@@ -82,10 +85,26 @@ const ViewTemplate: React.FC = () => {
         <Grid item xs={12}>
           <Box display="flex" flexDirection="column" gap={2} marginBottom={'3%'}>
             <Box display="flex" alignItems="center" gap={1}>
-              <IconButton>
-                <CircleIcon style={{ color: 'black' }} />
-              </IconButton>
-              <ArrowForward style={{ color: 'black' }} />
+            <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={() => navigate(-1)}
+          >
+            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+          </IconButton>
+          <IconButton onClick={() => console.log("Back arrow clicked")}>
+            <CircleIcon style={{ color: 'black' }} />
+          </IconButton>
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
+          <Typography variant="body2" color="textSecondary">
+            View Template
+          </Typography>
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
               <Typography variant="body2" color="textSecondary">
                 {templateData?.name || 'Template'}
               </Typography>
