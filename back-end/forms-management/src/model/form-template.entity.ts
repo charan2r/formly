@@ -3,6 +3,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, Up
 import { Form } from './form.entity';
 import { Category } from './category.entity';
 import { FormField } from './form-fields.entity';
+import { Organization } from './organization.entity';
 
 export enum BorderStyle {
   SOLID = 'solid',
@@ -114,6 +115,12 @@ export class FormTemplate {
 
   @ManyToOne(() => Category, (category) => category.formTemplates, { onDelete: 'SET NULL' })
   category: Category;
+
+  @Column('uuid', { nullable: true })
+  organizationId: string;
+
+  @ManyToOne(() => Organization, (organization) => organization.formTemplates, { onDelete: 'SET NULL' })
+  organization: Organization;
 
   @OneToMany(() => FormField, (formField) => formField.formTemplate)
   formFields: FormField[];

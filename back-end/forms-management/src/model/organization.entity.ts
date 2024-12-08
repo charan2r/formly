@@ -3,6 +3,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { User } from './user.entity';
 import { Category } from "./category.entity";
+import { FormTemplate } from './form-template.entity';
 
 @Entity()
 export class Organization {
@@ -60,4 +61,7 @@ export class Organization {
 
   @OneToMany(() => Category, (category) => category.organization)
   categories: Category[]; // Relationship to multiple categories
+
+  @OneToMany(() => FormTemplate, (formTemplate) => formTemplate.organization)
+  formTemplates: FormTemplate[]; // Relationship to multiple form templates
 }

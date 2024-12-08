@@ -114,39 +114,39 @@ const TitleContent: React.FC<TitleContentProps> = ({
           <Box sx={{
             position: 'relative',
             '& .ql-toolbar': {
-              display: 'flex',
-              position: 'absolute',
-              right: '-40px',
-              top: 0,
-              zIndex: 1000,
-              backgroundColor: '#fff',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              borderRadius: '4px',
-              padding: '8px 4px',
-              flexDirection: 'column',
-              opacity: 0,
-              visibility: 'hidden',
-              transition: 'opacity 0.3s ease, visibility 0.3s ease',
-              '& .ql-formats': {
-                margin: '4px 0',
-              }
-            },
-            '&:hover .ql-toolbar': {
-              opacity: 1,
-              visibility: 'visible',
+              // ... existing toolbar styles ...
             },
             '& .ql-container': {
               border: 'none',
+              '& p': {  // Add this
+                margin: 0,
+                lineHeight: '1.5',
+              }
             },
             '& .ql-editor': {
-              padding: '8px 0',
+              padding: '0',  // Changed from '8px 0'
               fontSize: '1.5rem',
               fontWeight: 'bold',
+              minHeight: '2em',  // Add this
               '&.ql-blank::before': {
                 color: '#999',
                 fontStyle: 'normal',
                 left: 0,
                 right: 0,
+                top: 0,  // Add this
+              },
+              '& p': {  // Add these specific text formatting fixes
+                margin: 0,
+                padding: 0,
+                '& span': {
+                  display: 'inline',
+                  lineHeight: 'inherit',
+                },
+                '& u, & s, & strong, & em': {
+                  display: 'inline',
+                  position: 'relative',
+                  padding: '0 1px',  // Small padding to prevent clipping
+                },
               }
             }
           }}>
@@ -188,31 +188,26 @@ const TitleContent: React.FC<TitleContentProps> = ({
               mb: 2,
               '&:hover .delete-subtitle': {
                 opacity: 1,
+              },
+              '& .ql-editor': {  // Add these styles for subtitles
+                padding: '0',
+                '& p': {
+                  margin: 0,
+                  lineHeight: '1.5',
+                  '& span': {
+                    display: 'inline',
+                    lineHeight: 'inherit',
+                  },
+                  '& u, & s, & strong, & em': {
+                    display: 'inline',
+                    position: 'relative',
+                    padding: '0 1px',
+                  },
+                }
               }
             }}
           >
-            <Box sx={{
-              position: 'relative',
-              '& .ql-toolbar': {
-                display: 'flex',
-                position: 'absolute',
-                right: '-40px',
-                top: 0,
-                zIndex: 1000,
-                backgroundColor: '#fff',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                borderRadius: '4px',
-                padding: '8px 4px',
-                flexDirection: 'column',
-                opacity: 0,
-                visibility: 'hidden',
-                transition: 'opacity 0.3s ease, visibility 0.3s ease',
-              },
-              '&:hover .ql-toolbar': {
-                opacity: 1,
-                visibility: 'visible',
-              },
-            }}>
+            <Box>
               <ReactQuill
                 value={option.option}
                 onChange={(content) => onSubtitleChange(formFieldId, option.formFieldsOptionId, content)}

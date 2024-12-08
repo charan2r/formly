@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Table,
   InputAdornment,
@@ -44,26 +44,45 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import PrintIcon from '@mui/icons-material/Print';
 import EmailIcon from '@mui/icons-material/Email';
 import { useAuth } from '../context/AuthContext';
+import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import DraggableQuestion from './DraggableQuestion';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import ReactDOM from 'react-dom';
+import { useReactToPrint } from 'react-to-print';
 
 interface form {
-  templateId: number;
+  formId: string;
   name: string;
-  category: string;
-  createdDate: string;
-  createdBy: string;
-  lastModifiedDate: string;
-  lastModifiedBy: string;
+  status: string;
+  description: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface EditFormData {
-  name: string; 
+  name: string;
   type: string;
   formName: string;
   description: string;
+  templateId?: string;
 }
 
 interface ViewFormData extends form {
+  formTemplateId: string;
   // Add any additional fields you want to display
+}
+
+const pageSizes = {
+    A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
+    A3: { width: 297 * 3.7795, height: 420 * 3.7795 },
+    Custom: { width: 800, height: 600 },
+};
+
+interface Template {
+  templateId: number;
+  name: string;
 }
 
 const SquarePagination = styled(Pagination)(({ theme }) => ({
@@ -82,16 +101,298 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
   },
 }));
 
+const FormPrintComponent = React.forwardRef<HTMLDivElement, any>((props, ref) => {
+  const { template, formFields, appearanceSettings, pageSizes } = props;
+  const pageSize = template.pageSize || 'A4';
+  const { width, height } = pageSizes[pageSize];
+
+  return (
+    <div 
+      ref={ref}
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+        backgroundColor: template.backgroundColor || '#ffffff',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
+    >
+      <DraggableQuestion
+        formTemplateId={template.templateId}
+        items={formFields}
+        gridSize={{ width, height }}
+        selectedSize={pageSize}
+        pageSizes={pageSizes}
+        isViewMode={true}
+        appearanceSettings={appearanceSettings}
+        onQuestionChange={() => {}}
+        onOptionChange={() => {}}
+        onDeleteOption={() => {}}
+        onAddOption={() => {}}
+      />
+    </div>
+  );
+});
+
+const PreviewDialog: React.FC<{
+  open: boolean;
+  onClose: () => void;
+  templateId: string;
+}> = ({ open, onClose, templateId }) => {
+  const printRef = React.useRef<HTMLDivElement>(null);
+  const [template, setTemplate] = useState<any>(null);
+  const [formFields, setFormFields] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (open && templateId) {
+      const fetchData = async () => {
+        try {
+          const [templateResponse, fieldsResponse] = await Promise.all([
+            api.get(`/form-templates/details?id=${templateId}`),
+            api.get(`/form-fields?formTemplateId=${templateId}`)
+          ]);
+
+          setTemplate(templateResponse.data.data);
+          setFormFields(fieldsResponse.data.data);
+        } catch (error) {
+          console.error('Error fetching preview data:', error);
+          toast.error('Failed to load preview');
+        }
+      };
+
+      fetchData();
+    }
+  }, [open, templateId]);
+
+  const handlePrint = () => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) return;
+
+    // Get all stylesheet links from the current document
+    const styleSheets = Array.from(document.styleSheets).map(styleSheet => {
+      try {
+        if (styleSheet.href) {
+          return `<link rel="stylesheet" type="text/css" href="${styleSheet.href}" />`;
+        } else {
+          // For inline styles
+          let cssRules = '';
+          Array.from(styleSheet.cssRules).forEach(rule => {
+            cssRules += rule.cssText;
+          });
+          return `<style>${cssRules}</style>`;
+        }
+      } catch (e) {
+        // For CORS stylesheets, just link them
+        if (styleSheet.href) {
+          return `<link rel="stylesheet" type="text/css" href="${styleSheet.href}" />`;
+        }
+        return '';
+      }
+    }).join('\n');
+
+    // Add print-specific styles with correct targeting
+    const printStyles = `
+      @page {
+        size: ${template?.pageSize || 'A4'};
+        margin: 0;
+      }
+      
+      @media print {
+        body {
+          margin: 0;
+          padding: 0;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        /* Template-level styles */
+        .printable-form {
+          width: ${pageSizes[template?.pageSize || 'A4'].width}px !important;
+          height: ${pageSizes[template?.pageSize || 'A4'].height}px !important;
+          overflow: hidden !important;
+          position: relative !important;
+          background-color: ${template?.backgroundColor || '#ffffff'} !important;
+          padding: ${template?.marginTop || 10}px ${template?.marginRight || 10}px 
+                  ${template?.marginBottom || 10}px ${template?.marginLeft || 10}px !important;
+        }
+
+        /* Form field-level styles */
+        .react-draggable {
+          border-width: ${template?.borderWidth || 0}px !important;
+          border-style: ${template?.borderStyle || 'none'} !important;
+          border-color: ${template?.borderColor || '#000000'} !important;
+          border-radius: ${template?.borderRadius || 0}px !important;
+          box-shadow: ${template?.boxShadowX || 0}px 
+                     ${template?.boxShadowY || 0}px 
+                     ${template?.boxShadowBlur || 0}px 
+                     ${template?.boxShadowSpread || 0}px 
+                     ${template?.boxShadowColor || '#000000'} !important;
+          opacity: ${(template?.boxShadowOpacity || 100) / 100} !important;
+          background-color: ${template?.backgroundColor || '#ffffff'} !important;
+        }
+
+        /* Hide UI elements */
+        .delete-form-field,
+        .drag-handle,
+        .add-subtitle,
+        .delete-subtitle,
+        .ql-toolbar {
+          display: none !important;
+        }
+
+        /* Preserve ReactQuill formatting */
+        .ql-editor {
+          padding: 0 !important;
+          border: none !important;
+        }
+        
+        .ql-editor p {
+          margin: 0 !important;
+          padding: 0 !important;
+          line-height: 1.5 !important;
+        }
+
+        /* Ensure text formatting is preserved */
+        .ql-editor u, 
+        .ql-editor s, 
+        .ql-editor strong, 
+        .ql-editor em,
+        .ql-editor span {
+          display: inline !important;
+          position: relative !important;
+          line-height: inherit !important;
+          vertical-align: baseline !important;
+        }
+
+        /* Preserve Material UI styles */
+        .MuiTypography-root {
+          display: block !important;
+          color: inherit !important;
+        }
+
+        .MuiBox-root {
+          display: block !important;
+        }
+
+        /* Preserve background colors and borders */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+      }
+    `;
+
+    // Get Material UI and other runtime styles
+    const runtimeStyles = Array.from(document.querySelectorAll('style'))
+      .map(style => style.innerHTML)
+      .join('\n');
+
+    // Get the current form content
+    const formContent = printRef.current?.innerHTML || '';
+
+    // Write to print window
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${template?.name || 'Form'}</title>
+          ${styleSheets}
+          <style>${runtimeStyles}</style>
+          <style>${printStyles}</style>
+          <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+        </head>
+        <body>
+          <div class="printable-form">
+            ${formContent}
+          </div>
+          <script>
+            // Wait for all resources to load
+            window.onload = () => {
+              setTimeout(() => {
+                window.print();
+                window.onafterprint = () => window.close();
+              }, 1000);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+  };
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+      <DialogTitle>
+        Preview Form
+        <IconButton 
+          onClick={handlePrint}
+          style={{ position: 'absolute', right: 48 }}
+        >
+          <PrintIcon />
+        </IconButton>
+        <IconButton 
+          onClick={onClose}
+          style={{ position: 'absolute', right: 8 }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        {template && (
+          <div 
+            ref={printRef}
+            className="printable-form"
+            style={{
+              width: `${pageSizes[template.pageSize || 'A4'].width}px`,
+              height: `${pageSizes[template.pageSize || 'A4'].height}px`,
+              backgroundColor: template.backgroundColor || '#ffffff',
+              padding: `${template.marginTop || 10}px ${template.marginRight || 10}px 
+                        ${template.marginBottom || 10}px ${template.marginLeft || 10}px`,
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            <FormPrintComponent
+              template={{
+                ...template,
+                // Pass form field specific styles separately
+                formFieldStyles: {
+                  borderWidth: template.borderWidth,
+                  borderRadius: template.borderRadius,
+                  borderStyle: template.borderStyle,
+                  borderColor: template.borderColor,
+                  boxShadowX: template.boxShadowX,
+                  boxShadowY: template.boxShadowY,
+                  boxShadowBlur: template.boxShadowBlur,
+                  boxShadowSpread: template.boxShadowSpread,
+                  boxShadowColor: template.boxShadowColor,
+                  boxShadowOpacity: template.boxShadowOpacity,
+                  backgroundColor: template.backgroundColor
+                }
+              }}
+              formFields={formFields}
+              appearanceSettings={template.appearanceSettings}
+              pageSizes={pageSizes}
+            />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const FormTable: React.FC = () => {
   const navigate = useNavigate();
   const {user} = useAuth();
   const [forms, setForms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedForms, setSelectedForms] = useState<Record<number, boolean>>({});
+  const [selectedForms, setSelectedForms] = useState<Record<string, boolean>>({});
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(4);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-  const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({ name: '', type: '', category: '', lastActive: '' });
   const [orderBy, setOrderBy] = useState<keyof form>('name');
@@ -113,18 +414,30 @@ const FormTable: React.FC = () => {
         name: '',
         type: '',
         formName: '',
-        description: ''
+        description: '',
+        templateId: ''
   });
+  const pageSizes = {
+    A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
+    A3: { width: 297 * 3.7795, height: 420 * 3.7795 },
+    Custom: { width: 800, height: 600 },
+};
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewFormData, setViewFormData] = useState<ViewFormData | null>(null);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewTemplateId, setPreviewTemplateId] = useState<string>('');
 
   const handleEditFormChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setEditFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
+      ...(name === 'templateId' && {
+        type: templates.find(t => t.formTemplateId === value)?.name || ''
+      })
     }));
   };
 
@@ -134,9 +447,10 @@ const FormTable: React.FC = () => {
     
     setEditFormData({
       name: form.name,
-      type: form.category,
+      type: templates.find(t => t.formTemplateId === form.formTemplateId)?.name || '',
       formName: form.name,
-      description: 'for office' // You might want to add description to your form interface if needed
+      description: form.description,
+      templateId: form.formTemplateId
     });
     setEditDialogOpen(true);
   };
@@ -148,10 +462,10 @@ const FormTable: React.FC = () => {
     handleMenuClose();
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, id: number) => {
-    event.stopPropagation(); // Prevent event bubbling
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, formId: string) => {
+    event.stopPropagation();
     setMenuAnchor(event.currentTarget);
-    setSelectedRowId(id);
+    setSelectedRowId(formId);
   };
 
   const handleMenuClose = () => {
@@ -162,15 +476,15 @@ const FormTable: React.FC = () => {
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
     const checked = event.target.checked;
     const newSelectedForms = forms.reduce((acc, form) => {
-      acc[form.templateId] = checked;
+      acc[form.formId] = checked;
       return acc;
-    }, {} as Record<number, boolean>);
+    }, {} as Record<string, boolean>);
 
     setSelectedForms(newSelectedForms);
   };
 
 
-  const handleSelectForm = (id: number) => {
+  const handleSelectForm = (id: string) => {
     setSelectedForms((prev) => ({
       ...prev,
       [id]: !prev[id],
@@ -214,12 +528,19 @@ const FormTable: React.FC = () => {
   // Method to get forms 
   useEffect(() => {
     const fetchForms = async () => {
-      try {
-        const response = await api.get('/forms');
-        setForms(response.data.data);
-      } catch (error) {
-        console.error('Failed to fetch forms:', error);
-      }
+        try {
+            const response = await api.get('/forms');
+            if (response.data.status === 'success') {
+                // Filter forms to only include active ones
+                const activeForms = response.data.data.filter(
+                    (form: form) => form.status === 'active'
+                );
+                setForms(activeForms);
+            }
+        } catch (error) {
+            console.error('Error fetching forms:', error);
+            toast.error('Failed to fetch forms');
+        }
     };
 
     fetchForms();
@@ -228,35 +549,26 @@ const FormTable: React.FC = () => {
   // Method to handle form update
   const handleUpdateForm = async () => {
     try {
-      const response = await api.patch(`/forms/${selectedRowId}`, editFormData);
+      const updatePayload = {
+        name: editFormData.name,
+        description: editFormData.description,
+        formTemplateId: editFormData.templateId,
+        status: 'active'
+      };
+
+      const response = await api.patch(`/forms/${selectedRowId}`, updatePayload);
       setForms(prevForms => prevForms.map(form => 
-        form.templateId === selectedRowId
+        form.formId === selectedRowId
           ? {
               ...form,
-              name: editFormData.name,
-              category: editFormData.type,
-              lastModifiedDate: new Date().toISOString(),
-              lastModifiedBy: 'Current User' // Replace with actual user name
+              ...response.data,
+              updatedAt: new Date().toISOString()
             }
           : form
       ));
 
       setEditDialogOpen(false);
-      toast.success("Form updated successfully!", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        style: {
-          backgroundColor: 'black',
-          color: 'white',
-          borderRadius: '10px',
-          fontWeight: 'bold',
-        },
-      });
+      toast.success("Form updated successfully!");
     } catch (error) {
       toast.error("Failed to update form");
     }
@@ -266,7 +578,14 @@ const FormTable: React.FC = () => {
   // Method to handle form creation
   const handleCreateForm = async () => {
     try {
-        const response = await api.post('/forms/create', newForm);
+        const formPayload = {
+            name: newForm.name,
+            description: newForm.description,
+            formTemplateId: newForm.templateId,
+            status: 'active'
+        };
+
+        const response = await api.post('/forms/create', formPayload);
         setForms([...forms, response.data]);
         setCreateFormOpen(false);
         toast.success("Form created successfully!");
@@ -409,7 +728,8 @@ const FormTable: React.FC = () => {
       name: '',
       type: '',
       formName: '',
-      description: ''
+      description: '',
+      templateId: ''
     });
   };
 
@@ -423,16 +743,136 @@ const FormTable: React.FC = () => {
     });
   };
 
-  const handleShareClick = () => {
-    // Generate or get your share URL here
-    setShareUrl('https://www.example.com/share/form/' + selectedRowId);
-    setShareDialogOpen(true);
-    handleMenuClose();
+  const handleShareClick = (form: form) => {
+    // First fetch the form details to get the templateId
+    const fetchFormDetails = async () => {
+        try {
+            const response = await api.get(`/forms/details?id=${form.formId}`);
+            if (response.data.status === 'success') {
+                const formDetails = response.data.data;
+                setViewFormData({
+                    ...form,
+                    formTemplateId: formDetails.formTemplateId // Make sure this matches your API response field
+                });
+                setShareDialogOpen(true);
+            } else {
+                toast.error('Failed to fetch form details');
+            }
+        } catch (error) {
+            console.error('Error fetching form details:', error);
+            toast.error('Failed to fetch form details');
+        }
+    };
+
+    fetchFormDetails();
   };
 
   const handleCloseViewDialog = () => {
     setViewDialogOpen(false);
     setViewFormData(null);
+  };
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+        try {
+            const response = await api.get('/form-templates');
+            // Filter templates to only include active ones
+            const activeTemplates = response.data.data.filter(
+                (template: any) => template.status === 'active'
+            );
+            setTemplates(activeTemplates);
+        } catch (error) {
+            console.error('Failed to fetch templates:', error);
+        }
+    };
+
+    fetchTemplates();
+  }, []);
+
+  const handlePreviewClick = (templateId: string) => {
+    if (!templateId) {
+        toast.error("Template ID not found");
+        return;
+    }
+    setPreviewTemplateId(templateId);
+    setPreviewOpen(true);
+  };
+
+  const handleDownloadPDF = async (templateId: string | undefined) => {
+    if (!templateId) {
+        toast.error('Template ID not found');
+        return;
+    }
+
+    try {
+        // Fetch template details and form fields
+        const [templateResponse, fieldsResponse] = await Promise.all([
+            api.get(`/form-templates/details?id=${templateId}`),
+            api.get(`/form-fields?formTemplateId=${templateId}`)
+        ]);
+
+        if (templateResponse.data.status !== 'success' || fieldsResponse.data.success !== true) {
+            toast.error('Failed to fetch template details');
+            return;
+        }
+
+        const template = templateResponse.data.data;
+        const formFields = fieldsResponse.data.data;
+
+        // Create a container for the print component
+        const printRef = React.createRef<HTMLDivElement>();
+        const printComponent = (
+            <FormPrintComponent
+                ref={printRef}
+                template={template}
+                formFields={formFields}
+                appearanceSettings={appearanceSettings}
+                pageSizes={pageSizes}
+            />
+        );
+
+        // Add component to DOM temporarily
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        document.body.appendChild(container);
+
+        // Render component
+        ReactDOM.render(printComponent, container);
+
+        // Setup print handler
+        const handlePrint = useReactToPrint({
+            content: () => printRef.current,
+            pageStyle: `
+                @page {
+                    size: ${template.pageSize || 'A4'};
+                    margin: 0;
+                }
+                @media print {
+                    body {
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            `,
+            onAfterPrint: () => {
+                // Cleanup
+                document.body.removeChild(container);
+                toast.success('PDF downloaded successfully!');
+            },
+            onPrintError: () => {
+                document.body.removeChild(container);
+                toast.error('Failed to generate PDF');
+            },
+        });
+
+        // Trigger print
+        handlePrint();
+
+    } catch (error) {
+        console.error('Error downloading PDF:', error);
+        toast.error('Failed to download PDF');
+    }
   };
 
   return (
@@ -518,356 +958,136 @@ const FormTable: React.FC = () => {
       </Box>
 
       <TableContainer sx={{ maxHeight: '400px', overflow: 'auto' }}>
-                <Table stickyHeader sx={{ marginTop: '25px' }}>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell
-                                padding="checkbox"
-                                sx={{
-                                    backgroundColor: '#f9f9f9',
-                                    borderStartStartRadius: '20px',
-                                    borderEndStartRadius: '20px',
-                                    padding: '4px',
-                                    position: 'relative',
-                                }}
-                            >
-                                <Checkbox
-                                    onChange={handleSelectAll}
-                                    checked={
-                                        forms.length > 0 &&
-                                        forms.every((frm) => selectedForms[frm.formId])
-                                    }
-                                    indeterminate={
-                                        forms.some((frm) => selectedForms[frm.formId]) &&
-                                        !forms.every((frm) => selectedForms[frm.formId])
-                                    }
-                                />
-                            </TableCell>
-                            <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', padding: '4px' }} />
-                            <TableCell 
-                                sx={{ 
-                                    backgroundColor: '#f9f9f9', 
-                                    padding: '4px', 
-                                    position: 'relative',
-                                    textAlign: 'left',  // Add this
-                                    paddingLeft: '16px'  // Add this for some spacing
-                                }}
-                            >
-                                <TableSortLabel
-                                    active={orderBy === 'name'}
-                                    direction={orderDirection}
-                                    onClick={() => handleRequestSort('name')}
-                                >
-                                    Form Name
-                                </TableSortLabel>
-                                {showFilters && (
-                                    <div style={{ position: 'absolute', top: '70%', width: '45%', right: 0 }}>
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            inputProps={{
-                                                style: {
-                                                    height: "10px",
-                                                },
-                                            }}
-                                            placeholder="Filter"
-                                            value={filters.name}
-                                            onChange={(e) => handleFilterChange(e, 'name')}
-                                            sx={{ width: '100%', marginTop: '4px' }}
-                                        />
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell 
-                                sx={{ 
-                                    backgroundColor: '#f9f9f9', 
-                                    padding: '4px', 
-                                    position: 'relative',
-                                    textAlign: 'left',  // Add this
-                                    paddingLeft: '16px'  // Add this for some spacing
-                                }}
-                            >
-                                <TableSortLabel
-                                    active={orderBy === 'category'}
-                                    direction={orderDirection}
-                                    onClick={() => handleRequestSort('category')}
-                                >
-                                    Type
-                                </TableSortLabel>
-                                {showFilters && (
-                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder="Filter"
-                                            inputProps={{
-                                                style: {
-                                                    height: "10px",
-                                                },
-                                            }}
-                                            value={filters.category}
-                                            onChange={(e) => handleFilterChange(e, 'category')}
-                                            sx={{ width: '100%', marginTop: '4px' }}
-                                        />
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell 
-                                sx={{ 
-                                    backgroundColor: '#f9f9f9', 
-                                    padding: '4px', 
-                                    position: 'relative',
-                                    textAlign: 'left',
-                                    paddingLeft: '16px'
-                                }}
-                            >
-                                <TableSortLabel
-                                    active={orderBy === 'createdDate'}
-                                    direction={orderDirection}
-                                    onClick={() => handleRequestSort('createdDate')}
-                                >
-                                    Created Date
-                                </TableSortLabel>
-                                {showFilters && (
-                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder="Filter"
-                                            inputProps={{
-                                                style: {
-                                                    height: "10px",
-                                                },
-                                            }}
-                                            value={filters.createdDate}
-                                            onChange={(e) => handleFilterChange(e, 'createdDate')}
-                                            sx={{ width: '100%', marginTop: '4px' }}
-                                        />
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell 
-                                sx={{ 
-                                    backgroundColor: '#f9f9f9', 
-                                    padding: '4px', 
-                                    position: 'relative',
-                                    textAlign: 'left',
-                                    paddingLeft: '16px'
-                                }}
-                            >
-                                <TableSortLabel
-                                    active={orderBy === 'createdBy'}
-                                    direction={orderDirection}
-                                    onClick={() => handleRequestSort('createdBy')}
-                                >
-                                    Created By
-                                </TableSortLabel>
-                                {showFilters && (
-                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder="Filter"
-                                            inputProps={{
-                                                style: {
-                                                    height: "10px",
-                                                },
-                                            }}
-                                            value={filters.createdBy}
-                                            onChange={(e) => handleFilterChange(e, 'createdBy')}
-                                            sx={{ width: '100%', marginTop: '4px' }}
-                                        />
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell 
-                                sx={{ 
-                                    backgroundColor: '#f9f9f9', 
-                                    padding: '4px', 
-                                    position: 'relative',
-                                    textAlign: 'left',
-                                    paddingLeft: '16px'
-                                }}
-                            >
-                                <TableSortLabel
-                                    active={orderBy === 'lastModifiedDate'}
-                                    direction={orderDirection}
-                                    onClick={() => handleRequestSort('lastModifiedDate')}
-                                >
-                                    Last Modified Date
-                                </TableSortLabel>
-                                {showFilters && (
-                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder="Filter"
-                                            inputProps={{
-                                                style: {
-                                                    height: "10px",
-                                                },
-                                            }}
-                                            value={filters.lastModifiedDate}
-                                            onChange={(e) => handleFilterChange(e, 'lastModifiedDate')}
-                                            sx={{ width: '100%', marginTop: '4px' }}
-                                        />
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell 
-                                sx={{ 
-                                    backgroundColor: '#f9f9f9', 
-                                    padding: '4px', 
-                                    position: 'relative',
-                                    textAlign: 'left',
-                                    paddingLeft: '16px'
-                                }}
-                            >
-                                <TableSortLabel
-                                    active={orderBy === 'lastModifiedBy'}
-                                    direction={orderDirection}
-                                    onClick={() => handleRequestSort('lastModifiedBy')}
-                                >
-                                    Last Modified By
-                                </TableSortLabel>
-                                {showFilters && (
-                                    <div style={{ position: 'absolute', top: '70%', width: '45%', left: 0, right: 0 }}>
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder="Filter"
-                                            inputProps={{
-                                                style: {
-                                                    height: "10px",
-                                                },
-                                            }}
-                                            value={filters.lastModifiedBy}
-                                            onChange={(e) => handleFilterChange(e, 'lastModifiedBy')}
-                                            sx={{ width: '100%', marginTop: '4px' }}
-                                        />
-                                    </div>
-                                )}
-                            </TableCell>
-                            <TableCell padding="checkbox" sx={{ backgroundColor: '#f9f9f9', borderStartEndRadius: '20px', borderEndEndRadius: '20px', padding: '1px' }} />
-                        </TableRow>
-                    </TableHead>
+        <Table stickyHeader sx={{ marginTop: '25px' }}>
+          <TableHead>
+            <TableRow>
+              <TableCell 
+                padding="checkbox" 
+                sx={{ 
+                  backgroundColor: '#f9f9f9', 
+                  borderTopLeftRadius: '12px',
+                  width: '48px'
+                }}
+              >
+                <Checkbox
+                  onChange={handleSelectAll}
+                  checked={forms.length > 0 && forms.every((frm) => selectedForms[frm.formId])}
+                  indeterminate={forms.some((frm) => selectedForms[frm.formId]) && !forms.every((frm) => selectedForms[frm.formId])}
+                />
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: '#f9f9f9',
+                  fontWeight: 600,
+                  color: '#333'
+                }}
+              >
+                <TableSortLabel
+                  active={orderBy === 'name'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('name')}
+                >
+                  Form Name
+                </TableSortLabel>
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: '#f9f9f9',
+                  fontWeight: 600,
+                  color: '#333'
+                }}
+              >
+                <TableSortLabel
+                  active={orderBy === 'status'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('status')}
+                >
+                  Status
+                </TableSortLabel>
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: '#f9f9f9',
+                  fontWeight: 600,
+                  color: '#333',
+                  display: { xs: 'none', sm: 'table-cell' } // Hide on mobile
+                }}
+              >
+                <TableSortLabel
+                  active={orderBy === 'createdAt'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('createdAt')}
+                >
+                  Created Date
+                </TableSortLabel>
+              </TableCell>
+              <TableCell 
+                sx={{ 
+                  backgroundColor: '#f9f9f9',
+                  fontWeight: 600,
+                  color: '#333',
+                  display: { xs: 'none', md: 'table-cell' } // Hide on mobile and tablet
+                }}
+              >
+                <TableSortLabel
+                  active={orderBy === 'updatedAt'}
+                  direction={orderDirection}
+                  onClick={() => handleRequestSort('updatedAt')}
+                >
+                  Last Modified Date
+                </TableSortLabel>
+              </TableCell>
+              <TableCell 
+                padding="checkbox" 
+                sx={{ 
+                  backgroundColor: '#f9f9f9',
+                  borderTopRightRadius: '12px',
+                  width: '48px'
+                }}
+              />
+            </TableRow>
+          </TableHead>
 
-                    <TableBody>
-                        {paginatedData.map((row, index) => (
-                            <TableRow key={row.templateId || index} sx={{ height: '60px' }}>
-                                <TableCell padding="checkbox">
-                                    <Checkbox
-                                        checked={!!selectedForms[row.templateId]}
-                                        onChange={() => handleSelectForm(row.templateId)}
-                                    />
-                                </TableCell>
-                                <TableCell padding="checkbox" />
-                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.name}</TableCell>
-                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.category}</TableCell>
-                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>
-                                    {row.createdDate}
-                                </TableCell>
-                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.createdBy}</TableCell>
-                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>
-                                    {row.lastModifiedDate}
-                                </TableCell>
-                                <TableCell sx={{ textAlign: 'left', paddingLeft: '16px' }}>{row.lastModifiedBy}</TableCell>
-                                <TableCell padding="checkbox">
-                                    <IconButton onClick={(event) => handleMenuOpen(event, row.templateId)}>
-                                        <MoreVertIcon />
-                                    </IconButton>
-                                    <Menu
-                                        anchorEl={menuAnchor}
-                                        open={Boolean(menuAnchor) && selectedRowId === row.templateId}
-                                        onClose={handleMenuClose}
-                                        anchorOrigin={{
-                                            vertical: 'center',
-                                            horizontal: 'right',
-                                        }}
-                                        transformOrigin={{
-                                            vertical: 'center',
-                                            horizontal: 'left',
-                                        }}
-                                        PaperProps={{
-                                            sx: {
-                                                backgroundColor: 'rgba(0, 0, 0, 0.25)',
-                                                color: 'black',
-                                                padding: '5px',
-                                            },
-                                        }}
-                                    >
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleEditClick(forms.find(form => form.templateId === selectedRowId)!);
-                                                handleMenuClose();
-                                            }}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            Edit
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleViewClick(forms.find(form => form.templateId === selectedRowId));
-                                            }}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            View
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={handleShareClick}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            Share
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleDeleteConfirmation(selectedRowId!.toString());
-                                                handleMenuClose();
-                                            }}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                color: 'red',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            Delete
-                                        </MenuItem>
-                                    </Menu>
-                                </TableCell>
-                </TableRow>
+          <TableBody>
+            {paginatedData.map((row) => (
+              <TableRow 
+                key={row.formId} 
+                sx={{
+                  height: '48px',
+                  '&:hover': { backgroundColor: '#f5f5f5' }
+                }}
+              >
+                <TableCell padding="checkbox" sx={{ width: '48px' }}>
+                  <Checkbox
+                    checked={!!selectedForms[row.formId]}
+                    onChange={() => handleSelectForm(row.formId)}
+                  />
+                </TableCell>
+                <TableCell>{row.name}</TableCell>
+                <TableCell>{row.status}</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                  {new Date(row.createdAt).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                  })}
+                </TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                  {new Date(row.updatedAt).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric"
+                  })}
+                </TableCell>
+                <TableCell padding="checkbox" sx={{ width: '48px' }}>
+                  <IconButton 
+                    onClick={(event) => handleMenuOpen(event, row.formId)}
+                    sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
             ))}
           </TableBody>
         </Table>
@@ -1048,159 +1268,209 @@ const FormTable: React.FC = () => {
 
       {/* Create Form Dialog */}
       <Dialog
-                open={createFormOpen}
-                onClose={handleCloseCreateDialog}
-                fullWidth
-                maxWidth="sm"
-                PaperProps={{
-                    sx: {
-                        borderRadius: '20px',
-                        padding: '16px 28px 40px',
-                        maxWidth: '650px',
-                        backgroundColor: '#f9f9f9',
-                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
-                    }
-                }}
+        open={createFormOpen}
+        onClose={handleCloseCreateDialog}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            padding: { xs: '16px', sm: '24px' },
+            maxWidth: '600px',
+            width: '100%',
+            backgroundColor: '#f9f9f9',
+            margin: { xs: '16px', sm: '32px' }
+          }
+        }}
+      >
+        <Box sx={{ position: 'relative' }}>
+          {/* Header section with back button */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: 2,
+            mb: { xs: 2, sm: 3 }, 
+            mt: { xs: 1, sm: 1 },
+            px: { xs: 2, sm: 3 }
+          }}>
+            <IconButton
+              onClick={handleCloseCreateDialog}
+              sx={{
+                p: 0,
+                '&:hover': {
+                  backgroundColor: 'transparent'
+                }
+              }}
             >
-                <Box sx={{ position: 'relative' }}>
-                    {/* Back button */}
-                    <IconButton
-                        onClick={handleCloseCreateDialog}
-                        sx={{
-                            position: 'absolute',
-                            left: 8,
-                            top: 8,
-                        }}
-                    >
-                        <ArrowBackIcon />
-                    </IconButton>
+              <ArrowBackIcon />
+            </IconButton>
 
-                    {/* Header section */}
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 3, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                                Create Form
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                Boost your employee’s productivity with digital forms.
-                            </Typography>
-                        </Box>
+            <Box>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.5rem', sm: '1.8rem' }
+              }}>
+                Create Form
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Boost your employee's productivity with digital forms.
+              </Typography>
+            </Box>
+          </Box>
 
+          <DialogContent sx={{ 
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2 }
+          }}>
+            <Box display="flex" flexDirection="column" gap={3}>
+              {/* First Row */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" gutterBottom>
+                    Template
+                  </Typography>
+                  <TextField
+                    select
+                    value={newForm.templateId}
+                    size="small"
+                    onChange={(e) => setNewForm({ 
+                      ...newForm, 
+                      templateId: e.target.value,
+                      type: templates.find(t => t.formTemplateId.toString() === e.target.value)?.name || '' 
+                    })}
+                    fullWidth
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  >
+                    {templates.map((template) => (
+                      <MenuItem key={template.formTemplateId} value={template.formTemplateId}>
+                        {template.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
 
-                    </Box>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" gutterBottom>
+                    Template Type
+                  </Typography>
+                  <TextField
+                    value={newForm.formName}
+                    size="small"
+                    onChange={(e) => setNewForm({ ...newForm, formName: e.target.value })}
+                    fullWidth
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
 
-                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
-                        <Box display="flex" flexDirection="column" gap={2.5}>
-                            {/* First Row: Form Type and Page Size */}
-                            <Box display="flex" gap={2} width="100%">
-                                {/* Form Type Field */}
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
-                                     Template
-                                    </Typography>
-                                    <TextField
-                                        select
-                                        value={newForm.type}
-                                        size="small"
-                                        onChange={(e) => setNewForm({ ...newForm, type: e.target.value })}
-                                        fullWidth
-                                        InputProps={{
-                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                        }}
-                                    >
-                                        <MenuItem value="Employees">Employees</MenuItem>
-                                        {/* Add more options as needed */}
-                                    </TextField>
-                                </Box>
+              {/* Second Row */}
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant="caption" gutterBottom>
+                    Form Name
+                  </Typography>
+                  <TextField
+                    value={newForm.name}
+                    onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
+                    fullWidth
+                    size="small"
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
 
-                                {/* Page Size Field */}
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
-                                        Template Type
-                                    </Typography>
-                                    <TextField
-                                        value={newForm.formName}
-                                        size="small"
-                                        onChange={(e) => setNewForm({ ...newForm, formName: e.target.value })}
-                                        fullWidth
-                                        InputProps={{
-                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
+              {/* Third Row */}
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant="caption" gutterBottom>
+                    Description
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={4}
+                    value={newForm.description}
+                    onChange={(e) => setNewForm({ ...newForm, description: e.target.value })}
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          </DialogContent>
 
-                            {/* Second Row: Form Name */}
-                            <Grid item xs={12} sm={6}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Form Name</Typography>
-                                <TextField
-                                    value={newForm.name}
-                                    InputProps={{ 
-                                        readOnly: false,
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                                    }}
-                                    fullWidth
-                                    variant="outlined"
-                                    size="small"
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} sm={6} mt={-2}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
-
-                                <TextField
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    value={newForm.description}
-                                    onChange={(e) => setNewForm({ ...newForm, description: e.target.value })}
-                                    InputProps={{
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                    }}
-                                />
-                            </Grid>
-                        </Box>
-                    </DialogContent>
-
-                    <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 5 }}>
-                        <Button
-                            variant="contained"
-                            onClick={() => console.log('Preview clicked')} // Add your preview logic here
-                            sx={{
-                                backgroundColor: 'black',
-                                color: 'white',
-                                borderRadius: '20px',
-                                width: '30%',
-                                marginTop: '-20px',
-                                marginBottom: '-25px',
-                                '&:hover': {
-                                    backgroundColor: '#333'
-                                }
-                            }}
-                        >
-                            Preview
-                        </Button>
-                        <Button
-                            variant="contained"
-                            onClick={handleCreateForm}
-                            sx={{
-                                backgroundColor: 'black',
-                                color: 'white',
-                                borderRadius: '20px',
-                                width: '30%',
-                                marginTop: '-20px',
-                                marginBottom: '-25px',
-                                '&:hover': {
-                                    backgroundColor: '#333'
-                                }
-                            }}
-                        >
-                            Create
-                        </Button>
-                    </DialogActions>
-                </Box>
-            </Dialog>
-             {/* Add Edit User Dialog */}
+          <DialogActions sx={{ 
+            p: { xs: 2, sm: 3 }, 
+            justifyContent: 'center', 
+            gap: { xs: 2, sm: 3 }
+          }}>
+            <Button
+              variant="contained"
+              onClick={() => console.log('Preview clicked')}
+              sx={{
+                backgroundColor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                width: { xs: '45%', sm: '35%' },
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#333'
+                }
+              }}
+            >
+              Preview
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleCreateForm}
+              sx={{
+                backgroundColor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                width: { xs: '45%', sm: '35%' },
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#333'
+                }
+              }}
+            >
+              Create
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
+       {/* Edit Form Dialog */}
       <Dialog
         open={isEditDialogOpen}
         onClose={handleCloseEditDialog}
@@ -1209,156 +1479,200 @@ const FormTable: React.FC = () => {
         PaperProps={{
           sx: {
             borderRadius: '20px',
-            padding: '16px 28px 40px',
-            maxWidth: '650px',
+            padding: { xs: '16px', sm: '24px' },
+            maxWidth: '600px',
+            width: '100%',
             backgroundColor: '#f9f9f9',
-            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+            margin: { xs: '16px', sm: '32px' }
           }
         }}
       >
         <Box sx={{ position: 'relative' }}>
-                    {/* Back button */}
-                    <IconButton
-                        onClick={handleCloseEditDialog}
-                        sx={{
-                            position: 'absolute',
-                            left: 8,
-                            top: 8,
-                        }}
-                    >
-                        <ArrowBackIcon />
-                    </IconButton>
+          {/* Header section with back button */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: 2,
+            mb: { xs: 2, sm: 3 }, 
+            mt: { xs: 1, sm: 1 },
+            px: { xs: 2, sm: 3 }
+          }}>
+            <IconButton
+              onClick={handleCloseEditDialog}
+              sx={{
+                p: 0,
+                '&:hover': {
+                  backgroundColor: 'transparent'
+                }
+              }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
 
-                    {/* Header section */}
-                    <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 3, mt: 2 }}>
-                        <Box sx={{ textAlign: 'left' }}>
-                            <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                                Update a Form
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                            Boost your employee’s productivity
-                            with digital forms.
-                            </Typography>
-                        </Box>
+            <Box>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.5rem', sm: '1.8rem' }
+              }}>
+                Update Form
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Boost your employee's productivity with digital forms.
+              </Typography>
+            </Box>
+          </Box>
 
+          <DialogContent sx={{ 
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2 }
+          }}>
+            <Box display="flex" flexDirection="column" gap={3}>
+              {/* First Row */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" gutterBottom>
+                    Template
+                  </Typography>
+                  <TextField
+                    select
+                    name="templateId"
+                    value={editFormData.templateId || ''}
+                    size="small"
+                    onChange={handleEditFormChange}
+                    fullWidth
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  >
+                    {templates.map((template) => (
+                      <MenuItem key={template.formTemplateId} value={template.formTemplateId}>
+                        {template.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
 
-                    </Box>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" gutterBottom>
+                    Template Type
+                  </Typography>
+                  <TextField
+                    name="formName"
+                    value={editFormData.formName}
+                    size="small"
+                    onChange={handleEditFormChange}
+                    fullWidth
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
 
-                    <DialogContent sx={{ px: 3, ml: 10, mr: 10 }}>
-                        <Box display="flex" flexDirection="column" gap={2.5}>
-                            {/* First Row: Form Type and Page Size */}
-                            <Box display="flex" gap={2} width="100%">
-                                {/* Form Type Field */}
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
-                                     Template
-                                    </Typography>
-                                    <TextField
-                                        select
-                                        name="type"
-                                        value={editFormData.type}
-                                        size="small"
-                                        onChange={handleEditFormChange}
-                                        fullWidth
-                                        InputProps={{
-                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                        }}
-                                    >
-                                        <MenuItem value="Employees">Employees</MenuItem>
-                                        <MenuItem value="Survey">Survey</MenuItem>
-                                        {/* Add more options as needed */}
-                                    </TextField>
-                                </Box>
+              {/* Second Row */}
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant="caption" gutterBottom>
+                    Form Name
+                  </Typography>
+                  <TextField
+                    name="name"
+                    value={editFormData.name}
+                    onChange={handleEditFormChange}
+                    fullWidth
+                    size="small"
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
 
-                                {/* Page Size Field */}
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>
-                                        Template Type
-                                    </Typography>
-                                    <TextField
-                                        name="formName"
-                                        value={editFormData.formName}
-                                        size="small"
-                                        onChange={handleEditFormChange}
-                                        fullWidth
-                                        InputProps={{
-                                            sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
+              {/* Third Row */}
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Typography variant="caption" gutterBottom>
+                    Description
+                  </Typography>
+                  <TextField
+                    name="description"
+                    fullWidth
+                    multiline
+                    rows={4}
+                    value={editFormData.description}
+                    onChange={handleEditFormChange}
+                    InputProps={{
+                      sx: { 
+                        backgroundColor: '#ffffff', 
+                        borderRadius: '8px',
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)'
+                        }
+                      }
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+          </DialogContent>
 
-                            {/* Second Row: Form Name */}
-                            <Grid item xs={12} sm={6}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Form Name</Typography>
-                                <TextField
-                                    name="name"
-                                    value={editFormData.name}
-                                    onChange={handleEditFormChange}
-                                    InputProps={{ 
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' }
-                                    }}
-                                    fullWidth
-                                    variant="outlined"
-                                    size="small"
-                                />
-                            </Grid>
-
-                            <Grid item xs={12} sm={6} mt={-2}>
-                                <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Description</Typography>
-
-                                <TextField
-                                    name="description"
-                                    fullWidth
-                                    multiline
-                                    rows={4}
-                                    value={editFormData.description}
-                                    onChange={handleEditFormChange}
-                                    InputProps={{
-                                        sx: { backgroundColor: '#ffffff', borderRadius: '5px', width: '100%' },
-                                    }}
-                                />
-                            </Grid>
-                        </Box>
-                    </DialogContent>
-
-                    <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 5 }}>
-                        <Button
-                            variant="contained"
-                            onClick={() => setEditDialogOpen(false)}
-                            sx={{
-                                backgroundColor: 'black',
-                                color: 'white',
-                                borderRadius: '20px',
-                                width: '30%',
-                                marginTop: '-20px',
-                                marginBottom: '-25px',
-                                '&:hover': {
-                                    backgroundColor: '#333'
-                                }
-                            }}
-                        >
-                            Preview
-                        </Button>
-                        <Button
-                            variant="contained"
-                            onClick={handleUpdateForm}
-                            sx={{
-                                backgroundColor: 'black',
-                                color: 'white',
-                                borderRadius: '20px',
-                                width: '30%',
-                                marginTop: '-20px',
-                                marginBottom: '-25px',
-                                '&:hover': {
-                                    backgroundColor: '#333'
-                                }
-                            }}
-                        >
-                            Update
-                        </Button>
-                    </DialogActions>
-                </Box>
+          <DialogActions sx={{ 
+            p: { xs: 2, sm: 3 }, 
+            justifyContent: 'space-between'
+          }}>
+            <Button
+              variant="outlined"
+              onClick={() => handlePreviewClick(editFormData?.templateId)}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                width: { xs: '45%', sm: '35%' },
+                py: 1,
+                '&:hover': {
+                  borderColor: '#333',
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                }
+              }}
+            >
+              Preview
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleUpdateForm}
+              sx={{
+                backgroundColor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                width: { xs: '45%', sm: '35%' },
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#333'
+                }
+              }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Box>
       </Dialog>
 
       <Dialog
@@ -1414,6 +1728,7 @@ const FormTable: React.FC = () => {
             </IconButton>
             
             <IconButton
+              onClick={() => handleDownloadPDF(viewFormData?.formTemplateId)}
               sx={{
                 backgroundColor: '#FFF0F0',
                 width: 56,
@@ -1472,6 +1787,7 @@ const FormTable: React.FC = () => {
         </Box>
       </Dialog>
 
+      {/* View Form Dialog */}
       <Dialog
         open={viewDialogOpen}
         onClose={handleCloseViewDialog}
@@ -1480,32 +1796,349 @@ const FormTable: React.FC = () => {
         PaperProps={{
           sx: {
             borderRadius: '20px',
-            padding: '16px 28px 40px',
-            maxWidth: '650px',
-            height: '500px',
+            padding: { xs: '16px', sm: '24px' },
+            maxWidth: '600px',
+            width: '100%',
             backgroundColor: '#f9f9f9',
-            boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+            margin: { xs: '16px', sm: '32px' },
+            overflowY: 'visible',
+            overflowX: 'visible'
           }
         }}
       >
         <Box sx={{ position: 'relative' }}>
-          {/* Back button */}
-          <IconButton
-            onClick={handleCloseViewDialog}
-            sx={{
-              position: 'absolute',
-              left: 8,
-              top: 8,
-            }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
+          {/* Header section with back button */}
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center',
+            gap: 2,
+            mb: { xs: 2, sm: 3 }, 
+            mt: { xs: 1, sm: 1 },
+            px: { xs: 2, sm: 3 }
+          }}>
+            <IconButton
+              onClick={handleCloseViewDialog}
+              sx={{
+                p: 0,
+                '&:hover': {
+                  backgroundColor: 'transparent'
+                }
+              }}
+            >
+              <ArrowBackIcon />
+            </IconButton>
 
-          {/* Empty content */}
-          <DialogContent>
+            <Box>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 'bold',
+                fontSize: { xs: '1.5rem', sm: '1.8rem' }
+              }}>
+                View Form
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Form details and information
+              </Typography>
+            </Box>
+          </Box>
+
+          <DialogContent sx={{ 
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2 },
+            overflowY: 'visible',
+            overflowX: 'visible'
+          }}>
+            {viewFormData && (
+              <Box display="flex" flexDirection="column" gap={3}>
+                {/* First Row */}
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" gutterBottom>
+                      Template
+                    </Typography>
+                    <TextField
+                      value={templates.find(t => t.formTemplateId === viewFormData.formTemplateId)?.name || 'N/A'}
+                      fullWidth
+                      size="small"
+                      InputProps={{
+                        readOnly: true,
+                        sx: { 
+                          backgroundColor: '#ffffff', 
+                          borderRadius: '8px',
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.1)'
+                          },
+                          '& .MuiInputBase-input.Mui-readOnly': {
+                            cursor: 'default',
+                            color: 'rgba(0, 0, 0, 0.87)'
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" gutterBottom>
+                      Status
+                    </Typography>
+                    <TextField
+                      value={viewFormData.status}
+                      fullWidth
+                      size="small"
+                      InputProps={{
+                        readOnly: true,
+                        sx: { 
+                          backgroundColor: '#ffffff', 
+                          borderRadius: '8px',
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.1)'
+                          },
+                          '& .MuiInputBase-input.Mui-readOnly': {
+                            cursor: 'default',
+                            color: 'rgba(0, 0, 0, 0.87)'
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* Second Row */}
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="caption" gutterBottom>
+                      Form Name
+                    </Typography>
+                    <TextField
+                      value={viewFormData.name}
+                      fullWidth
+                      size="small"
+                      InputProps={{
+                        readOnly: true,
+                        sx: { 
+                          backgroundColor: '#ffffff', 
+                          borderRadius: '8px',
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.1)'
+                          },
+                          '& .MuiInputBase-input.Mui-readOnly': {
+                            cursor: 'default',
+                            color: 'rgba(0, 0, 0, 0.87)'
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* Third Row */}
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <Typography variant="caption" gutterBottom>
+                      Description
+                    </Typography>
+                    <TextField
+                      value={viewFormData.description}
+                      fullWidth
+                      multiline
+                      rows={4}
+                      InputProps={{
+                        readOnly: true,
+                        sx: { 
+                          backgroundColor: '#ffffff', 
+                          borderRadius: '8px',
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.1)'
+                          },
+                          '& .MuiInputBase-input.Mui-readOnly': {
+                            cursor: 'default',
+                            color: 'rgba(0, 0, 0, 0.87)'
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+
+                {/* Fourth Row */}
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" gutterBottom>
+                      Created Date
+                    </Typography>
+                    <TextField
+                      value={new Date(viewFormData.createdAt).toLocaleDateString()}
+                      fullWidth
+                      size="small"
+                      InputProps={{
+                        readOnly: true,
+                        sx: { 
+                          backgroundColor: '#ffffff', 
+                          borderRadius: '8px',
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.1)'
+                          },
+                          '& .MuiInputBase-input.Mui-readOnly': {
+                            cursor: 'default',
+                            color: 'rgba(0, 0, 0, 0.87)'
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="caption" gutterBottom>
+                      Last Modified Date
+                    </Typography>
+                    <TextField
+                      value={new Date(viewFormData.updatedAt).toLocaleDateString()}
+                      fullWidth
+                      size="small"
+                      InputProps={{
+                        readOnly: true,
+                        sx: { 
+                          backgroundColor: '#ffffff', 
+                          borderRadius: '8px',
+                          '& fieldset': {
+                            borderColor: 'rgba(0, 0, 0, 0.1)'
+                          },
+                          '& .MuiInputBase-input.Mui-readOnly': {
+                            cursor: 'default',
+                            color: 'rgba(0, 0, 0, 0.87)'
+                          }
+                        }
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
           </DialogContent>
+
+          <DialogActions sx={{ 
+            p: { xs: 2, sm: 3 }, 
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="contained"
+              onClick={handleCloseViewDialog}
+              sx={{
+                backgroundColor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                width: { xs: '45%', sm: '35%' },
+                py: 1,
+                '&:hover': {
+                  backgroundColor: '#333'
+                }
+              }}
+            >
+              Close
+            </Button>
+          </DialogActions>
         </Box>
       </Dialog>
+
+      <Popover
+        open={Boolean(menuAnchor)}
+        anchorEl={menuAnchor}
+        onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'center',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'center',
+          horizontal: 'right',
+        }}
+        PaperProps={{
+          sx: {
+            backgroundColor: 'rgba(0, 0, 0, 0.25)',
+            color: 'black',
+            padding: '5px',
+          },
+        }}
+      >
+        <MenuItem
+          onClick={() => {
+            handleViewClick(forms.find(form => form.formId === selectedRowId));
+            handleMenuClose();
+          }}
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            margin: '5px',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            minHeight: '30px',
+            minWidth: '100px',
+            '&:hover': { backgroundColor: '#f0f0f0' },
+          }}
+        >
+          View
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleEditClick(forms.find(form => form.formId === selectedRowId));
+            handleMenuClose();
+          }}
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            margin: '5px',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            minHeight: '30px',
+            minWidth: '100px',
+            '&:hover': { backgroundColor: '#f0f0f0' },
+          }}
+        >
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleShareClick(forms.find(form => form.formId === selectedRowId)!);
+            handleMenuClose();
+          }}
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            margin: '5px',
+            justifyContent: 'center',
+            fontSize: '0.875rem',
+            minHeight: '30px',
+            minWidth: '100px',
+            '&:hover': { backgroundColor: '#f0f0f0' },
+          }}
+        >
+          Share
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            handleDeleteConfirmation(selectedRowId);
+            handleMenuClose();
+          }}
+          sx={{
+            backgroundColor: 'white',
+            borderRadius: '10px',
+            margin: '5px',
+            justifyContent: 'center',
+            color: 'red',
+            fontSize: '0.875rem',
+            minHeight: '30px',
+            minWidth: '100px',
+            '&:hover': { backgroundColor: '#f0f0f0' },
+          }}
+        >
+          Delete
+        </MenuItem>
+      </Popover>
+
+      <PreviewDialog
+        open={previewOpen}
+        onClose={() => setPreviewOpen(false)}
+        templateId={previewTemplateId}
+      />
 
       <ToastContainer></ToastContainer>
     </Paper>

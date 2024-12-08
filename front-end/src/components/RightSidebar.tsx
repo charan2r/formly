@@ -191,6 +191,7 @@ const EditPageSettings: React.FC = () => {
           console.log("Template data received:", template); // Debug log
 
           setTemplateData(template);
+          console.log("Template data received:", template); // Debug log
           setTemplateId(template.formTemplateId);
           // Initialize states with template data
           setBackgroundColor(template.backgroundColor || '#ffffff');

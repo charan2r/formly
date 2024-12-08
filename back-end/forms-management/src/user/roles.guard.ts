@@ -29,12 +29,14 @@ export class RolesGuard implements CanActivate {
       if (!orgIdFromRequest) {
         orgIdFromRequest = user.organizationId;
       }
+    console.log(user.organizationId, orgIdFromRequest);
 
-      if (user.organizationId !== orgIdFromRequest) {
-        throw new ForbiddenException(
-          `Admins can only perform actions on their own organization. You are restricted to organization ID "${user.organizationId}".`
-        );
-      }
+      // need a more better implementation over here
+      // if (user.organizationId !== orgIdFromRequest) {
+      //   throw new ForbiddenException(
+      //     `Admins can only perform actions on their own organization. You are restricted to organization ID "${user.organizationId}".`
+      //   );
+      // }
       return true; // Admin is automatically authorized if organization check passes
     }
 

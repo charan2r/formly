@@ -108,6 +108,10 @@ export class UpdateTemplateDto {
   boxShadowColor?: string;
 
   @IsOptional()
+  @IsUUID()
+  organizationId?: string;
+
+  @IsOptional()
   @IsNumber()
   boxShadowOpacity?: number;
 }

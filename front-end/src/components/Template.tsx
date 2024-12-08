@@ -234,6 +234,7 @@ const Template: React.FC = () => {
             console.log(newTemplate);
             const response = await api.post('/form-templates/create', {
                 ...newTemplate,
+                organizationId: user?.organizationId,
                 categoryId: newTemplate.categoryId,
                 pageSize: newTemplate.pageSize,
                 status: 'active',

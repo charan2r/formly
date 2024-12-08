@@ -10,13 +10,13 @@ import { RolesGuard } from 'src/user/roles.guard';
 import { Roles } from 'src/user/roles.decorator';
 
 @Controller('organization')
-@Roles("SuperAdmin")
 @UseGuards(AuthGuard('jwt'), RolesGuard) // Protect all routes with JWT authentication
 export class OrganizationController {
     constructor(private readonly organizationService: OrganizationService) {}
 
     // API endpoint to get all organizations
     @Get()
+    @Roles("SuperAdmin")
     async getAll() {
         const organizations = await this.organizationService.getAll();
         return {
@@ -28,6 +28,7 @@ export class OrganizationController {
 
     // API endpoint to get details of a specific organization along with super admin details
     @Get('details')
+    @Roles("SuperAdmin")
     async getOrganizationDetails(
         @Query('id') orgId: string | undefined,
         @Request() req: any
@@ -48,6 +49,7 @@ export class OrganizationController {
 
     // API endpoint to update details of a specific organization
     @Patch('edit')
+    @Roles("SuperAdmin")
     async updateOrganization(
       @Query('id') orgId: string,
       @Body() updateOrganizationDto: UpdateOrganizationDto,
@@ -65,6 +67,7 @@ export class OrganizationController {
 
     // API endpoint to delete a specific organization
     @Delete('delete')
+    @Roles("SuperAdmin")
     async deleteOne(@Query('id') id: string): Promise<{ status: string; message: string }> {
         const deleted = await this.organizationService.deleteOne(id);
         if (!deleted) {
@@ -78,6 +81,7 @@ export class OrganizationController {
 
     // API endpoint to bulk delete organizations
     @Delete('bulk-delete')
+    @Roles("SuperAdmin")
     async bulkDeleteOrganizations(@Body('ids') orgIds: string[]) {
       if (!orgIds || orgIds.length === 0) {
         throw new BadRequestException('No organization IDs provided for bulk deletion');
@@ -96,6 +100,7 @@ export class OrganizationController {
 
     // API endpoint to create a new organization with super admin
     @Post('create')
+    @Roles("SuperAdmin")
     async createOrganizationWithSuperAdmin(
       @Body('organizationData') organizationData: any,
       @Body('superAdminData') superAdminData: any,
@@ -130,6 +135,7 @@ export class OrganizationController {
     }
 
     @Patch('change-admin')
+    @Roles("SuperAdmin")
     async changeOrganizationAdmin(
       @Query('orgId') orgId: string,
       @Body() adminData: {
@@ -158,6 +164,7 @@ export class OrganizationController {
     }
 
     @Get('user-types-count')
+    @Roles("SuperAdmin")
     async getUserTypesCounts(@Req() request): Promise<{ status: string; message: string; data: any }> {
       try {
         const user = request.user;

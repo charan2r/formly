@@ -17,12 +17,12 @@ interface MetaSchemaResponse<T> {
 
 @Controller('forms')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles('Admin', 'SubUser')
 export class FormsController {
   constructor(private readonly formsService: FormsService) {}
 
   // API endpoint to create forms
   @Permissions('Create form')
+  @Roles('Admin', 'SubUser')
   @Post('create')
   async createForm(@Body() createFormDto: CreateFormDto): Promise<Form> {
     return this.formsService.create(createFormDto);
@@ -30,6 +30,7 @@ export class FormsController {
 
   // API endpoint to get all forms
   @Get()
+  @Roles('Admin', 'SubUser')
   @Permissions('View forms')
   async getAll(): Promise<MetaSchemaResponse<Form[]>> {
     const forms = await this.formsService.findAll();
@@ -42,6 +43,7 @@ export class FormsController {
 
   // API endpoint to get a form by ID
   @Get('details')
+  @Roles('Admin', 'SubUser')
   @Permissions('View form')
   async findOne(@Query('id') formId: string): Promise<MetaSchemaResponse<Form | undefined>> {
     const form = await this.formsService.findOne(formId);
@@ -60,6 +62,7 @@ export class FormsController {
 
   // API endpoint to update a form
   @Patch('edit')
+  @Roles('Admin', 'SubUser')
   @Permissions('Edit form')
   async updateForm(
     @Query('id') id: string,
@@ -78,6 +81,7 @@ export class FormsController {
 
   // API endpoint to delete a form
   @Delete('delete')
+  @Roles('Admin', 'SubUser')
   @Permissions('Delete form')
   async softDelete(@Query('id') id: string): Promise<MetaSchemaResponse<Form>> {
     const deletedForm = await this.formsService.softDelete(id);
@@ -93,6 +97,7 @@ export class FormsController {
 
   // API endpoint to bulk delete forms
   @Delete('bulk-delete')
+  @Roles('Admin', 'SubUser')
   @Permissions('Delete form') 
   async bulkDelete(@Body('ids') ids: string[]): Promise<MetaSchemaResponse<null>> {
     const deletedForms = await this.formsService.bulkDelete(ids);
