@@ -95,7 +95,7 @@ function ChangeOrganization() {
   };
 
   const handleBack = () => {
-    navigate(`/view-organization/${orgId}`);
+    navigate(-1);
   };
 
   return (
@@ -156,7 +156,7 @@ function ChangeOrganization() {
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom>Admin's First Name *</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's First Name *</Typography>
             <TextField
               name="firstName"
               value={formData.firstName}
@@ -167,12 +167,12 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px' }}
+              sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom>Admin's Last Name *</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's Last Name *</Typography>
             <TextField
               name="lastName"
               value={formData.lastName}
@@ -183,12 +183,12 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px' }}
+              sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom>New Phone</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Phone</Typography>
             <TextField
               name="phone"
               value={formData.phone}
@@ -198,12 +198,12 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px' }}
+              sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom>New Email</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Email</Typography>
             <TextField
               name="email"
               value={formData.email}
@@ -213,7 +213,7 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px' }}
+              sx={{ paddingY: '2px', marginBottom: '-8px' }}
             />
           </Grid>
         </Grid>
