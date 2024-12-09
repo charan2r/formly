@@ -127,10 +127,10 @@ function ChangeOrganization() {
           </Typography>
         </Box>
 
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginBottom: '20px' }}>
           <Box>
             <Typography variant="h5" fontWeight="bold">Change Admin</Typography>
-            <Typography variant="body2" color="textSecondary" marginBottom="20px">
+            <Typography variant="body2" color="textSecondary">
               Change and Manage Admin Details.
             </Typography>
           </Box>
@@ -151,7 +151,7 @@ function ChangeOrganization() {
       </Box>
 
       <form>
-        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px' }}>
+        <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', fontWeight: 'bold' }}>
           New Admin Details
         </Typography>
         <Grid container spacing={2}>
