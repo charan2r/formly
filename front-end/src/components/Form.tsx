@@ -106,17 +106,42 @@ const FormPrintComponent = React.forwardRef<HTMLDivElement, any>((props, ref) =>
   const pageSize = template.pageSize || 'A4';
   const { width, height } = pageSizes[pageSize];
 
+  // Create a style object for the container
+  const containerStyle = {
+    width: `${width}px`,
+    height: `${height}px`,
+    backgroundColor: template.backgroundColor || '#ffffff',
+    padding: `${template.marginTop || 10}px ${template.marginRight || 10}px 
+              ${template.marginBottom || 10}px ${template.marginLeft || 10}px`,
+    position: 'relative' as const,
+    overflow: 'hidden',
+    boxSizing: 'border-box' as const
+  };
+
+  // Create appearance settings object for form fields
+  const formFieldAppearance = {
+    border: {
+      width: template.borderWidth || 0,
+      style: template.borderStyle || 'none',
+      color: template.borderColor || '#000000',
+      radius: template.borderRadius || 0
+    },
+    boxShadow: {
+      x: template.boxShadowX || 0,
+      y: template.boxShadowY || 0,
+      blur: template.boxShadowBlur || 0,
+      spread: template.boxShadowSpread || 0,
+      color: template.boxShadowColor || '#000000',
+      opacity: template.boxShadowOpacity || 1
+    },
+    background: {
+      color: template.backgroundColor || '#ffffff',
+      opacity: 100
+    }
+  };
+
   return (
-    <div 
-      ref={ref}
-      style={{
-        width: `${width}px`,
-        height: `${height}px`,
-        backgroundColor: template.backgroundColor || '#ffffff',
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-    >
+    <div ref={ref} style={containerStyle}>
       <DraggableQuestion
         formTemplateId={template.templateId}
         items={formFields}
@@ -124,7 +149,7 @@ const FormPrintComponent = React.forwardRef<HTMLDivElement, any>((props, ref) =>
         selectedSize={pageSize}
         pageSizes={pageSizes}
         isViewMode={true}
-        appearanceSettings={appearanceSettings}
+        appearanceSettings={formFieldAppearance}
         onQuestionChange={() => {}}
         onOptionChange={() => {}}
         onDeleteOption={() => {}}
@@ -153,6 +178,7 @@ const PreviewDialog: React.FC<{
           ]);
 
           setTemplate(templateResponse.data.data);
+          console.log(templateResponse.data.data)
           setFormFields(fieldsResponse.data.data);
         } catch (error) {
           console.error('Error fetching preview data:', error);
@@ -192,12 +218,12 @@ const PreviewDialog: React.FC<{
 
     // Add print-specific styles with correct targeting
     const printStyles = `
-      @page {
-        size: ${template?.pageSize || 'A4'};
-        margin: 0;
-      }
-      
       @media print {
+        @page {
+          size: ${template?.pageSize || 'A4'};
+          margin: 0;
+        }
+        
         body {
           margin: 0;
           padding: 0;
@@ -214,21 +240,20 @@ const PreviewDialog: React.FC<{
           background-color: ${template?.backgroundColor || '#ffffff'} !important;
           padding: ${template?.marginTop || 10}px ${template?.marginRight || 10}px 
                   ${template?.marginBottom || 10}px ${template?.marginLeft || 10}px !important;
+          box-sizing: border-box !important;
         }
 
         /* Form field-level styles */
-        .react-draggable {
-          border-width: ${template?.borderWidth || 0}px !important;
-          border-style: ${template?.borderStyle || 'none'} !important;
-          border-color: ${template?.borderColor || '#000000'} !important;
-          border-radius: ${template?.borderRadius || 0}px !important;
-          box-shadow: ${template?.boxShadowX || 0}px 
-                     ${template?.boxShadowY || 0}px 
-                     ${template?.boxShadowBlur || 0}px 
-                     ${template?.boxShadowSpread || 0}px 
-                     ${template?.boxShadowColor || '#000000'} !important;
-          opacity: ${(template?.boxShadowOpacity || 100) / 100} !important;
-          background-color: ${template?.backgroundColor || '#ffffff'} !important;
+        .form-field {
+          border: ${template?.borderWidth}px ${template?.borderStyle} ${template?.borderColor} !important;
+          border-radius: ${template?.borderRadius}px !important;
+          box-shadow: ${template?.boxShadowX}px 
+                     ${template?.boxShadowY}px 
+                     ${template?.boxShadowBlur}px 
+                     ${template?.boxShadowSpread}px 
+                     ${template?.boxShadowColor} !important;
+          opacity: ${template?.boxShadowOpacity} !important;
+          background-color: ${template?.backgroundColor} !important;
         }
 
         /* Hide UI elements */
@@ -321,6 +346,7 @@ const PreviewDialog: React.FC<{
 
     printWindow.document.close();
   };
+  // console.log(template)
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -797,6 +823,29 @@ const FormTable: React.FC = () => {
     setPreviewTemplateId(templateId);
     setPreviewOpen(true);
   };
+
+    // Add these state declarations at the top
+    const [appearanceSettings, setAppearanceSettings] = useState({
+      border: {
+        width: 0,
+        style: 'none',
+        color: '#e0e0e0',
+        radius: 12
+      },
+      boxShadow: {
+        x: 0,
+        y: 4,
+        blur: 12,
+        spread: 0,
+        color: 'rgba(0, 0, 0, 0.1)',
+        enabled: true
+      },
+      background: {
+        color: '#ffffff',
+        opacity: 100
+      }
+    });
+  
 
   const handleDownloadPDF = async (templateId: string | undefined) => {
     if (!templateId) {

@@ -31,6 +31,35 @@ const ViewTemplate: React.FC = () => {
   const [gridSize, setGridSize] = useState({ width: 210 * 3.7795, height: 297 * 3.7795 });
   const paperRef = useRef<HTMLDivElement>(null);
 
+  // Add these state declarations at the top
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    border: {
+      width: 0,
+      style: 'none',
+      color: '#e0e0e0',
+      radius: 12
+    },
+    boxShadow: {
+      x: 0,
+      y: 4,
+      blur: 12,
+      spread: 0,
+      color: 'rgba(0, 0, 0, 0.1)',
+      enabled: true
+    },
+    background: {
+      color: '#ffffff',
+      opacity: 100
+    }
+  });
+
+  const [templateName, setTemplateName] = useState('Employee Survey');
+  // const [templateIdd, setTemplateId] = useState(templateId);
+  const [templateDescription, setTemplateDescription] = useState('Add a description');
+  const [gridPadding, setGridPadding] = useState({ top: 10, bottom: 10, left: 10, right: 10 });
+
+
+
   // Fetch template data
   useEffect(() => {
     const fetchTemplateData = async () => {
@@ -41,6 +70,43 @@ const ViewTemplate: React.FC = () => {
           setTemplateData(template);
           setSelectedSize(template.pageSize || 'A4');
           setBackgroundColor(template.backgroundColor || '#ffffff');
+
+          // setTemplateId(template.formTemplateId);
+          // Initialize states with template data
+          setBackgroundColor(template.backgroundColor || '#ffffff');
+          setSelectedSize(template.pageSize || 'A4');
+          setGridPadding({
+            top: parseInt(template.marginTop) || 10,
+            bottom: parseInt(template.marginBottom) || 10,
+            left: parseInt(template.marginLeft) || 10,
+            right: parseInt(template.marginRight) || 10
+          });
+          setTemplateName(template.name);
+          setTemplateDescription(template.description);
+          console.log(template)
+
+          // Initialize appearance settings
+          setAppearanceSettings({
+            border: {
+              width: template.borderWidth === 0 ? undefined : template.borderWidth,
+              radius: template.borderRadius,
+              style: template.borderStyle,
+              color: template.borderColor
+            },
+            boxShadow: {
+              x: template.boxShadowX ?? 0,
+              y: template.boxShadowY ?? 4,
+              blur: template.boxShadowBlur ?? 12,
+              spread: template.boxShadowSpread ?? 0,
+              color: template.boxShadowColor ?? 'rgba(0, 0, 0, 0.1)',
+              enabled: true
+            },
+            background: {
+              color: template.backgroundColor ?? '#ffffff',
+              opacity: ((template.boxShadowOpacity ?? 1) * 100)
+            }
+          });
+
         }
       } catch (error) {
         console.error('Error fetching template data:', error);
@@ -140,6 +206,7 @@ const ViewTemplate: React.FC = () => {
               onDeleteOption={() => {}}
               onAddOption={() => {}}
               isViewMode={true}
+              appearanceSettings={appearanceSettings}
             />
           </div>
         </Grid>
