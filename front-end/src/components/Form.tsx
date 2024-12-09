@@ -349,60 +349,133 @@ const PreviewDialog: React.FC<{
   // console.log(template)
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        Preview Form
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="md" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: '20px',
+          backgroundColor: '#f9f9f9',
+          overflow: 'hidden'
+        }
+      }}
+    >
+      {/* Header */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center',
+        padding: '24px',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
+      }}>
+        <IconButton
+          onClick={onClose}
+          sx={{
+            mr: 2,
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)'
+            }
+          }}
+        >
+          <KeyboardBackspaceRoundedIcon />
+        </IconButton>
+        
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
+            Preview Form
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {template?.name || 'Loading...'}
+          </Typography>
+        </Box>
+
         <IconButton 
           onClick={handlePrint}
-          style={{ position: 'absolute', right: 48 }}
+          sx={{
+            ml: 1,
+            backgroundColor: 'black',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: '#333'
+            }
+          }}
         >
           <PrintIcon />
         </IconButton>
-        <IconButton 
-          onClick={onClose}
-          style={{ position: 'absolute', right: 8 }}
-        >
-          <CloseIcon />
-        </IconButton>
-      </DialogTitle>
-      <DialogContent>
-        {template && (
-          <div 
-            ref={printRef}
-            className="printable-form"
-            style={{
-              width: `${pageSizes[template.pageSize || 'A4'].width}px`,
-              height: `${pageSizes[template.pageSize || 'A4'].height}px`,
-              backgroundColor: template.backgroundColor || '#ffffff',
-              padding: `${template.marginTop || 10}px ${template.marginRight || 10}px 
-                        ${template.marginBottom || 10}px ${template.marginLeft || 10}px`,
-              position: 'relative',
-              overflow: 'hidden'
+      </Box>
+
+      {/* Content */}
+      <DialogContent sx={{ 
+        p: 3,
+        backgroundColor: '#fff',
+        display: 'flex',
+        justifyContent: 'center',
+        minHeight: '60vh'
+      }}>
+        {template ? (
+          <Box
+            sx={{
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              overflow: 'auto',
+              p: 2,
+              backgroundColor: '#f5f5f5',
+              borderRadius: '12px'
             }}
           >
-            <FormPrintComponent
-              template={{
-                ...template,
-                // Pass form field specific styles separately
-                formFieldStyles: {
-                  borderWidth: template.borderWidth,
-                  borderRadius: template.borderRadius,
-                  borderStyle: template.borderStyle,
-                  borderColor: template.borderColor,
-                  boxShadowX: template.boxShadowX,
-                  boxShadowY: template.boxShadowY,
-                  boxShadowBlur: template.boxShadowBlur,
-                  boxShadowSpread: template.boxShadowSpread,
-                  boxShadowColor: template.boxShadowColor,
-                  boxShadowOpacity: template.boxShadowOpacity,
-                  backgroundColor: template.backgroundColor
-                }
+            <div 
+              ref={printRef}
+              className="printable-form"
+              style={{
+                width: `${pageSizes[template.pageSize || 'A4'].width}px`,
+                height: `${pageSizes[template.pageSize || 'A4'].height}px`,
+                backgroundColor: template.backgroundColor || '#ffffff',
+                padding: `${template.marginTop || 10}px ${template.marginRight || 10}px 
+                          ${template.marginBottom || 10}px ${template.marginLeft || 10}px`,
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                borderRadius: '8px'
               }}
-              formFields={formFields}
-              appearanceSettings={template.appearanceSettings}
-              pageSizes={pageSizes}
-            />
-          </div>
+            >
+              <FormPrintComponent
+                template={{
+                  ...template,
+                  formFieldStyles: {
+                    borderWidth: template.borderWidth,
+                    borderRadius: template.borderRadius,
+                    borderStyle: template.borderStyle,
+                    borderColor: template.borderColor,
+                    boxShadowX: template.boxShadowX,
+                    boxShadowY: template.boxShadowY,
+                    boxShadowBlur: template.boxShadowBlur,
+                    boxShadowSpread: template.boxShadowSpread,
+                    boxShadowColor: template.boxShadowColor,
+                    boxShadowOpacity: template.boxShadowOpacity,
+                    backgroundColor: template.backgroundColor
+                  }
+                }}
+                formFields={formFields}
+                appearanceSettings={template.appearanceSettings}
+                pageSizes={pageSizes}
+              />
+            </div>
+          </Box>
+        ) : (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            height: '100%'
+          }}>
+            <Typography variant="body1" color="text.secondary">
+              Loading preview...
+            </Typography>
+          </Box>
         )}
       </DialogContent>
     </Dialog>
@@ -1689,7 +1762,7 @@ const FormTable: React.FC = () => {
           }}>
             <Button
               variant="outlined"
-              onClick={() => handlePreviewClick(editFormData?.templateId)}
+              onClick={() => handlePreviewClick(editFormData?.formTemplateId)}
               sx={{
                 borderColor: 'black',
                 color: 'black',
@@ -1849,7 +1922,7 @@ const FormTable: React.FC = () => {
             maxWidth: '600px',
             width: '100%',
             backgroundColor: '#f9f9f9',
-            margin: { xs: '16px', sm: '32px' },
+            margin: { xs: '16px 16px', sm: '32px 32px' },
             overflowY: 'visible',
             overflowX: 'visible'
           }
@@ -2066,8 +2139,25 @@ const FormTable: React.FC = () => {
 
           <DialogActions sx={{ 
             p: { xs: 2, sm: 3 }, 
-            justifyContent: 'center'
+            justifyContent: 'space-between'
           }}>
+            <Button
+              variant="outlined"
+              onClick={() => handlePreviewClick(viewFormData?.formTemplateId)}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                width: { xs: '45%', sm: '35%' },
+                py: 1,
+                '&:hover': {
+                  borderColor: '#333',
+                  backgroundColor: 'rgba(0, 0, 0, 0.04)'
+                }
+              }}
+            >
+              Preview
+            </Button>
             <Button
               variant="contained"
               onClick={handleCloseViewDialog}
