@@ -1762,7 +1762,7 @@ const FormTable: React.FC = () => {
           }}>
             <Button
               variant="outlined"
-              onClick={() => handlePreviewClick(editFormData?.formTemplateId)}
+              onClick={() => handlePreviewClick(editFormData?.templateId)}
               sx={{
                 borderColor: 'black',
                 color: 'black',
@@ -1922,7 +1922,7 @@ const FormTable: React.FC = () => {
             maxWidth: '600px',
             width: '100%',
             backgroundColor: '#f9f9f9',
-            margin: { xs: '16px 16px', sm: '32px 32px' },
+            margin: { xs: '16px', sm: '32px' },
             overflowY: 'visible',
             overflowX: 'visible'
           }
@@ -2139,25 +2139,8 @@ const FormTable: React.FC = () => {
 
           <DialogActions sx={{ 
             p: { xs: 2, sm: 3 }, 
-            justifyContent: 'space-between'
+            justifyContent: 'center'
           }}>
-            <Button
-              variant="outlined"
-              onClick={() => handlePreviewClick(viewFormData?.formTemplateId)}
-              sx={{
-                borderColor: 'black',
-                color: 'black',
-                borderRadius: '20px',
-                width: { xs: '45%', sm: '35%' },
-                py: 1,
-                '&:hover': {
-                  borderColor: '#333',
-                  backgroundColor: 'rgba(0, 0, 0, 0.04)'
-                }
-              }}
-            >
-              Preview
-            </Button>
             <Button
               variant="contained"
               onClick={handleCloseViewDialog}
