@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Controller, UseGuards,Get, Delete, Post, Request, NotFoundException, Query, Patch, Body, BadRequestException, HttpException, HttpStatus, ConflictException, Req} from '@nestjs/common';
 import { OrganizationService } from './organization.service';
 import { Organization } from 'src/model/organization.entity';

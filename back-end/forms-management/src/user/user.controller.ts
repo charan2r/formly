@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Controller, Get, Query, NotFoundException, Post, Body, Patch, Delete, UseGuards, ForbiddenException, Request, BadRequestException,ExecutionContext} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
