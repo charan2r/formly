@@ -33,6 +33,9 @@ interface FormData {
 interface PermissionGroups {
   userManagement: Permission[];
   formManagement: Permission[];
+  templateManagement: Permission[];
+  categoryManagement: Permission[];
+  roleManagement: Permission[];
 }
 
 interface SelectedPermissions {
@@ -70,7 +73,10 @@ function AddRole() {
   const [selectedPermissions, setSelectedPermissions] = useState<SelectedPermissions>({});
   const [permissionGroups, setPermissionGroups] = useState<PermissionGroups>({
     userManagement: [],
-    formManagement: []
+    formManagement: [],
+    templateManagement: [],
+    categoryManagement: [],
+    roleManagement: []
   });
 
   // Fetch permissions when component mounts
@@ -78,18 +84,30 @@ function AddRole() {
     const fetchPermissions = async () => {
       try {
         const response = await api.get('/permissions');
-        console.log(response.data);
         const permissions = response.data;
         
-        // Group permissions
+        // Group permissions based on their names
         const grouped = permissions.reduce((acc: PermissionGroups, permission: Permission) => {
-          if (permission.name.toLowerCase().includes('user')) {
+          const name = permission.name.toLowerCase();
+          if (name.includes('user')) {
             acc.userManagement.push(permission);
-          } else if (permission.name.toLowerCase().includes('form')) {
+          } else if (name.includes('form')) {
             acc.formManagement.push(permission);
+          } else if (name.includes('template')) {
+            acc.templateManagement.push(permission);
+          } else if (name.includes('category')) {
+            acc.categoryManagement.push(permission);
+          } else if (name.includes('role')) {
+            acc.roleManagement.push(permission);
           }
           return acc;
-        }, { userManagement: [], formManagement: [] });
+        }, {
+          userManagement: [],
+          formManagement: [],
+          templateManagement: [],
+          categoryManagement: [],
+          roleManagement: []
+        });
 
         setPermissionGroups(grouped);
         setAvailablePermissions(permissions);
@@ -357,51 +375,41 @@ function AddRole() {
         </Grid>
       </Grid>
 
-      {/* User Management Group */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="20px">
-        <Typography variant="subtitle1" fontWeight="bold">User Management</Typography>
-        <Checkbox
-          checked={permissionGroups.userManagement.every(p => selectedPermissions[p.permissionId])}
-          onChange={() => handleGroupChange(permissionGroups.userManagement)}
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      {permissionGroups.userManagement.map(permission => (
-        <React.Fragment key={permission.permissionId}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography>{permission.name}</Typography>
-            <Checkbox
-              checked={selectedPermissions[permission.permissionId] || false}
-              onChange={() => handlePermissionChange(permission.permissionId)}
-              sx={{ color: 'black' }}
-            />
-          </Box>
-          <Divider />
-        </React.Fragment>
-      ))}
-
-      {/* Form Management Group */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="16px">
-        <Typography variant="subtitle1" fontWeight="bold">Form Management</Typography>
-        <Checkbox
-          checked={permissionGroups.formManagement.every(p => selectedPermissions[p.permissionId])}
-          onChange={() => handleGroupChange(permissionGroups.formManagement)}
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      {permissionGroups.formManagement.map(permission => (
-        <React.Fragment key={permission.permissionId}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography>{permission.name}</Typography>
-            <Checkbox
-              checked={selectedPermissions[permission.permissionId] || false}
-              onChange={() => handlePermissionChange(permission.permissionId)}
-              sx={{ color: 'black' }}
-            />
-          </Box>
-          <Divider />
+      {/* Permission Groups */}
+      {[
+        { title: 'User Management', key: 'userManagement' },
+        { title: 'Form Management', key: 'formManagement' },
+        { title: 'Template Management', key: 'templateManagement' },
+        { title: 'Category Management', key: 'categoryManagement' },
+        { title: 'Role Management', key: 'roleManagement' }
+      ].map(({ title, key }) => (
+        <React.Fragment key={key}>
+          {permissionGroups[key as keyof PermissionGroups].length > 0 && (
+            <>
+              <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="20px">
+                <Typography variant="subtitle1" fontWeight="bold">{title}</Typography>
+                <Checkbox
+                  checked={permissionGroups[key as keyof PermissionGroups].every(p => selectedPermissions[p.permissionId])}
+                  onChange={() => handleGroupChange(permissionGroups[key as keyof PermissionGroups])}
+                  sx={{ color: 'black' }}
+                />
+              </Box>
+              <Divider />
+              {permissionGroups[key as keyof PermissionGroups].map(permission => (
+                <React.Fragment key={permission.permissionId}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography>{permission.name}</Typography>
+                    <Checkbox
+                      checked={selectedPermissions[permission.permissionId] || false}
+                      onChange={() => handlePermissionChange(permission.permissionId)}
+                      sx={{ color: 'black' }}
+                    />
+                  </Box>
+                  <Divider />
+                </React.Fragment>
+              ))}
+            </>
+          )}
         </React.Fragment>
       ))}
     </Paper>

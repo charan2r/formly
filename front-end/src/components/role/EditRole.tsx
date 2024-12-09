@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Paper, Typography, Box, Checkbox, Divider, IconButton, TextField, Button
+  Paper, Typography, Box, Checkbox, Divider, IconButton, TextField, Button, Grid
 } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
@@ -9,12 +9,15 @@ import api from '../../utils/axios';
 import { toast } from 'react-toastify';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
-
+import { useAuth } from '../../context/AuthContext';
 interface Permissions {
   // Group headers
   userManagement: boolean;
+  templateManagement: boolean;
+  categoryManagement: boolean;
+  roleManagement: boolean;
   formManagement: boolean;
-  // Individual permissions will be added dynamically with UUID keys
+  // Individual permissions will be added dynamically
   [key: string]: boolean;
 }
 
@@ -22,14 +25,35 @@ interface Permissions {
 const initialPermissionState: Permissions = {
   // Group headers
   usermanagement: false,
+  templatemanagement: false,
+  categorymanagement: false,
+  rolemanagement: false,
   formmanagement: false,
-  // Individual permissions
-  createusers: false,
-  editusers: false,
-  deleteusers: false,
+  // User permissions
+  createuser: false,
+  viewuser: false,
+  edituser: false,
+  deleteuser: false,
+  // Template permissions
+  createtemplate: false,
+  viewtemplate: false,
+  edittemplate: false,
+  deletetemplate: false,
+  // Category permissions
+  createcategory: false,
+  viewcategory: false,
+  editcategory: false,
+  deletecategory: false,
+  // Role permissions
+  createrole: false,
+  viewrole: false,
+  editrole: false,
+  deleterole: false,
+  // Form permissions
   createform: false,
   viewform: false,
-  editform: false
+  editform: false,
+  deleteform: false,
 };
 
 // Add a utility function to normalize permission names
@@ -46,8 +70,9 @@ const normalizePermissionName = (name: string): string => {
 function EditRole() {
   const { roleId } = useParams<{ roleId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     roleName: '',
     description: '',
   });
@@ -108,11 +133,23 @@ function EditRole() {
 
           // Update group headers
           newPermissions.userManagement = 
-            ['createUsers', 'editUsers', 'deleteUsers']
+            ['createUser', 'viewUser', 'editUser', 'deleteUser']
+              .every(perm => newPermissions[perm]);
+
+          newPermissions.templateManagement = 
+            ['createTemplate', 'viewTemplate', 'editTemplate', 'deleteTemplate']
+              .every(perm => newPermissions[perm]);
+
+          newPermissions.categoryManagement = 
+            ['createCategory', 'viewCategory', 'editCategory', 'deleteCategory']
+              .every(perm => newPermissions[perm]);
+
+          newPermissions.roleManagement = 
+            ['createRole', 'viewRole', 'editRole', 'deleteRole']
               .every(perm => newPermissions[perm]);
 
           newPermissions.formManagement = 
-            ['createForm', 'viewForm', 'editForm']
+            ['createForm', 'viewForm', 'editForm', 'deleteForm']
               .every(perm => newPermissions[perm]);
 
           console.log('Setting permissions to:', newPermissions);
@@ -146,6 +183,9 @@ function EditRole() {
         .filter(([key, isSelected]) => {
           return isSelected && 
                  key !== 'userManagement' && 
+                 key !== 'templateManagement' && 
+                 key !== 'categoryManagement' && 
+                 key !== 'roleManagement' && 
                  key !== 'formManagement' && 
                  permissionMap[key]; // Check if it's a valid permission name
         })
@@ -176,14 +216,35 @@ function EditRole() {
       if (name.startsWith('create') || name.startsWith('edit') || name.startsWith('delete')) {
         // Update User Management group header
         newPermissions.userManagement = 
-          ['createUsers', 'editUsers', 'deleteUsers']
+          ['createUser', 'viewUser', 'editUser', 'deleteUser']
+            .every(perm => perm === name ? checked : newPermissions[perm]);
+      }
+
+      if (name.startsWith('create') || name.startsWith('view') || name.startsWith('edit')) {
+        // Update Template Management group header
+        newPermissions.templateManagement = 
+          ['createTemplate', 'viewTemplate', 'editTemplate', 'deleteTemplate']
+            .every(perm => perm === name ? checked : newPermissions[perm]);
+      }
+
+      if (name.startsWith('create') || name.startsWith('view') || name.startsWith('edit')) {
+        // Update Category Management group header
+        newPermissions.categoryManagement = 
+          ['createCategory', 'viewCategory', 'editCategory', 'deleteCategory']
+            .every(perm => perm === name ? checked : newPermissions[perm]);
+      }
+
+      if (name.startsWith('create') || name.startsWith('edit') || name.startsWith('delete')) {
+        // Update Role Management group header
+        newPermissions.roleManagement = 
+          ['createRole', 'viewRole', 'editRole', 'deleteRole']
             .every(perm => perm === name ? checked : newPermissions[perm]);
       }
 
       if (name.startsWith('create') || name.startsWith('view') || name.startsWith('edit')) {
         // Update Form Management group header
         newPermissions.formManagement = 
-          ['createForm', 'viewForm', 'editForm']
+          ['createForm', 'viewForm', 'editForm', 'deleteForm']
             .every(perm => perm === name ? checked : newPermissions[perm]);
       }
 
@@ -211,7 +272,7 @@ function EditRole() {
       {/* Top Navigation Section */}
       <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
-        <IconButton 
+          <IconButton 
             sx={{ 
               backgroundColor: '#f5f5f5',
               color: 'black',
@@ -230,126 +291,126 @@ function EditRole() {
           <Typography variant="body2" color="textSecondary">
             Atlas corp.
           </Typography>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
             Edit a Role
           </Typography>
         </Box>
         <Typography variant="h5" fontWeight="bold">Edit a Role</Typography>
         <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
-          Assign permission easily for roles here.
+          Edit role and assign permissions.
         </Typography>
       </Box>
 
-      <Box display="flex" alignItems="center" sx={{ marginTop: '20px', marginBottom: '-5px', marginLeft: '150px' }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', marginRight: '16px', fontSize: '18px' }}>
-          {formData.roleName}
-        </Typography>
-        <Button
-          variant="contained"
-          sx={{
-            backgroundColor: 'black',
-            color: 'white',
-            borderRadius: '25px',
-            paddingX: '20px',
-            paddingY: '4px',
-            fontSize: '14px',
-            textTransform: 'none',
-            marginLeft: '850px',
-          }}
-          onClick={handleUpdateRole}
-        >
-          Update
-        </Button>
-      </Box>
-      <Typography variant="body2" color="textSecondary" sx={{ marginLeft: '150px', marginBottom: '20px', fontSize: '13px' }}>
-        {formData.description}
-      </Typography>
+      {/* Input Fields and Update Button */}
+      <Grid container spacing={2} sx={{ marginBottom: '20px' }}>
+        <Grid item xs={12} sm={5} display="flex" alignItems="center">
+          <Typography variant="body2" sx={{ marginRight: '8px', marginLeft: '25px', minWidth: '70px', color: 'black' }}>
+            Role Name
+          </Typography>
+          <TextField
+            name="roleName"
+            value={formData.roleName}
+            onChange={(e) => setFormData({ ...formData, roleName: e.target.value })}
+            fullWidth
+            placeholder="Enter role name"
+            InputProps={{
+              sx: { 
+                backgroundColor: '#f9f9f9', 
+                borderRadius: '5px', 
+                fontSize: '12px', 
+                padding: '-100px -100px',
+                paddingY: '3px',
+                paddingX: '6px',
+                height: '30px'
+              }
+            }}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid item xs={12} sm={5} display="flex" alignItems="center">
+          <Typography variant="body2" sx={{ marginRight: '8px', marginLeft: '25px', minWidth: '70px', color: 'black' }}>
+            Description
+          </Typography>
+          <TextField
+            name="description"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            fullWidth
+            placeholder="Enter role description"
+            InputProps={{
+              sx: { 
+                backgroundColor: '#f9f9f9', 
+                borderRadius: '5px', 
+                fontSize: '12px', 
+                padding: '-10px -10px',
+                paddingY: '3px',
+                paddingX: '6px',
+                height: '30px'
+              }
+            }}
+            variant="outlined"
+          />
+        </Grid>
+        <Grid item xs={12} sm={2} display="flex" alignItems="center">
+          <Button
+            variant="contained"
+            onClick={handleUpdateRole}
+            sx={{
+              backgroundColor: 'black',
+              color: 'white',
+              borderRadius: '25px',
+              paddingX: '20px',
+              paddingY: '4px',
+              fontSize: '14px',
+              textTransform: 'none',
+              marginLeft: '40px'
+            }}
+          >
+            Update
+          </Button>
+        </Grid>
+      </Grid>
 
-      {/* User Management Group */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="20px">
-        <Typography variant="subtitle1" fontWeight="bold">User Management</Typography>
-        <Checkbox
-          checked={permissions.usermanagement}
-          onChange={() =>
-            handleGroupChange('userManagement', ['createUsers', 'editUsers', 'deleteUsers'])
-          }
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Create Users</Typography>
-        <Checkbox
-          checked={permissions.createusers}
-          onChange={handlePermissionChange}
-          name="createUsers"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Edit Users </Typography>
-        <Checkbox
-          checked={permissions.editusers}
-          onChange={handlePermissionChange}
-          name="editUsers"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Delete Users</Typography>
-        <Checkbox
-          checked={permissions.deleteusers}
-          onChange={handlePermissionChange}
-          name="deleteUsers"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider sx={{ marginY: '16px' }} />
-
-      {/* Form Management Group */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px">
-        <Typography variant="subtitle1" fontWeight="bold">Form Management</Typography>
-        <Checkbox
-          checked={permissions.formmanagement}
-          onChange={() =>
-            handleGroupChange('formManagement', ['createForm', 'viewForm', 'editForm'])
-          }
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Create Form</Typography>
-        <Checkbox
-          checked={permissions.createform}
-          onChange={handlePermissionChange}
-          name="createForm"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>View Form</Typography>
-        <Checkbox
-          checked={permissions.viewform}
-          onChange={handlePermissionChange}
-          name="viewForm"
-          sx={{ color: 'black' }}
-        />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Edit Form</Typography>
-        <Checkbox
-          checked={permissions.editform}
-          onChange={handlePermissionChange}
-          name="editForm"
-          sx={{ color: 'black' }}
-        />
-      </Box>
+      {/* Permission Groups */}
+      {[
+        { title: 'User Management', key: 'userManagement' },
+        { title: 'Form Management', key: 'formManagement' },
+        { title: 'Template Management', key: 'templateManagement' },
+        { title: 'Category Management', key: 'categoryManagement' },
+        { title: 'Role Management', key: 'roleManagement' }
+      ].map(({ title, key }) => (
+        <React.Fragment key={key}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="20px">
+            <Typography variant="subtitle1" fontWeight="bold">{title}</Typography>
+            <Checkbox
+              checked={permissions[key]}
+              onChange={() => handleGroupChange(key, [
+                `create${key.replace('Management', '')}`,
+                `view${key.replace('Management', '')}`,
+                `edit${key.replace('Management', '')}`,
+                `delete${key.replace('Management', '')}`
+              ])}
+              sx={{ color: 'black' }}
+            />
+          </Box>
+          <Divider />
+          {['Create', 'View', 'Edit', 'Delete'].map((action) => (
+            <React.Fragment key={`${action}${key}`}>
+              <Box display="flex" justifyContent="space-between" alignItems="center">
+                <Typography>{`${action} ${key.replace('Management', '')}`}</Typography>
+                <Checkbox
+                  checked={permissions[`${action.toLowerCase()}${key.replace('Management', '')}`]}
+                  onChange={handlePermissionChange}
+                  name={`${action.toLowerCase()}${key.replace('Management', '')}`}
+                  sx={{ color: 'black' }}
+                />
+              </Box>
+              <Divider />
+            </React.Fragment>
+          ))}
+        </React.Fragment>
+      ))}
     </Paper>
   );
 }

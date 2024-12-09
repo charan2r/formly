@@ -10,28 +10,19 @@ import { toast } from 'react-toastify';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
-
-interface Permissions {
-  userManagement: boolean;
-  createUsers: boolean;
-  editUsers: boolean;
-  deleteUsers: boolean;
-  formManagement: boolean;
-  createForm: boolean;
-  viewForm: boolean;
-  editForm: boolean;
+interface Permission {
+  permissionId: string;
+  name: string;
+  status: string;
 }
 
-const initialPermissionState: Permissions = {
-  usermanagement: false,
-  createusers: false,
-  editusers: false,
-  deleteusers: false,
-  formmanagement: false,
-  createform: false,
-  viewform: false,
-  editform: false,
-};
+interface PermissionGroups {
+  userManagement: Permission[];
+  formManagement: Permission[];
+  templateManagement: Permission[];
+  categoryManagement: Permission[];
+  roleManagement: Permission[];
+}
 
 function ViewRole() {
   const { roleId } = useParams<{ roleId: string }>();
@@ -40,7 +31,14 @@ function ViewRole() {
     roleName: '',
     description: '',
   });
-  const [permissions, setPermissions] = useState<Permissions>(initialPermissionState);
+  const [selectedPermissions, setSelectedPermissions] = useState<{ [key: string]: boolean }>({});
+  const [permissionGroups, setPermissionGroups] = useState<PermissionGroups>({
+    userManagement: [],
+    formManagement: [],
+    templateManagement: [],
+    categoryManagement: [],
+    roleManagement: []
+  });
 
   useEffect(() => {
     const fetchRoleData = async () => {
@@ -56,38 +54,44 @@ function ViewRole() {
 
         // Fetch all permissions
         const permissionsResponse = await api.get('/permissions');
-        const permissionMap = {};
-        permissionsResponse.data.forEach((perm: any) => {
-          const normalizedName = perm.name.toLowerCase().replace(/[\s-]/g, '');
-          permissionMap[normalizedName] = perm.permissionId;
+        const permissions = permissionsResponse.data;
+        
+        // Group permissions based on their names
+        const grouped = permissions.reduce((acc: PermissionGroups, permission: Permission) => {
+          const name = permission.name.toLowerCase();
+          if (name.includes('user')) {
+            acc.userManagement.push(permission);
+          } else if (name.includes('form')) {
+            acc.formManagement.push(permission);
+          } else if (name.includes('template')) {
+            acc.templateManagement.push(permission);
+          } else if (name.includes('category')) {
+            acc.categoryManagement.push(permission);
+          } else if (name.includes('role')) {
+            acc.roleManagement.push(permission);
+          }
+          return acc;
+        }, {
+          userManagement: [],
+          formManagement: [],
+          templateManagement: [],
+          categoryManagement: [],
+          roleManagement: []
         });
+
+        setPermissionGroups(grouped);
 
         // Fetch role permissions
         const rolePermissionsResponse = await api.get(`/role-permissions/${roleId}`);
         if (rolePermissionsResponse.data.status === 'success') {
-          const newPermissions = { ...initialPermissionState };
-
-          rolePermissionsResponse.data.data.forEach((assignedPerm: any) => {
-            const matchingPerm = permissionsResponse.data.find(
-              (p: any) => p.permissionId === assignedPerm.permissionId
-            );
-            if (matchingPerm) {
-              const normalizedName = matchingPerm.name.toLowerCase().replace(/[\s-]/g, '');
-              newPermissions[normalizedName] = true;
-            }
-          });
-
-          // Update group headers
-          newPermissions.userManagement = 
-            ['createUsers', 'editUsers', 'deleteUsers']
-              .every(perm => newPermissions[perm]);
-
-          newPermissions.formManagement = 
-            ['createForm', 'viewForm', 'editForm']
-              .every(perm => newPermissions[perm]);
-
-          setPermissions(newPermissions);
-          console.log(newPermissions);
+          const permissionState = rolePermissionsResponse.data.data.reduce(
+            (acc: { [key: string]: boolean }, { permissionId }: { permissionId: string }) => ({
+              ...acc,
+              [permissionId]: true
+            }),
+            {}
+          );
+          setSelectedPermissions(permissionState);
         }
       } catch (error: any) {
         console.error('Error fetching role data:', error);
@@ -146,49 +150,44 @@ function ViewRole() {
         {formData.description}
       </Typography>
 
-      {/* User Management Group */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="20px">
-        <Typography variant="subtitle1" fontWeight="bold">User Management</Typography>
-        <Checkbox checked={permissions.usermanagement} disabled sx={{ color: 'black' }} />
-      </Box>
-      <Divider />
-      {/* ... Rest of the checkboxes with their respective permission values ... */}
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Create Users</Typography>
-        <Checkbox checked={permissions.createusers} disabled sx={{ color: 'black' }} />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Edit Users</Typography>
-        <Checkbox checked={permissions.editusers} disabled sx={{ color: 'black' }} />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Delete Users</Typography>
-        <Checkbox checked={permissions.deleteusers} disabled sx={{ color: 'black' }} />
-      </Box>
-      <Divider sx={{ marginY: '16px' }} />
-
-      {/* Form Management Group */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px">
-        <Typography variant="subtitle1" fontWeight="bold">Form Management</Typography>
-        <Checkbox checked={permissions.formmanagement} disabled sx={{ color: 'black' }} />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Create Form</Typography>
-        <Checkbox checked={permissions.createform} disabled sx={{ color: 'black' }} />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>View Form</Typography>
-        <Checkbox checked={permissions.viewform} disabled sx={{ color: 'black' }} />
-      </Box>
-      <Divider />
-      <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography>Edit Form</Typography>
-        <Checkbox checked={permissions.editform} disabled sx={{ color: 'black' }} />
-      </Box>
+      {/* Permission Groups */}
+      {[
+        { title: 'User Management', key: 'userManagement' },
+        { title: 'Form Management', key: 'formManagement' },
+        { title: 'Template Management', key: 'templateManagement' },
+        { title: 'Category Management', key: 'categoryManagement' },
+        { title: 'Role Management', key: 'roleManagement' }
+      ].map(({ title, key }) => (
+        <React.Fragment key={key}>
+          {permissionGroups[key as keyof PermissionGroups].length > 0 && (
+            <>
+              <Box display="flex" justifyContent="space-between" alignItems="center" marginBottom="8px" marginTop="20px">
+                <Typography variant="subtitle1" fontWeight="bold">{title}</Typography>
+                <Checkbox
+                  checked={permissionGroups[key as keyof PermissionGroups]
+                    .every(p => selectedPermissions[p.permissionId])}
+                  disabled
+                  sx={{ color: 'black' }}
+                />
+              </Box>
+              <Divider />
+              {permissionGroups[key as keyof PermissionGroups].map(permission => (
+                <React.Fragment key={permission.permissionId}>
+                  <Box display="flex" justifyContent="space-between" alignItems="center">
+                    <Typography>{permission.name}</Typography>
+                    <Checkbox
+                      checked={selectedPermissions[permission.permissionId] || false}
+                      disabled
+                      sx={{ color: 'black' }}
+                    />
+                  </Box>
+                  <Divider />
+                </React.Fragment>
+              ))}
+            </>
+          )}
+        </React.Fragment>
+      ))}
     </Paper>
   );
 }

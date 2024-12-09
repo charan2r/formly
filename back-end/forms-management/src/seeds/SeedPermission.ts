@@ -7,42 +7,52 @@ async function seedPermissions() {
     // Define the new permissions
     const newPermissions = [
         // Permissions for form fields
-        { name: 'create feilds' },
-        { name: 'view Fields' },
-        { name: 'view Field' },
-        { name: 'delete Field' },
-        { name: 'Delete Fields' },
-        { name: 'Edit Fields' },
+        // { name: 'create feilds' },  -- since a template needs to retain and show information 
+        // { name: 'view Fields' },    -- about fields and options no need to maintain permissions for this section
+        // { name: 'view Field' },
+        // { name: 'delete Field' },
+        // { name: 'Delete Fields' },
+        // { name: 'Edit Fields' },
 
-        // Permissions for form field options
-        { name: 'add feild option' },
-        { name: 'view feild options' },
-        { name: 'view feild option' },
-        { name: 'edit feild options' },
-        { name: 'delete feild option' },
-        { name: 'delete feild options' },
+        // // Permissions for form field options
+        // { name: 'add feild option' },
+        // { name: 'view feild options' },
+        // { name: 'view feild option' },
+        // { name: 'edit feild options' },
+        // { name: 'delete feild option' },
+        // { name: 'delete feild options' },
 
         // Permissions for form templates
         { name: 'Create Template' },
-        { name: 'view Templates' },
-        { name: 'view Template' },
+        { name: 'View Template' },
         { name: 'Edit Template' },
         { name: 'Delete Template' },
-        { name: 'Delete Templates' },
 
         // Permissions for users
-        { name: 'view Users' },
-        { name: 'view user' },
-        { name: 'Create Users' },
+        { name: 'View User' },
+        { name: 'Create User' },
         { name: 'Delete User' },
-        { name: 'Delete Users' },
+        { name: 'Edit User'},
 
         // Permissions for categories
-        { name: 'view all categories' },
-        { name: 'view Category' },
-        { name: 'edit Categories' },
-        { name: 'delete Category' },
-        { name: 'delete Categories' },
+        { name: 'View Category' },
+        { name: 'Edit Category' },
+        { name: 'Delete Category' },
+        {name: 'Create Category'},
+
+        // Permissions for roles
+        { name: 'View Role' },
+        { name: 'Edit Role' },
+        { name: 'Delete Role' },
+        { name: 'Create Role' },
+
+        // Permissions for forms
+        { name: 'View Form' },
+        { name: 'Create Form' },
+        { name: 'Edit Form' },
+        { name: 'Delete Form' },
+
+
     ];
 
     // Step 1: Loop through each permission and save if not already existing
