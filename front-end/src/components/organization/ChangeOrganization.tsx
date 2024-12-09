@@ -130,7 +130,7 @@ function ChangeOrganization() {
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Typography variant="h5" fontWeight="bold">Change Admin</Typography>
-            <Typography variant="body2" color="textSecondary" marginBottom="20px">
+            <Typography variant="body2" color="textSecondary" marginBottom="40px">
               Change and Manage Admin Details.
             </Typography>
           </Box>
