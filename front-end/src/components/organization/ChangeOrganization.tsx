@@ -127,10 +127,10 @@ function ChangeOrganization() {
           </Typography>
         </Box>
 
-        <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginBottom: '20px' }}>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Typography variant="h5" fontWeight="bold">Change Admin</Typography>
-            <Typography variant="body2" color="textSecondary">
+            <Typography variant="body2" color="textSecondary" marginBottom="20px">
               Change and Manage Admin Details.
             </Typography>
           </Box>
@@ -151,12 +151,12 @@ function ChangeOrganization() {
       </Box>
 
       <form>
-        <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', fontWeight: 'bold' }}>
+        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px' }}>
           New Admin Details
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's First Name *</Typography>
+            <Typography variant="caption" gutterBottom>Admin's First Name *</Typography>
             <TextField
               name="firstName"
               value={formData.firstName}
@@ -167,12 +167,12 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
+              sx={{ paddingY: '2px' }}
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's Last Name *</Typography>
+            <Typography variant="caption" gutterBottom>Admin's Last Name *</Typography>
             <TextField
               name="lastName"
               value={formData.lastName}
@@ -183,12 +183,12 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
+              sx={{ paddingY: '2px' }}
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Phone</Typography>
+            <Typography variant="caption" gutterBottom>New Phone</Typography>
             <TextField
               name="phone"
               value={formData.phone}
@@ -198,12 +198,12 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
+              sx={{ paddingY: '2px' }}
             />
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Email</Typography>
+            <Typography variant="caption" gutterBottom>New Email</Typography>
             <TextField
               name="email"
               value={formData.email}
@@ -213,7 +213,7 @@ function ChangeOrganization() {
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
-              sx={{ paddingY: '2px', marginBottom: '-8px' }}
+              sx={{ paddingY: '2px' }}
             />
           </Grid>
         </Grid>
