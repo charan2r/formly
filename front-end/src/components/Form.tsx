@@ -379,7 +379,7 @@ const PreviewDialog: React.FC<{
             }
           }}
         >
-          <KeyboardBackspaceRoundedIcon />
+          <ArrowBackIcon />
         </IconButton>
         
         <Box sx={{ flex: 1 }}>
@@ -741,7 +741,7 @@ const FormTable: React.FC = () => {
           fontWeight: 'bold',
         },
       });
-    };
+    }
   }
 
 
@@ -1418,7 +1418,7 @@ const FormTable: React.FC = () => {
             }}
             onClick={handleCloseCreateDialog}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           {/* Header section with back button */}
           <Box sx={{ 
@@ -1623,7 +1623,7 @@ const FormTable: React.FC = () => {
             }}
             onClick={handleCloseEditDialog}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           {/* Header section with back button */}
           <Box sx={{ 
