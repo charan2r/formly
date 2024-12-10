@@ -188,10 +188,10 @@ function EditOrganization() {
           </Typography>
         </Box>
 
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ marginBottom: '38px' }}>
           <Box>
             <Typography variant="h5" fontWeight="bold">Edit Organization</Typography>
-            <Typography variant="body2" color="textSecondary" marginBottom="20px">
+            <Typography variant="body2" color="textSecondary">
               Modify and Manage your organizations.
             </Typography>
           </Box>
@@ -206,7 +206,7 @@ function EditOrganization() {
       </Box>
 
       <form onSubmit={handleSubmit}>
-        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px' }}>
+        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
           Organizational Details
         </Typography>
         <Grid container spacing={2}>
@@ -331,7 +331,7 @@ function EditOrganization() {
           </Grid>
         </Grid>
 
-        <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', marginBottom: '-4px', fontWeight: 'bold'}} >
+        <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', fontWeight: 'bold'}} >
           Super Admin Details
         </Typography>
         <Grid container spacing={2}>

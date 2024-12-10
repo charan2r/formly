@@ -191,7 +191,7 @@ function CreateOrganization() {
       </Box>
 
       <form onSubmit={handleSubmit}>
-        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px', marginTop:'20px' }}>
+        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold',  marginTop:'20px' }}>
           Organizational Details
         </Typography>
         <Grid container spacing={2}>
@@ -319,7 +319,7 @@ function CreateOrganization() {
           </Grid>
         </Grid>
 
-        <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', marginBottom: '-4px', fontWeight: 'bold'}}>
+        <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', fontWeight: 'bold'}}>
           Super Admin Details
         </Typography>
         <Grid container spacing={2}>

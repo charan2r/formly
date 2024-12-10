@@ -217,7 +217,7 @@ function ViewOrganization() {
         </Box>
 
         <form>
-          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px' }}>
+          <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
             Organizational Details
           </Typography>
           <Grid container spacing={2}>
@@ -327,7 +327,7 @@ function ViewOrganization() {
             </Grid>
           </Grid>
 
-          <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', fontWeight: 'bold'}}>
+          <Typography variant="subtitle2" gutterBottom sx={{ marginTop: '24px', fontWeight: 'bold' }}>
             Super Admin Details
           </Typography>
           <Grid container spacing={2}>
