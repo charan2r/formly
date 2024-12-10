@@ -688,9 +688,37 @@ const FormTable: React.FC = () => {
         const response = await api.post('/forms/create', formPayload);
         setForms([...forms, response.data]);
         setCreateFormOpen(false);
-        toast.success("Form created successfully!");
+        toast.success("Form created successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
     } catch (error) {
-        toast.error("Failed to create form");
+        toast.error("Failed to create form", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
     }
   };
 
