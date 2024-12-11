@@ -40,7 +40,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../context/AuthContext';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
 interface Category {
     categoryId: string;
@@ -719,7 +718,7 @@ const Category: React.FC = () => {
                         }}
                         onClick={() => setConfirmationOpen(false)}
                     >
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
                     </IconButton>
                     <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
                         Delete Category
@@ -806,7 +805,7 @@ const Category: React.FC = () => {
                         }}
                         onClick={() => setCreateCategoryOpen(false)}
                     >
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
                     </IconButton>
 
                     {/* Header section */}
@@ -946,7 +945,7 @@ const Category: React.FC = () => {
                         }}
                         onClick={() => setViewCategoryOpen(false)}
                     >
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
                     </IconButton>
 
                     <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
@@ -1045,7 +1044,7 @@ const Category: React.FC = () => {
                         }}
                         onClick={() => setEditCategoryOpen(false)}
                     >
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
                     </IconButton>
 
                     <Box sx={{ display: 'flex', alignItems: 'left', justifyContent: 'center', mb: 4, mt: 2 }}>
