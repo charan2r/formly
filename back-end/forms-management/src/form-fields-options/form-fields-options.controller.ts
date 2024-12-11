@@ -29,13 +29,13 @@ export class UpdateOptionDto {
 
 @Controller('form-fields-options')
 @UseGuards(AuthGuard('jwt'))
-@Roles("Admin","SubUser")
 export class FormFieldsOptionsController {
     constructor(private readonly formFieldsOptionsService: FormFieldsOptionsService) {}
     
     // API Endpoint to add an option to a form field
   @Post('create')
-  @Permissions("add feild option")
+  @Roles("Admin","SubUser")
+  @Permissions("Add Template")
   async addOption(@Body() createFormFieldsOptionDto: CreateFormFieldsOptionDto,
   ): Promise<MetaSchemaResponse<FormFieldsOption>> {
     const option = await this.formFieldsOptionsService.addOption(createFormFieldsOptionDto);
@@ -48,7 +48,8 @@ export class FormFieldsOptionsController {
 
   // API Endpoint to get all options of a form field
   @Get()
-  @Permissions("view feild options")
+  @Roles("Admin","SubUser")
+  @Permissions("View Template", "View Form")
   async getOptions(@Query('formFieldId') formFieldId: string): Promise<MetaSchemaResponse<FormFieldsOption[]>> {
     const options = await this.formFieldsOptionsService.getOptions(formFieldId);
     return {
@@ -60,7 +61,8 @@ export class FormFieldsOptionsController {
 
   // API Endpoint to get an option by its ID
   @Get('details')
-  @Permissions("view feild option")
+  @Roles("Admin","SubUser")
+  @Permissions("View Template", "View Form")
   async getOptionById(@Query('optionId') optionId: string): Promise<MetaSchemaResponse<FormFieldsOption>> {
     const option = await this.formFieldsOptionsService.getOptionById(optionId);
     return {
@@ -76,7 +78,8 @@ export class FormFieldsOptionsController {
   @ApiBody({ type: UpdateOptionDto })
   @Patch('update')
 
-  @Permissions("edit feild options")
+  @Roles("Admin","SubUser")
+  @Permissions("Edit Template")
   async updateOption(
     @Body() updateData: UpdateOptionDto,
   ): Promise<MetaSchemaResponse<FormFieldsOption>> {
@@ -99,7 +102,8 @@ export class FormFieldsOptionsController {
 
   // API Endpoint to delete an option
   @Delete('delete')
-  @Permissions("delete feild option")
+  @Roles("Admin","SubUser")
+  @Permissions("Edit Template")
   async deleteOption(@Query('optionId') optionId: string): Promise<MetaSchemaResponse> {
     await this.formFieldsOptionsService.deleteOption(optionId);
     return {
@@ -110,7 +114,8 @@ export class FormFieldsOptionsController {
 
   // API Endpoint to soft bulk delete options
   @Delete('bulk-delete')
-  @Permissions("delete feild options")
+  @Roles("Admin","SubUser")
+  @Permissions("Edit Template")
   async bulkDeleteOptions(@Body('optionIds') optionIds: string[]): Promise<MetaSchemaResponse> {
     await this.formFieldsOptionsService.bulkDeleteOptions(optionIds);
     return {

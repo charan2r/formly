@@ -263,7 +263,7 @@ const UserOverview: React.FC = () => {
         const response = await api.get('/audit-trail/admin/top5');
         console.log(response.data);
         if (response.data.status === 'success') {
-          setTopActivities(response.data.data);
+          setTopActivities(response.data.data.slice(0, 3));
         }
       } catch (error) {
         console.error('Error fetching top activities:', error);
@@ -332,15 +332,103 @@ const UserOverview: React.FC = () => {
 
             {topActivities.map((activity, index) => {
               const label = formatDateLabel(activity.createdAt);
-              console.log(activity);
               return (
-                <Box key={index} display="flex" flexDirection="column" mt={4}>
-                  <Typography variant="h6" color="textPrimary">{label}</Typography>
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <CircleIcon style={{ color: 'green', fontSize: '14px' }} />
-                    <Typography variant="body2" color="textSecondary">
-                      {activity.action} performed on {new Date(activity.createdAt).toLocaleString()} by {activity.type}
-                    </Typography>
+                <Box 
+                  key={index} 
+                  sx={{
+                    mt: 1,
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.02)',
+                      borderRadius: '8px',
+                      transition: 'background-color 0.3s'
+                    }
+                  }}
+                >
+                  {/* Date Label */}
+                  <Typography 
+                    variant="subtitle1" 
+                    sx={{ 
+                      fontWeight: 600,
+                      color: '#2c3e50',
+                      mb: 0.5,
+                      pl: 2
+                    }}
+                  >
+                    {label}
+                  </Typography>
+
+                  {/* Activity Item */}
+                  <Box 
+                    display="flex" 
+                    alignItems="center" 
+                    sx={{
+                      p: 1,
+                      borderLeft: '2px solid #e0e0e0',
+                      ml: 2,
+                      position: 'relative'
+                    }}
+                  >
+                    {/* Activity Indicator */}
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        left: -5,
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        backgroundColor: '#4CAF50',
+                        border: '2px solid white',
+                        boxShadow: '0 0 0 2px #4CAF50'
+                      }}
+                    />
+
+                    {/* Activity Content */}
+                    <Box sx={{ ml: 2 }}>
+                      <Typography 
+                        variant="body1" 
+                        sx={{ 
+                          color: '#34495e',
+                          fontWeight: 500,
+                          mb: 0.25
+                        }}
+                      >
+                        {activity.action}
+                      </Typography>
+                      
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: '#7f8c8d',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          {new Date(activity.createdAt).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: '#7f8c8d',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          •
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: '#2980b9',
+                            fontWeight: 500,
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          {activity.type}
+                        </Typography>
+                      </Box>
+                    </Box>
                   </Box>
                 </Box>
               );

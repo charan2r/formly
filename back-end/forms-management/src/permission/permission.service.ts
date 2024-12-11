@@ -20,8 +20,9 @@ export class PermissionService {
   // Get a permission by ID
   async getPermissionById(permissionId: string): Promise<Permission> {
     const permission = await this.permissionRepository.findOne({
-      where: { permissionId, status: 'active' },
+      where: { permissionId: permissionId, status: 'active' },
     });
+    console.log('-------', permission);
     if (!permission) {
       throw new NotFoundException('Permission not found');
     }

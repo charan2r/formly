@@ -48,6 +48,7 @@ async getUsers(organizationId?: string): Promise<[User[], number]> {
     if (candidate) {
       throw new NotFoundException('User with this email already exists');
     }
+    console.log(createUserDto);
 
     const {verificationToken, verificationTokenExpires} = TokenService.generateVerificationToken();
 

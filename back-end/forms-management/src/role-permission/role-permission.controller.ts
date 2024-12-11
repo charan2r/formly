@@ -4,6 +4,7 @@ import { PermissionRepository } from '../permission/permission.repository';
 import { Roles } from 'src/user/roles.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/user/roles.guard';
+import { Permissions } from 'src/user/permissions.decorator';
 
 
 @UseGuards(AuthGuard('jwt'))
@@ -15,7 +16,8 @@ export class RolePermissionController {
   ) {}
 
   @Post(':roleId')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('Edit Role')
   async assignPermissionsToRole(
     @Param('roleId') roleId: string,
     @Body('permissionIds') permissionIds: string[],
@@ -41,7 +43,8 @@ export class RolePermissionController {
 
   // Get a role with its permissions
   @Get(':roleId')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('View Role', 'Create User', 'Edit User', 'Edit Role')
   async getRolePermissions(@Param('roleId') roleId: string) {
     const rolePermissions = await this.rolePermissionService.getRolePermissions(roleId);
     return {
@@ -51,7 +54,8 @@ export class RolePermissionController {
   }
 
   @Patch(':roleId')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('Edit Role', 'Delete Role')
   async updateRolePermissions(
     @Param('roleId') roleId: string,
     @Body('permissionIds') permissionIds: string[],
@@ -71,7 +75,8 @@ export class RolePermissionController {
   }
 
   @Delete(':roleId/:permissionId')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('Edit Role', 'Delete Role')
   async softDeleteRolePermission(
     @Param('roleId') roleId: string,
     @Param('permissionId') permissionId: string,

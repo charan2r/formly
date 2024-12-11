@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Box, CircularProgress, Typography } from '@mui/material';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -22,15 +22,19 @@ import Form from './Form';
 
 
 import LeftSidebar from './LeftSidebar';
-import EditPageSettings from './RightSidebar';
 import ViewTemplate from './ViewTemplate';
 import { DragDropContext } from 'react-beautiful-dnd';
 import { TemplateProvider } from '../context/TemplateContext';
 import Login from './authentication/Login';
-import ProtectedRoute from './authentication/ProtectedRoute';
+
 
 import FTReset from './authentication/FTReset';
 import ProfileSettings from './ProfileSettings';
+import SubUserOverview from './subUser/SubUserOverview';
+import { SuperAdminRoutes } from '../routes/SuperAdminRoutes';
+import { AdminRoutes } from '../routes/AdminRoutes';
+import { SubUserRoutes } from '../routes/SubUserRoutes';
+import { usePermissions } from '../hooks/usePermissions';
 
 
 const LoadingScreen = () => (
@@ -70,13 +74,84 @@ import AuditTrail from './AuditTrail';
 const Background: React.FC = () => {
   const location = useLocation();
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { hasAnyCrudPermission, hasSpecificPermission } = usePermissions();
   
   const isEditTemplate = location.pathname.match(/^\/edittemplate\/[^/]+$/);
   const isAuthPage = location.pathname === '/login' || 
                     location.pathname.startsWith('/auth/verify-email') || 
                     location.pathname.startsWith('/auth/reset-password');
+  
   const isSuperAdmin = user?.userType === 'SuperAdmin';
   const isAdmin = user?.userType === 'Admin';
+  const isSubUser = user?.userType === 'SubUser';
+
+  const renderAuthenticatedRoutes = () => {
+    if (!isAuthenticated) return null;
+
+    if (isSuperAdmin) {
+      return (
+        <>
+          <Route path="/overview" element={<Overview />} />
+          <Route path="/organizations" element={<DataTable />} />
+          <Route path="/create-organization" element={<CreateOrganization />} />
+          <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
+          <Route path="/edit-organization/:orgId" element={<EditOrganization />} />
+          <Route path="/change-organization/:orgId" element={<ChangeOrganization />} />
+          <Route path="/audit-trail" element={<AuditTrail />} />
+        </>
+      );
+    }
+
+    if (isAdmin) {
+      return (
+        <>
+          <Route path="/useroverview" element={<UserOverview />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="/forms" element={<Form />} />
+          <Route path="/templates" element={<Template />} />
+          <Route path="/viewtemplate/:id" element={<ViewTemplate />} />
+          <Route path="/roles" element={<Role />} />
+          <Route path="/addrole" element={<AddRole />} />
+          <Route path="/editrole/:roleId" element={<EditRole />} />
+          <Route path="/viewrole/:roleId" element={<ViewRole />} />
+        </>
+      );
+    }
+
+    if (isSubUser) {
+      return (
+        <>
+          <Route path="/useroverview" element={<SubUserOverview />} />
+          {hasAnyCrudPermission('User') && 
+            <Route path="/users" element={<Users />} />
+          }
+          {hasAnyCrudPermission('Form') && 
+            <Route path="/forms" element={<Form />} />
+          }
+          {hasAnyCrudPermission('Template') && 
+            <Route path="/templates" element={<Template />} />
+          }
+          {hasSpecificPermission('View Template') && 
+            <Route path="/viewtemplate/:id" element={<ViewTemplate />} />
+          }
+          {hasAnyCrudPermission('Role') && 
+            <Route path="/roles" element={<Role />} />
+          }
+          {hasSpecificPermission('Create Role') && 
+            <Route path="/addrole" element={<AddRole />} />
+          }
+          {hasSpecificPermission('Edit Role') && 
+            <Route path="/editrole/:roleId" element={<EditRole />} />
+          }
+          {hasSpecificPermission('View Role') && 
+            <Route path="/viewrole/:roleId" element={<ViewRole />} />
+          }
+        </>
+      );
+    }
+
+    return null;
+  };
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -94,6 +169,8 @@ const Background: React.FC = () => {
       return <Navigate to="/useroverview" replace />;
     } else if (user?.userType === 'SuperAdmin') {
       return <Navigate to="/overview" replace />;
+    } else if (user?.userType === 'SubUser') {
+      return <Navigate to="/useroverview" replace />;
     }
   }
 
@@ -103,6 +180,8 @@ const Background: React.FC = () => {
       return <Navigate to="/useroverview" replace />;
     } else if (user?.userType === 'SuperAdmin') {
       return <Navigate to="/overview" replace />;
+    } else if (user?.userType === 'SubUser') {
+      return <Navigate to="/useroverview" replace />;
     }
   }
 
@@ -111,72 +190,31 @@ const Background: React.FC = () => {
   };
 
   return (
-    <>
     <TemplateProvider>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
-            {isAuthenticated && !isAuthPage && (
-              isEditTemplate ? (
-                <>
-                  <LeftSidebar />
-                </>
-              ) : (
-                <Sidebar />
-              )
-            )}
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Box sx={{ display: 'flex', backgroundColor: '#F9F9F9' }}>
+          {isAuthenticated && !isAuthPage && (
+            isEditTemplate ? <LeftSidebar /> : <Sidebar />
+          )}
 
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/auth/verify-email" element={<FTReset />} />
-              <Route path="/auth/reset-password" element={<FTReset />} />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/verify-email" element={<FTReset />} />
+            <Route path="/auth/reset-password" element={<FTReset />} />
 
-              {/* Protected Routes */}
-              {isAuthenticated && (
-                <>
-                  {/* Common Routes (accessible to both Admin and SuperAdmin) */}
-                  <Route path="/profile-settings" element={<ProfileSettings />} />
-
-                  {/* Admin Routes */}
-                  {isAdmin && (
-                    <>
-                      <Route path="/useroverview" element={<UserOverview />} />
-                      <Route path="/users" element={<Users />} />
-                      <Route path="/forms" element={<Form />} />
-                      <Route path="/templates" element={<Template />} />
-                      <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
-                      <Route path="/categories" element={<Category />} />
-                      <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
-                      <Route path="/roles" element={<Role />} />
-                      <Route path="/addrole" element={<AddRole />} />
-                      <Route path="/editrole/:roleId" element={<EditRole />} />
-                      <Route path="/viewrole/:roleId" element={<ViewRole />} />
-                    </>
-                  )}
-
-                  {/* SuperAdmin Routes */}
-                  {isSuperAdmin && (
-                    <>
-                      <Route path="/overview" element={<Overview />} />
-                      <Route path="/organizations" element={<DataTable />} />
-                      <Route path="/create-organization" element={<CreateOrganization />} />
-                      <Route path="/view-organization/:orgId" element={<ViewOrganization />} />
-                      <Route path="/Edit-organization/:orgId" element={<EditOrganization />} />
-                      <Route path="/Change-organization/:orgId" element={<ChangeOrganization />} />
-                      <Route path="/audit-trail" element={<AuditTrail />} />
-                    </>
-                  )}
-
-                  {/* Catch-all redirect */}
-                  <Route path="*" element={isAdmin ?
-                    <Navigate to="/useroverview" replace /> :
-                    <Navigate to="/overview" replace />} />
-                </>
-              )}
-            </Routes>
-          </Box>
-        </DragDropContext>
-      </TemplateProvider></>
+            {/* Protected Routes */}
+            <Route path="/profile-settings" element={<ProfileSettings />} />
+            {renderAuthenticatedRoutes()}
+            <Route path="*" element={
+              isSuperAdmin ? 
+                <Navigate to="/overview" replace /> : 
+                <Navigate to="/useroverview" replace />
+            } />
+          </Routes>
+        </Box>
+      </DragDropContext>
+    </TemplateProvider>
   );
 };
 

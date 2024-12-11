@@ -21,8 +21,8 @@ export class FormsController {
   constructor(private readonly formsService: FormsService) {}
 
   // API endpoint to create forms
-  @Permissions('Create form')
   @Roles('Admin', 'SubUser')
+  @Permissions('Create Form', 'View Template')
   @Post('create')
   async createForm(@Body() createFormDto: CreateFormDto): Promise<Form> {
     return this.formsService.create(createFormDto);
@@ -31,7 +31,7 @@ export class FormsController {
   // API endpoint to get all forms
   @Get()
   @Roles('Admin', 'SubUser')
-  @Permissions('View forms')
+  @Permissions('View Form')
   async getAll(): Promise<MetaSchemaResponse<Form[]>> {
     const forms = await this.formsService.findAll();
     return {
@@ -44,7 +44,7 @@ export class FormsController {
   // API endpoint to get a form by ID
   @Get('details')
   @Roles('Admin', 'SubUser')
-  @Permissions('View form')
+  @Permissions('View Form')
   async findOne(@Query('id') formId: string): Promise<MetaSchemaResponse<Form | undefined>> {
     const form = await this.formsService.findOne(formId);
     if (!form) {
@@ -63,7 +63,7 @@ export class FormsController {
   // API endpoint to update a form
   @Patch('edit')
   @Roles('Admin', 'SubUser')
-  @Permissions('Edit form')
+  @Permissions('Edit Form')
   async updateForm(
     @Query('id') id: string,
     @Body() updateFormDto: UpdateFormDto,
@@ -82,7 +82,7 @@ export class FormsController {
   // API endpoint to delete a form
   @Delete('delete')
   @Roles('Admin', 'SubUser')
-  @Permissions('Delete form')
+  @Permissions('Delete Form')
   async softDelete(@Query('id') id: string): Promise<MetaSchemaResponse<Form>> {
     const deletedForm = await this.formsService.softDelete(id);
     if (!deletedForm) {
@@ -98,7 +98,7 @@ export class FormsController {
   // API endpoint to bulk delete forms
   @Delete('bulk-delete')
   @Roles('Admin', 'SubUser')
-  @Permissions('Delete form') 
+  @Permissions('Delete Form') 
   async bulkDelete(@Body('ids') ids: string[]): Promise<MetaSchemaResponse<null>> {
     const deletedForms = await this.formsService.bulkDelete(ids);
     if (!deletedForms.length) {

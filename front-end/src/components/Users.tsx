@@ -100,7 +100,9 @@ const Users: React.FC = () => {
     lastName: '',
     email: '',
     phone: '',
-    roleId: ''
+    roleId: '',
+    userType: 'SubUser',
+    organizationId: ''
   });
   const [roles, setRoles] = useState<Role[]>([]);
   const { user } = useAuth();
@@ -202,7 +204,7 @@ const Users: React.FC = () => {
   const handleCreateUser = async () => {
     try {
       const response = await api.post('/users/create', newUser);
-      setUsers([...users, response.data]);
+      setUsers([...users, response.data.data]);
       setCreateUserOpen(false);
       toast.success("User created successfully!");
     } catch (error) {
@@ -342,7 +344,9 @@ const Users: React.FC = () => {
   const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewUser({
       ...newUser,
-      roleId: event.target.value
+      roleId: event.target.value,
+      userType: 'SubUser',
+      organizationId: user?.organizationId
     });
   };
 

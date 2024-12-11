@@ -34,6 +34,7 @@ export class OrganizationService {
       organizationId: organization.orgId, // Link admin to organization
     };
     const admin = await this.authService.registerAdmin(adminData);
+    console.log(admin);
     organization.superAdminId = admin.data.id; // Link organization to admin
     await this.organizationRepository.save(organization);
 

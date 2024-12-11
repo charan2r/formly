@@ -13,14 +13,14 @@ export class PermissionController {
 
   @Get()
   @Roles('Admin', 'SubUser')
-  @Permissions('View Permissions')
+  @Permissions('View Role', 'Edit Role')
   async getAllPermissions(): Promise<Permission[]> {
     return this.permissionService.getAllPermissions();
   }
 
   @Get(':id')
   @Roles('Admin', 'SubUser')
-  @Permissions('View Permissions')
+  @Permissions('View Role', 'Edit Role')
   async findOne(@Param('id') id: string): Promise<Permission> {
     return this.permissionService.getPermissionById(id);
   }

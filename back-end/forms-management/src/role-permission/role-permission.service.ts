@@ -50,10 +50,12 @@ export class RolePermissionService {
   }
 
   async getRolePermissions(roleId: string) {
+    console.log(roleId);
     const rolePermissions = await this.rolePermissionRepository.find({
-      where: { roleId, status: 'active' },
+      where: { roleId: roleId, status: 'active' },
       relations: ['permission']
     });
+    console.log(rolePermissions);
 
     if (!rolePermissions.length) {
       throw new NotFoundException('No active permissions found for this role');

@@ -1,20 +1,20 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/axios';
 
-// Define the JWT payload interface
-interface JWTPayload {
-  userId: string;
+// Define the user interface that matches the backend response
+interface User {
+  id: string;
   email: string;
   userType: string;
   organizationId: string;
-  iat: number;
-  exp: number;
+  roleId: string;
+  permissions: string[];
 }
 
-// Update the context type to include decoded token info
+// Update the context type
 interface AuthContextType {
   isAuthenticated: boolean;
-  user: JWTPayload | null;
+  user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -23,7 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<JWTPayload | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -33,13 +33,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Auth Status Response:', response.data);
       
       if (response.data.success) {
-        setUser(response.data.data.user);
+        const userData: User = response.data.data.user;
+        setUser(userData);
+        console.log('Setting user data:', userData);
         setIsAuthenticated(true);
       } else {
         setUser(null);
         setIsAuthenticated(false);
       }
     } catch (error) {
+      console.error('Auth check error:', error);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -56,17 +59,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
-
       
-      // Return early if the response indicates failure
-      if (response.data.success===false) {
+      if (response.data.success === false) {
         setUser(null);
         setIsAuthenticated(false);
-        return response.data; // Return the response data for error handling
+        return response.data;
       }
 
-      // Handle successful login
-      setUser(response.data.data.user);
+      const userData: User = response.data.data.user;
+      setUser(userData);
       setIsAuthenticated(true);
       return response.data;
     } catch (error: any) {

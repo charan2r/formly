@@ -7,13 +7,18 @@ import * as bcrypt from 'bcryptjs';
 import { EmailService } from './email.service';
 import { TokenService } from 'src/auth/token.service';
 import { Request } from 'express';
+import { RolePermissionService } from '../role-permission/role-permission.service';
+import { PermissionService } from '../permission/permission.service';
 
 @Injectable()
 export class AuthService {
     constructor( 
         private readonly userService: UserService, 
         private readonly emailService: EmailService,
-        private readonly jwtService: JwtService) {}
+        private readonly jwtService: JwtService,
+        private readonly rolePermissionService: RolePermissionService,
+        private readonly permissionService: PermissionService,
+    ) {}
 
     // Register admin 
     async registerAdmin(userDto: any): Promise<{message:string, data: any}> {
@@ -38,6 +43,8 @@ export class AuthService {
             verificationTokenExpires,
             passwordHash: ''
         });
+
+        console.log(user);
 
         return { message: 'Admin registered successfully. Verification email sent', data: user };
         
@@ -118,13 +125,34 @@ export class AuthService {
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        // Generate JWT token with permissions
+        // Initialize permissions array
+        let permissions = [];
+
+        // Only fetch permissions if roleId exists
+        if (user.roleId) {
+            // Fetch user's permission IDs based on their role
+            const rolePermissions = await this.rolePermissionService.getRolePermissions(user.roleId);
+            
+            if (rolePermissions && rolePermissions.length > 0) {
+                // Get permission IDs from role permissions
+                const permissionIds = rolePermissions.map(rp => rp.permissionId);
+                
+                // Fetch actual permissions using permission IDs
+                for (const permissionId of permissionIds) {
+                    const permission = await this.permissionService.getPermissionById(permissionId);
+                    permissions.push(permission.name);
+                }
+            }
+        }
+
+        // Generate JWT token with permissions (will be empty array if no roleId)
         const payload = {
             userId: user.id,
             email: user.email,
             userType: user.userType,
+            roleId: user.roleId,
             organizationId: user.organizationId,
-            permissions:  [] // Add permissions to token
+            permissions: permissions
         };
         
         const accessToken = this.jwtService.sign(payload);
@@ -134,11 +162,16 @@ export class AuthService {
             id: user.id,
             email: user.email,
             userType: user.userType,
+            roleId: user.roleId,
             organizationId: user.organizationId,
-            permissions:  []
+            permissions: permissions
         };
+        console.log(userData);
 
-        return { accessToken, user: userData };
+        return {
+            accessToken,
+            user: userData
+        };
     }
 
     async validateUser(request: Request): Promise<any> {
@@ -155,12 +188,36 @@ export class AuthService {
                 throw new UnauthorizedException('User not found');
             }
 
+            // Initialize permissions array
+            let permissions = [];
+            console.log('----------------------',permissions);
+            
+            // Only fetch permissions if roleId exists
+            if (user.roleId) {
+                // Fetch user's permission IDs based on their role
+                const rolePermissions = await this.rolePermissionService.getRolePermissions(user.roleId);
+                
+                if (rolePermissions && rolePermissions.length > 0) {
+                    // Get permission IDs from role permissions
+                    const permissionIds = rolePermissions.map(rp => rp.permissionId);
+                    
+                    // Fetch actual permissions using permission IDs
+                    for (const permissionId of permissionIds) {
+                        const permission = await this.permissionService.getPermissionById(permissionId);
+                        permissions.push(permission.name);
+                        }
+                        }
+                        }
+                        
+            console.log('2. ----------------------',permissions);
             // Return user data without sensitive information
             return {
                 id: user.id,
                 email: user.email,
                 userType: user.userType,
-                organizationId: user.organizationId
+                roleId: user.roleId,
+                organizationId: user.organizationId,
+                permissions: permissions
             };
         } catch (error) {
             throw new UnauthorizedException('Invalid token');

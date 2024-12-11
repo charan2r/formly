@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Rnd } from "react-rnd";
 import html2canvas from "html2canvas";
+import SettingsIcon from '@mui/icons-material/Settings';
 import { jsPDF } from "jspdf";
 import {
   Container,
@@ -31,6 +32,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import api from '../utils/axios';
 import { useTemplate } from '../context/TemplateContext';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 import GlobalQuillToolbar from './GlobalQuillToolbar';
 
@@ -884,7 +886,7 @@ const EditPageSettings: React.FC = () => {
             }}
             onClick={() => navigate(-1)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
                   <IconButton onClick={() => console.log('Back arrow clicked')}>
                     <CircleIcon style={{ color: 'black' }} />
@@ -898,24 +900,6 @@ const EditPageSettings: React.FC = () => {
                 {templateData?.name || 'Template'}
               </Typography>
                   <Box marginLeft="auto" display="flex" gap={1}>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{
-                        color: 'black',
-                        borderColor: '#333',
-                        borderWidth: 2,
-                        borderRadius: '20px',
-                        paddingX: '15px',
-                        '&:hover': {
-                          backgroundColor: 'rgba(0, 0, 0, 0.05)',
-                          borderColor: '#000',
-                        },
-                      }}
-                      onClick={toggleSidebar}
-                    >
-                      Settings
-                    </Button>
                     <Button
                       variant="contained"
                       size="small"
@@ -1502,7 +1486,7 @@ const EditPageSettings: React.FC = () => {
             sx={{
               position: 'fixed',
               right: '20px',
-              top: '20px',
+              top: '40px',
               backgroundColor: '#F9F9F9',
               boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
               zIndex: 1000,
@@ -1511,7 +1495,7 @@ const EditPageSettings: React.FC = () => {
               },
             }}
           >
-            <ArrowForward />
+            <SettingsIcon sx={{ color: 'black' }} />
           </IconButton>
         )}
 

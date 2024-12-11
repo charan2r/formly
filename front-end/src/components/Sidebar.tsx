@@ -10,11 +10,96 @@ import KeyboardArrowDownOutlinedIcon from '@mui/icons-material/KeyboardArrowDown
 import HighlightOffIcon from '@mui/icons-material/HighlightOff';
 import { useAuth } from '../context/AuthContext';
 
+type Permission = string | string[];
+
+interface MenuItem {
+  path: string;
+  label: string;
+  permission: Permission;
+}
+
 const Sidebar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  // Helper function to check permissions
+  const hasPermission = (permission: Permission) => {
+    if (!user?.permissions) return false;
+    if (!permission) return true;
+    
+    // If permission is an array, check if user has any of the permissions
+    if (Array.isArray(permission)) {
+      return permission.some(perm => user.permissions.includes(perm));
+    }
+    
+    // Single permission check
+    return user.permissions.includes(permission);
+  };
+
+  // Get menu items based on user type
+  const getMenuItems = () => {
+    if (user?.userType === 'SuperAdmin') {
+      return {
+        general: [
+          { path: '/overview', label: 'Overview', permission: null },
+          { path: '/organizations', label: 'Organizations', permission: null },
+          { path: '/audit-trail', label: 'Audit Trails', permission: null },
+        ],
+        authorization: [] // SuperAdmin doesn't need authorization section
+      };
+    }
+
+    // For Admin and SubUser
+    return {
+      general: [
+        { path: '/userOverview', label: 'Overview', permission: null },
+        { 
+          path: '/forms', 
+          label: 'Forms', 
+          permission: ['View Form', 'Edit Form', 'Delete Form', 'Create Form']
+        },
+        { 
+          path: '/templates', 
+          label: 'Templates', 
+          permission: ['View Template', 'Edit Template', 'Delete Template', 'Create Template']
+        },
+        { 
+          path: '/categories', 
+          label: 'Categories', 
+          permission: ['View Category', 'Edit Category', 'Delete Category', 'Create Category']
+        },
+      ],
+      authorization: [
+        { 
+          path: '/users', 
+          label: 'Users', 
+          permission: ['View User', 'Edit User', 'Delete User', 'Create User']
+        },
+        { 
+          path: '/roles', 
+          label: 'Roles', 
+          permission: ['View Role', 'Edit Role', 'Delete Role', 'Create Role']
+        }
+      ]
+    };
+  };
+
+  const menuItems = getMenuItems();
+
+  // Filter menu items based on permissions for non-SuperAdmin users
+  const filteredGeneralMenuItems = menuItems.general.filter(item => {
+    if (user?.userType === 'SuperAdmin') return true;
+    if (user?.userType === 'Admin') return true;
+    return hasPermission(item.permission);
+  });
+
+  const filteredAuthorizationMenuItems = menuItems.authorization.filter(item => {
+    if (user?.userType === 'SuperAdmin') return true;
+    if (user?.userType === 'Admin') return true; // Admin sees all authorization items
+    return hasPermission(item.permission); // SubUser needs permission check
+  });
 
   const handleProfileClick = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -28,27 +113,6 @@ const Sidebar: React.FC = () => {
       console.error('Logout failed:', error);
     }
   };
-
-  const isUsersPage = user?.userType === 'Admin';
-
-  // Define separate menu items for GENERAL and AUTHORIZATION sections
-  const generalMenuItems = isUsersPage
-    ? [
-        { path: '/userOverview', label: 'Overview' },
-        { path: '/forms', label: 'Forms' },
-        { path: '/templates', label: 'Templates' },
-        { path: '/categories', label: 'Categories' },
-      ]
-    : [
-        { path: '/overview', label: 'Overview' },
-        { path: '/organizations', label: 'Organizations' },
-        { path: '/audit-trail', label: 'Audit Logs' },
-      ];
-
-  const authorizationMenuItems = isUsersPage ? [
-    { path: '/users', label: 'Users' },
-    { path: '/roles', label: 'Roles' }
-  ] : [];
 
   const handleProfileSettings = () => {
     if (location.pathname !== '/profile-settings') {
@@ -83,60 +147,62 @@ const Sidebar: React.FC = () => {
       </Stack>
 
       {/* GENERAL Menu Items */}
-      <Box ml={2}>
-        <Typography variant="caption" color="text.secondary">
-          GENERAL
-        </Typography>
-        <List disablePadding sx={{ marginLeft: '-14px', marginTop: '7px'}}>
-          {generalMenuItems.map(({ path, label }) => (
-            <ListItemButton
-              key={path}
-              component={Link}
-              to={path}
-              sx={{
-                borderRadius: '150px',
-                padding: '1px',
-                margin: '5px',
-                backgroundColor: location.pathname === path ? 'black' : 'transparent',
-                color: location.pathname === path ? 'white' : 'inherit',
-                '&:hover': {
-                  backgroundColor: location.pathname === path ? 'black' : '#E0E0E0',
-                },
-              }}
-            >
-              <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 'bold', marginLeft: '15px' }} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Box>
-
-      {/* AUTHORIZATION Menu Items */}
-      {authorizationMenuItems.length > 0 && (
-        <Box ml={2} mt={3}>
+      {filteredGeneralMenuItems.length > 0 && (
+        <Box ml={2}>
           <Typography variant="caption" color="text.secondary">
-            AUTHORIZATION
+            GENERAL
           </Typography>
           <List disablePadding sx={{ marginLeft: '-14px', marginTop: '7px'}}>
-            {authorizationMenuItems.map(({ path, label }) => (
+            {filteredGeneralMenuItems.map(({ path, label }) => (
               <ListItemButton
                 key={path}
                 component={Link}
                 to={path}
                 sx={{
                   borderRadius: '150px',
-                padding: '1px',
-                margin: '5px',
-                backgroundColor: location.pathname === path ? 'black' : 'transparent',
-                color: location.pathname === path ? 'white' : 'inherit',
-                '&:hover': {
-                  backgroundColor: location.pathname === path ? 'black' : '#E0E0E0',
-                },
-              }}
-            >
-              <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 'bold', marginLeft: '15px' }} />
-            </ListItemButton>
-          ))}
-        </List>
+                  padding: '1px',
+                  margin: '5px',
+                  backgroundColor: location.pathname === path ? 'black' : 'transparent',
+                  color: location.pathname === path ? 'white' : 'inherit',
+                  '&:hover': {
+                    backgroundColor: location.pathname === path ? 'black' : '#E0E0E0',
+                  },
+                }}
+              >
+                <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 'bold', marginLeft: '15px' }} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
+      )}
+
+      {/* AUTHORIZATION Menu Items */}
+      {filteredAuthorizationMenuItems.length > 0 && (
+        <Box ml={2} mt={3}>
+          <Typography variant="caption" color="text.secondary">
+            AUTHORIZATION
+          </Typography>
+          <List disablePadding sx={{ marginLeft: '-14px', marginTop: '7px'}}>
+            {filteredAuthorizationMenuItems.map(({ path, label }) => (
+              <ListItemButton
+                key={path}
+                component={Link}
+                to={path}
+                sx={{
+                  borderRadius: '150px',
+                  padding: '1px',
+                  margin: '5px',
+                  backgroundColor: location.pathname === path ? 'black' : 'transparent',
+                  color: location.pathname === path ? 'white' : 'inherit',
+                  '&:hover': {
+                    backgroundColor: location.pathname === path ? 'black' : '#E0E0E0',
+                  },
+                }}
+              >
+                <ListItemText primary={label} primaryTypographyProps={{ fontWeight: 'bold', marginLeft: '15px' }} />
+              </ListItemButton>
+            ))}
+          </List>
         </Box>
       )}
 

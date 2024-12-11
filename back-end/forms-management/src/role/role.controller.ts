@@ -4,6 +4,7 @@ import { RoleService } from './role.service';
 import { CreateRoleDto } from '../dto/create-role.dto';
 import { RolesGuard } from 'src/user/roles.guard';
 import { Roles } from 'src/user/roles.decorator';
+import { Permissions } from 'src/user/permissions.decorator';
 
 @Controller('roles')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -11,7 +12,8 @@ export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
   @Post()
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('Create Role')
   async createRole(@Body() createRoleDto: CreateRoleDto, @Request() req: any) {
     if (!createRoleDto.organizationId) {
       createRoleDto.organizationId = req.user.organizationId;
@@ -31,7 +33,8 @@ export class RoleController {
 
   // get all roles 
   @Get()
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('View Role', 'Create User', 'Edit User', 'Edit Role')
   async getAllRoles(@Req() request) {
     const organizationId = request.user.organizationId;
     const roles = await this.roleService.getAllByOrganization(organizationId);
@@ -44,7 +47,8 @@ export class RoleController {
 
   //get one role by id
   @Get(':id')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('View Role', 'Create User', 'Edit User', 'Edit Role')
   async getRole(@Req() request, @Param('id') roleId: string) {
     const organizationId = request.user.organizationId;
     const role = await this.roleService.getOne(roleId, organizationId);
@@ -64,7 +68,8 @@ export class RoleController {
 
   // Soft delete a role
   @Delete(':id')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('Delete Role')
   async deleteRole(@Req() request, @Param('id') id: string) {
     const organizationId = request.user.organizationId;
     await this.roleService.deleteRoleForOrganization(id, organizationId);
@@ -77,7 +82,8 @@ export class RoleController {
 
   //soft bulk delete
   @Delete()
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('Delete Role')
   async deleteRoles(@Req() request, @Body() ids: string[]) {
     const organizationId = request.user.organizationId;
     await this.roleService.deleteRolesForOrganization(ids, organizationId);
@@ -89,7 +95,8 @@ export class RoleController {
   }
 
   @Patch(':id')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('Edit Role')
   async updateRole(
     @Req() request,
     @Param('id') roleId: string,
@@ -109,7 +116,8 @@ export class RoleController {
   }
 
   @Get(':id')
-  @Roles('Admin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('View Role', 'Create User', 'Edit User', 'Edit Role')
   async getRoleById(@Param('id') roleId: string, @Param('organizationId') organizationId: string) {
     try {
       const role = await this.roleService.getOne(roleId, organizationId);
@@ -142,7 +150,8 @@ export class RoleController {
   }
 
   @Get('organization/:organizationId')
-  @Roles('Admin', 'SuperAdmin')
+  @Roles('Admin', 'SubUser')
+  @Permissions('View Role', 'Create User', 'Edit User', 'Edit Role')
   async getRolesByOrganization(@Param('organizationId') organizationId: string) {
     try {
       const roles = await this.roleService.getAllByOrganization(organizationId);

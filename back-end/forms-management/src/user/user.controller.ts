@@ -18,7 +18,7 @@ export class UserController {
   // API Endpoint to get all users without pagination
   @Get()
   @Roles("Admin","SubUser")
-  @Permissions("view Users")
+  @Permissions("View User", "Edit User", "Delete User", "Create User")
   async getUsers(
     @Request() req: any,
     @Query('organizationId') organizationId?: string
@@ -45,7 +45,7 @@ export class UserController {
   // API endpoint to get details of a specific user by ID
   @Get('details')
   @Roles("Admin","SubUser")
-  @Permissions("view user")
+  @Permissions("View User", "Edit User", "Delete User", "Create User")
   async getUserById(@Query('userId') userId: string): Promise<{ message: string; status: string;data: User }> {
     if (!userId) {
       throw new NotFoundException('User ID query parameter is required');
@@ -65,7 +65,7 @@ export class UserController {
   // API endpoint to create a new user
   @Post('create')
   @Roles("Admin","SubUser")
-  @Permissions('Create Users')
+  @Permissions('Create User')
   async addUser(
     @Body() createUserDto: CreateUserDto,
   ): Promise<{ message: string; status: string; data: User }> {
@@ -81,6 +81,7 @@ export class UserController {
   // API endpoint to update a user
   @Patch('edit')
   @Roles("Admin","SubUser")
+  @Permissions("Edit User")
   async updateUser(
     @Query('userid') id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -121,7 +122,7 @@ export class UserController {
   // API endpoint to bulk delete users
   @Delete('bulk-delete')
   @Roles("Admin","SubUser")
-  @Permissions("Delete Users")
+  @Permissions("Delete User")
   async bulkDeleteUsers(
     @Body() body: { ids: string[] },
     @Request() request: any 

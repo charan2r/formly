@@ -151,12 +151,12 @@ function ChangeOrganization() {
       </Box>
 
       <form>
-        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold', marginBottom: '-4px' }}>
+        <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
           New Admin Details
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's First Name *</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Admin's First Name *</Typography>
             <TextField
               name="firstName"
               value={formData.firstName}
@@ -172,7 +172,7 @@ function ChangeOrganization() {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Admin's Last Name *</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Admin's Last Name *</Typography>
             <TextField
               name="lastName"
               value={formData.lastName}
@@ -188,13 +188,13 @@ function ChangeOrganization() {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Phone</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone*</Typography>
             <TextField
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               fullWidth
-              placeholder="Enter New Phone"
+              placeholder="Enter Phone"
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
@@ -203,13 +203,13 @@ function ChangeOrganization() {
           </Grid>
 
           <Grid item xs={12} sm={6}>
-            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>New Email</Typography>
+            <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Email*</Typography>
             <TextField
               name="email"
               value={formData.email}
               onChange={handleChange}
               fullWidth
-              placeholder="Enter New Email"
+              placeholder="Enter Email"
               InputProps={{
                 sx: { backgroundColor: '#f9f9f9', borderRadius: '5px', width: '70%', paddingY: '2px', height: '30px' }
               }}
