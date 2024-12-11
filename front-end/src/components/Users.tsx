@@ -685,7 +685,7 @@ const Users: React.FC = () => {
             }}
             onClick={() => setCreateUserOpen(false)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -882,7 +882,7 @@ const Users: React.FC = () => {
             }}
             onClick={handleCloseDialog}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -1016,7 +1016,7 @@ const Users: React.FC = () => {
             }}
             onClick={() => setEditDialogOpen(false)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -1174,7 +1174,7 @@ const Users: React.FC = () => {
             }}
             onClick={() => setConfirmationOpen(false)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
             Delete User
