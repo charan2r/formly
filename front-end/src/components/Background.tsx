@@ -35,6 +35,9 @@ import { SuperAdminRoutes } from '../routes/SuperAdminRoutes';
 import { AdminRoutes } from '../routes/AdminRoutes';
 import { SubUserRoutes } from '../routes/SubUserRoutes';
 import { usePermissions } from '../hooks/usePermissions';
+import EditPageSettings from './RightSidebar';
+import AuditTrail from './AuditTrail';
+import EditTemplate from './EditTemplate';
 
 
 const LoadingScreen = () => (
@@ -69,7 +72,6 @@ const LoadingScreen = () => (
     </Typography>
   </Box>
 );
-import AuditTrail from './AuditTrail';
 
 const Background: React.FC = () => {
   const location = useLocation();
@@ -98,6 +100,7 @@ const Background: React.FC = () => {
           <Route path="/edit-organization/:orgId" element={<EditOrganization />} />
           <Route path="/change-organization/:orgId" element={<ChangeOrganization />} />
           <Route path="/audit-trail" element={<AuditTrail />} />
+          <Route path="/categories" element={<Category />} />
         </>
       );
     }
@@ -109,11 +112,13 @@ const Background: React.FC = () => {
           <Route path="/users" element={<Users />} />
           <Route path="/forms" element={<Form />} />
           <Route path="/templates" element={<Template />} />
-          <Route path="/viewtemplate/:id" element={<ViewTemplate />} />
+          <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
+          <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
           <Route path="/roles" element={<Role />} />
           <Route path="/addrole" element={<AddRole />} />
           <Route path="/editrole/:roleId" element={<EditRole />} />
           <Route path="/viewrole/:roleId" element={<ViewRole />} />
+          <Route path="/categories" element={<Category />} />
         </>
       );
     }
@@ -128,11 +133,18 @@ const Background: React.FC = () => {
           {hasAnyCrudPermission('Form') && 
             <Route path="/forms" element={<Form />} />
           }
-          {hasAnyCrudPermission('Template') && 
-            <Route path="/templates" element={<Template />} />
-          }
+          {hasAnyCrudPermission('Template') && (
+            <>
+              <Route path="/templates" element={<Template />} />
+              {hasSpecificPermission('Edit Template') && (
+                <>
+                  <Route path="/edittemplate/:formTemplateId" element={<EditPageSettings />} />
+                </>
+              )}
+            </>
+          )}
           {hasSpecificPermission('View Template') && 
-            <Route path="/viewtemplate/:id" element={<ViewTemplate />} />
+            <Route path="/viewtemplate/:templateId" element={<ViewTemplate />} />
           }
           {hasAnyCrudPermission('Role') && 
             <Route path="/roles" element={<Role />} />
@@ -145,6 +157,9 @@ const Background: React.FC = () => {
           }
           {hasSpecificPermission('View Role') && 
             <Route path="/viewrole/:roleId" element={<ViewRole />} />
+          }
+          {hasSpecificPermission('View Category') && 
+            <Route path="/categories" element={<Category />} />
           }
         </>
       );

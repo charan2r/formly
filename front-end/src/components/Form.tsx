@@ -51,6 +51,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import ReactDOM from 'react-dom';
 import { useReactToPrint } from 'react-to-print';
+import domtoimage from 'dom-to-image';
 
 interface form {
   formId: string;
@@ -110,12 +111,15 @@ const FormPrintComponent = React.forwardRef<HTMLDivElement, any>((props, ref) =>
   const containerStyle = {
     width: `${width}px`,
     height: `${height}px`,
+    minHeight: `${height}px`,
     backgroundColor: template.backgroundColor || '#ffffff',
     padding: `${template.marginTop || 10}px ${template.marginRight || 10}px 
               ${template.marginBottom || 10}px ${template.marginLeft || 10}px`,
     position: 'relative' as const,
-    overflow: 'hidden',
-    boxSizing: 'border-box' as const
+    overflow: 'visible',
+    boxSizing: 'border-box' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
   };
 
   // Create appearance settings object for form fields
@@ -138,6 +142,7 @@ const FormPrintComponent = React.forwardRef<HTMLDivElement, any>((props, ref) =>
       color: template.backgroundColor || '#ffffff',
       opacity: 100
     }
+
   };
 
   return (
@@ -165,8 +170,50 @@ const PreviewDialog: React.FC<{
   templateId: string;
 }> = ({ open, onClose, templateId }) => {
   const printRef = React.useRef<HTMLDivElement>(null);
+  const paperRef = useRef<HTMLDivElement>(null);
   const [template, setTemplate] = useState<any>(null);
   const [formFields, setFormFields] = useState<any[]>([]);
+  const [selectedSize, setSelectedSize] = useState("A4");
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+  const [gridSize, setGridSize] = useState({ width: 210 * 3.7795, height: 297 * 3.7795 });
+  const [gridPadding, setGridPadding] = useState({ top: 10, bottom: 10, left: 10, right: 10 });
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    border: {
+      width: 0,
+      style: 'none',
+      color: '#e0e0e0',
+      radius: 12
+    },
+    boxShadow: {
+      x: 0,
+      y: 4,
+      blur: 12,
+      spread: 0,
+      color: 'rgba(0, 0, 0, 0.1)',
+      enabled: true
+    },
+    background: {
+      color: '#ffffff',
+      opacity: 100
+    }
+  });
+
+  const calculateGridSize = () => {
+    if (paperRef.current) {
+      const { width, height } = pageSizes[selectedSize];
+      const parentWidth = paperRef.current.offsetWidth;
+      const ratio = height / width;
+      const gridWidth = Math.min(parentWidth, width);
+      const gridHeight = gridWidth * ratio;
+      setGridSize({ width: gridWidth, height: gridHeight });
+    }
+  };
+
+  useEffect(() => {
+    calculateGridSize();
+    window.addEventListener('resize', calculateGridSize);
+    return () => window.removeEventListener('resize', calculateGridSize);
+  }, [selectedSize]);
 
   useEffect(() => {
     if (open && templateId) {
@@ -177,8 +224,36 @@ const PreviewDialog: React.FC<{
             api.get(`/form-fields?formTemplateId=${templateId}`)
           ]);
 
-          setTemplate(templateResponse.data.data);
-          console.log(templateResponse.data.data)
+          const template = templateResponse.data.data;
+          setTemplate(template);
+          setSelectedSize(template.pageSize || 'A4');
+          setBackgroundColor(template.backgroundColor || '#ffffff');
+          setGridPadding({
+            top: parseInt(template.marginTop) || 10,
+            bottom: parseInt(template.marginBottom) || 10,
+            left: parseInt(template.marginLeft) || 10,
+            right: parseInt(template.marginRight) || 10
+          });
+          setAppearanceSettings({
+            border: {
+              width: template.borderWidth === 0 ? undefined : template.borderWidth,
+              radius: template.borderRadius,
+              style: template.borderStyle,
+              color: template.borderColor
+            },
+            boxShadow: {
+              x: template.boxShadowX ?? 0,
+              y: template.boxShadowY ?? 4,
+              blur: template.boxShadowBlur ?? 12,
+              spread: template.boxShadowSpread ?? 0,
+              color: template.boxShadowColor ?? 'rgba(0, 0, 0, 0.1)',
+              enabled: true
+            },
+            background: {
+              color: template.backgroundColor ?? '#ffffff',
+              opacity: ((template.boxShadowOpacity ?? 1) * 100)
+            }
+          });
           setFormFields(fieldsResponse.data.data);
         } catch (error) {
           console.error('Error fetching preview data:', error);
@@ -190,294 +265,323 @@ const PreviewDialog: React.FC<{
     }
   }, [open, templateId]);
 
-  const handlePrint = () => {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-    // Get all stylesheet links from the current document
-    const styleSheets = Array.from(document.styleSheets).map(styleSheet => {
-      try {
-        if (styleSheet.href) {
-          return `<link rel="stylesheet" type="text/css" href="${styleSheet.href}" />`;
-        } else {
-          // For inline styles
-          let cssRules = '';
-          Array.from(styleSheet.cssRules).forEach(rule => {
-            cssRules += rule.cssText;
-          });
-          return `<style>${cssRules}</style>`;
-        }
-      } catch (e) {
-        // For CORS stylesheets, just link them
-        if (styleSheet.href) {
-          return `<link rel="stylesheet" type="text/css" href="${styleSheet.href}" />`;
-        }
-        return '';
-      }
-    }).join('\n');
-
-    // Add print-specific styles with correct targeting
-    const printStyles = `
-      @media print {
-        @page {
-          size: ${template?.pageSize || 'A4'};
-          margin: 0;
-        }
-        
-        body {
-          margin: 0;
-          padding: 0;
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-        }
-        
-        /* Template-level styles */
-        .printable-form {
-          width: ${pageSizes[template?.pageSize || 'A4'].width}px !important;
-          height: ${pageSizes[template?.pageSize || 'A4'].height}px !important;
-          overflow: hidden !important;
-          position: relative !important;
-          background-color: ${template?.backgroundColor || '#ffffff'} !important;
-          padding: ${template?.marginTop || 10}px ${template?.marginRight || 10}px 
-                  ${template?.marginBottom || 10}px ${template?.marginLeft || 10}px !important;
-          box-sizing: border-box !important;
-        }
-
-        /* Form field-level styles */
-        .form-field {
-          border: ${template?.borderWidth}px ${template?.borderStyle} ${template?.borderColor} !important;
-          border-radius: ${template?.borderRadius}px !important;
-          box-shadow: ${template?.boxShadowX}px 
-                     ${template?.boxShadowY}px 
-                     ${template?.boxShadowBlur}px 
-                     ${template?.boxShadowSpread}px 
-                     ${template?.boxShadowColor} !important;
-          opacity: ${template?.boxShadowOpacity} !important;
-          background-color: ${template?.backgroundColor} !important;
-        }
-
-        /* Hide UI elements */
-        .delete-form-field,
-        .drag-handle,
-        .add-subtitle,
-        .delete-subtitle,
-        .ql-toolbar {
-          display: none !important;
-        }
-
-        /* Preserve ReactQuill formatting */
-        .ql-editor {
-          padding: 0 !important;
-          border: none !important;
-        }
-        
-        .ql-editor p {
-          margin: 0 !important;
-          padding: 0 !important;
-          line-height: 1.5 !important;
-        }
-
-        /* Ensure text formatting is preserved */
-        .ql-editor u, 
-        .ql-editor s, 
-        .ql-editor strong, 
-        .ql-editor em,
-        .ql-editor span {
-          display: inline !important;
-          position: relative !important;
-          line-height: inherit !important;
-          vertical-align: baseline !important;
-        }
-
-        /* Preserve Material UI styles */
-        .MuiTypography-root {
-          display: block !important;
-          color: inherit !important;
-        }
-
-        .MuiBox-root {
-          display: block !important;
-        }
-
-        /* Preserve background colors and borders */
-        * {
-          -webkit-print-color-adjust: exact !important;
-          print-color-adjust: exact !important;
-          color-adjust: exact !important;
-        }
-      }
-    `;
-
-    // Get Material UI and other runtime styles
-    const runtimeStyles = Array.from(document.querySelectorAll('style'))
-      .map(style => style.innerHTML)
-      .join('\n');
-
-    // Get the current form content
-    const formContent = printRef.current?.innerHTML || '';
-
-    // Write to print window
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${template?.name || 'Form'}</title>
-          ${styleSheets}
-          <style>${runtimeStyles}</style>
-          <style>${printStyles}</style>
-          <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-        </head>
-        <body>
-          <div class="printable-form">
-            ${formContent}
-          </div>
-          <script>
-            // Wait for all resources to load
-            window.onload = () => {
-              setTimeout(() => {
-                window.print();
-                window.onafterprint = () => window.close();
-              }, 1000);
-            };
-          </script>
-        </body>
-      </html>
-    `);
-
-    printWindow.document.close();
+  const handlePrintClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
-  // console.log(template)
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDirectPrint = async () => {
+    if (printRef.current) {
+      try {
+        toast.info('Preparing document...');
+        
+        const pageSize = template?.pageSize || 'A4';
+        const { width: pageWidth, height: pageHeight } = pageSizes[pageSize];
+        
+        const originalStyle = printRef.current.style.cssText;
+        Object.assign(printRef.current.style, {
+          width: `${pageWidth}px`,
+          height: `${pageHeight}px`,
+          position: 'absolute',
+          left: '0',
+          top: '0',
+          transform: 'none',
+          transformOrigin: 'top left'
+        });
+
+        const dataUrl = await domtoimage.toPng(printRef.current, {
+          quality: 1.0,
+          width: pageWidth,
+          height: pageHeight,
+          style: {
+            '-webkit-print-color-adjust': 'exact',
+            'print-color-adjust': 'exact'
+          },
+          cacheBust: true
+        });
+        
+        printRef.current.style.cssText = originalStyle;
+        
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <title>${template?.name || 'Form Preview'}</title>
+                <style>
+                  @page {
+                    size: ${pageSize};
+                    margin: 0;
+                  }
+                  body {
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: flex-start;
+                    background-color: white;
+                  }
+                  .print-container {
+                    width: ${pageWidth}px;
+                    height: ${pageHeight}px;
+                    position: relative;
+                    margin: 0;
+                    padding: 0;
+                  }
+                  img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    display: block;
+                    margin: 0;
+                    padding: 0;
+                  }
+                  @media print {
+                    html, body {
+                      width: ${pageWidth}px;
+                      height: ${pageHeight}px;
+                      margin: 0;
+                      padding: 0;
+                    }
+                    .print-container {
+                      break-inside: avoid;
+                      page-break-inside: avoid;
+                    }
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="print-container">
+                  <img 
+                    src="${dataUrl}" 
+                    alt="Form Preview"
+                  />
+                </div>
+                <script>
+                  window.onload = () => {
+                    const img = document.querySelector('img');
+                    if (img) {
+                      img.onload = () => {
+                        requestAnimationFrame(() => {
+                          window.print();
+                          window.close();
+                        });
+                      };
+                    }
+                  };
+                </script>
+              </body>
+            </html>
+          `);
+          printWindow.document.close();
+          toast.success('Document printed successfully!');
+        } else {
+          throw new Error('Could not open print window');
+        }
+        handleClose();
+      } catch (error) {
+        console.error('Print failed:', error);
+        toast.error('Failed to print document');
+        handleClose();
+      }
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (printRef.current) {
+      try {
+        toast.info('Preparing PDF...');
+        
+        const pageSize = template?.pageSize || 'A4';
+        const { width: pageWidth, height: pageHeight } = pageSizes[pageSize];
+        
+        const originalStyle = printRef.current.style.cssText;
+        Object.assign(printRef.current.style, {
+          width: `${pageWidth}px`,
+          height: `${pageHeight}px`,
+          position: 'absolute',
+          left: '0',
+          top: '0',
+          transform: 'none',
+          transformOrigin: 'top left'
+        });
+
+        const dataUrl = await domtoimage.toPng(printRef.current, {
+          quality: 1.0,
+          width: pageWidth,
+          height: pageHeight,
+          style: {
+            '-webkit-print-color-adjust': 'exact',
+            'print-color-adjust': 'exact'
+          },
+          cacheBust: true
+        });
+        
+        printRef.current.style.cssText = originalStyle;
+
+        // Convert pixels to millimeters for A4 size
+        const mmWidth = 210; // A4 width in mm
+        const mmHeight = 297; // A4 height in mm
+
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        // Add the image to PDF with correct A4 dimensions
+        pdf.addImage(
+          dataUrl,
+          'PNG',
+          0,
+          0,
+          mmWidth,
+          mmHeight,
+          undefined,
+          'FAST'
+        );
+
+        pdf.save(`${template?.name || 'form'}.pdf`);
+        toast.success('PDF downloaded successfully!');
+        handleClose();
+      } catch (error) {
+        console.error('PDF generation failed:', error);
+        toast.error('Failed to generate PDF');
+        handleClose();
+      }
+    }
+  };
 
   return (
     <Dialog 
       open={open} 
       onClose={onClose} 
-      maxWidth="md" 
-      fullWidth
+      maxWidth={false}
       PaperProps={{
         sx: {
-          borderRadius: '20px',
-          backgroundColor: '#f9f9f9',
-          overflow: 'hidden'
+          width: 'auto',
+          maxWidth: '95vw',
+          maxHeight: '90vh',
+          overflow: 'auto'
         }
       }}
     >
-      {/* Header */}
       <Box sx={{ 
         display: 'flex', 
+        flexDirection: 'column', 
         alignItems: 'center',
-        padding: '24px',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.1)'
-      }}>
-        <IconButton
-          onClick={onClose}
-          sx={{
-            mr: 2,
-            '&:hover': {
-              backgroundColor: 'rgba(0, 0, 0, 0.04)'
-            }
-          }}
-        >
-          <KeyboardBackspaceRoundedIcon />
-        </IconButton>
-        
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-            Preview Form
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {template?.name || 'Loading...'}
-          </Typography>
-        </Box>
-
-        <IconButton 
-          onClick={handlePrint}
-          sx={{
-            ml: 1,
-            backgroundColor: 'black',
-            color: 'white',
-            '&:hover': {
-              backgroundColor: '#333'
-            }
-          }}
-        >
-          <PrintIcon />
-        </IconButton>
-      </Box>
-
-      {/* Content */}
-      <DialogContent sx={{ 
         p: 3,
-        backgroundColor: '#fff',
-        display: 'flex',
-        justifyContent: 'center',
-        minHeight: '60vh'
+        width: '100%'
       }}>
-        {template ? (
-          <Box
+        <Box sx={{ mb: 3, textAlign: 'center' }}>
+          <Typography variant="h5" fontWeight="bold" mb={1}>
+            {template?.name || 'Template Preview'}
+          </Typography>
+          <Typography variant="body2" color="textSecondary" mb={2}>
+            {template?.description}
+          </Typography>
+          <Button
+            startIcon={<PrintIcon />}
+            variant="outlined"
+            onClick={handlePrintClick}
             sx={{
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'flex-start',
-              overflow: 'auto',
-              p: 2,
-              backgroundColor: '#f5f5f5',
-              borderRadius: '12px'
+              borderColor: 'black',
+              color: 'black',
+              borderRadius: '20px',
+              px: 3,
+              '&:hover': {
+                borderColor: '#333',
+                backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              }
             }}
           >
-            <div 
-              ref={printRef}
-              className="printable-form"
-              style={{
-                width: `${pageSizes[template.pageSize || 'A4'].width}px`,
-                height: `${pageSizes[template.pageSize || 'A4'].height}px`,
-                backgroundColor: template.backgroundColor || '#ffffff',
-                padding: `${template.marginTop || 10}px ${template.marginRight || 10}px 
-                          ${template.marginBottom || 10}px ${template.marginLeft || 10}px`,
-                position: 'relative',
-                overflow: 'hidden',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                borderRadius: '8px'
+            Print / Download
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            PaperProps={{
+              sx: {
+                mt: 1,
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
+                borderRadius: '12px',
+              }
+            }}
+          >
+            <MenuItem 
+              onClick={handleDirectPrint}
+              sx={{ 
+                py: 1.5,
+                px: 2,
+                '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
               }}
             >
-              <FormPrintComponent
-                template={{
-                  ...template,
-                  formFieldStyles: {
-                    borderWidth: template.borderWidth,
-                    borderRadius: template.borderRadius,
-                    borderStyle: template.borderStyle,
-                    borderColor: template.borderColor,
-                    boxShadowX: template.boxShadowX,
-                    boxShadowY: template.boxShadowY,
-                    boxShadowBlur: template.boxShadowBlur,
-                    boxShadowSpread: template.boxShadowSpread,
-                    boxShadowColor: template.boxShadowColor,
-                    boxShadowOpacity: template.boxShadowOpacity,
-                    backgroundColor: template.backgroundColor
-                  }
-                }}
-                formFields={formFields}
-                appearanceSettings={template.appearanceSettings}
-                pageSizes={pageSizes}
-              />
-            </div>
-          </Box>
-        ) : (
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            alignItems: 'center',
-            height: '100%'
-          }}>
-            <Typography variant="body1" color="text.secondary">
-              Loading preview...
-            </Typography>
-          </Box>
-        )}
-      </DialogContent>
+              <PrintIcon sx={{ mr: 2 }} /> Print Document
+            </MenuItem>
+            <MenuItem 
+              onClick={handleDownloadPDF}
+              sx={{ 
+                py: 1.5,
+                px: 2,
+                '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+              }}
+            >
+              <DescriptionIcon sx={{ mr: 2 }} /> Download as PDF
+            </MenuItem>
+          </Menu>
+        </Box>
+
+        <Paper 
+          elevation={1} 
+          ref={paperRef} 
+          sx={{ 
+            padding: '50px',
+            margin: '0 auto',
+            borderRadius: 3,
+            width: 'fit-content',
+            minWidth: '70vw',
+            maxWidth: '90vw',
+          }}
+        >
+          <div
+            ref={printRef}
+            style={{
+              width: '70vw',
+              height: `${70 * (gridSize.height/gridSize.width)}vw`,
+              position: "relative",
+              border: "1px solid #ccc",
+              borderRadius: '15px',
+              overflow: "hidden",
+              backgroundColor: backgroundColor,
+              transition: "all 0.3s ease",
+              padding: `${gridPadding.top}px ${gridPadding.right}px ${gridPadding.bottom}px ${gridPadding.left}px`,
+              boxSizing: "border-box",
+            }}
+          >
+            <DraggableQuestion
+              formTemplateId={templateId}
+              items={formFields}
+              gridSize={gridSize}
+              selectedSize={selectedSize}
+              pageSizes={pageSizes}
+              onQuestionChange={() => {}}
+              onOptionChange={() => {}}
+              onDeleteOption={() => {}}
+              onAddOption={() => {}}
+              isViewMode={true}
+              appearanceSettings={appearanceSettings}
+              gridPadding={gridPadding}
+            />
+          </div>
+        </Paper>
+      </Box>
     </Dialog>
   );
 };
@@ -920,82 +1024,7 @@ const FormTable: React.FC = () => {
     });
   
 
-  const handleDownloadPDF = async (templateId: string | undefined) => {
-    if (!templateId) {
-        toast.error('Template ID not found');
-        return;
-    }
-
-    try {
-        // Fetch template details and form fields
-        const [templateResponse, fieldsResponse] = await Promise.all([
-            api.get(`/form-templates/details?id=${templateId}`),
-            api.get(`/form-fields?formTemplateId=${templateId}`)
-        ]);
-
-        if (templateResponse.data.status !== 'success' || fieldsResponse.data.success !== true) {
-            toast.error('Failed to fetch template details');
-            return;
-        }
-
-        const template = templateResponse.data.data;
-        const formFields = fieldsResponse.data.data;
-
-        // Create a container for the print component
-        const printRef = React.createRef<HTMLDivElement>();
-        const printComponent = (
-            <FormPrintComponent
-                ref={printRef}
-                template={template}
-                formFields={formFields}
-                appearanceSettings={appearanceSettings}
-                pageSizes={pageSizes}
-            />
-        );
-
-        // Add component to DOM temporarily
-        const container = document.createElement('div');
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        document.body.appendChild(container);
-
-        // Render component
-        ReactDOM.render(printComponent, container);
-
-        // Setup print handler
-        const handlePrint = useReactToPrint({
-            content: () => printRef.current,
-            pageStyle: `
-                @page {
-                    size: ${template.pageSize || 'A4'};
-                    margin: 0;
-                }
-                @media print {
-                    body {
-                        margin: 0;
-                        padding: 0;
-                    }
-                }
-            `,
-            onAfterPrint: () => {
-                // Cleanup
-                document.body.removeChild(container);
-                toast.success('PDF downloaded successfully!');
-            },
-            onPrintError: () => {
-                document.body.removeChild(container);
-                toast.error('Failed to generate PDF');
-            },
-        });
-
-        // Trigger print
-        handlePrint();
-
-    } catch (error) {
-        console.error('Error downloading PDF:', error);
-        toast.error('Failed to download PDF');
-    }
-  };
+  
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -1850,7 +1879,7 @@ const FormTable: React.FC = () => {
             </IconButton>
             
             <IconButton
-              onClick={() => handleDownloadPDF(viewFormData?.formTemplateId)}
+              // onClick={() => handlePrintClick()}
               sx={{
                 backgroundColor: '#FFF0F0',
                 width: 56,
@@ -1858,7 +1887,7 @@ const FormTable: React.FC = () => {
                 '&:hover': { backgroundColor: '#FFE0E0' }
               }}
             >
-              <DescriptionIcon />
+              <PrintIcon />
             </IconButton>
             
             <IconButton
@@ -1869,7 +1898,7 @@ const FormTable: React.FC = () => {
                 '&:hover': { backgroundColor: '#FFE0E0' }
               }}
             >
-              <PrintIcon />
+              <DescriptionIcon />
             </IconButton>
           </Box>
 

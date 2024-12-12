@@ -423,22 +423,26 @@ const Users: React.FC = () => {
               </Button>
             </Box>
             {selectedCount > 0 ? (
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-              >
-                <Delete sx={{ marginRight: 1 }} />
-                Delete
-              </Button>
+              user?.permissions.includes('Delete User') && (
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                >
+                  <Delete sx={{ marginRight: 1 }} />
+                  Delete
+                </Button>
+              )
             ) : (
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                onClick={() => setCreateUserOpen(true)}
-              >
-                <AddIcon sx={{ marginRight: 1 }} />
-                Add Users
-              </Button>
+              user?.permissions.includes('Add User') && (
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                  onClick={() => setCreateUserOpen(true)}
+                >
+                  <AddIcon sx={{ marginRight: 1 }} />
+                  Add Users
+                </Button>
+              )
             )}
           </Box>
         </Box>
@@ -598,52 +602,58 @@ const Users: React.FC = () => {
                       },
                     }}
                   >
-                    <MenuItem
-                      onClick={() => handleViewUser(row.id)}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '40px',
-                        margin: '5px',
-                        justifyContent: 'center',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      View
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleEditUser(row.id)}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '40px',
-                        margin: '5px',
-                        justifyContent: 'center',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Edit
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleDeleteClick(row.id)}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '40px',
-                        margin: '5px',
-                        justifyContent: 'center',
-                        color: 'red',
-                        fontSize: '0.875rem',
-                        minHeight: '30px',
-                        minWidth: '100px',
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
+                    {user?.permissions.includes('View User') && (
+                      <MenuItem
+                        onClick={() => handleViewUser(row.id)}
+                        sx={{
+                          backgroundColor: 'white',
+                          borderRadius: '40px',
+                          margin: '5px',
+                          justifyContent: 'center',
+                          fontSize: '0.875rem',
+                          minHeight: '30px',
+                          minWidth: '100px',
+                          '&:hover': { backgroundColor: '#f0f0f0' },
+                        }}
+                      >
+                        View
+                      </MenuItem>
+                    )}
+                    {user?.permissions.includes('Edit User') && (
+                      <MenuItem
+                        onClick={() => handleEditUser(row.id)}
+                        sx={{
+                          backgroundColor: 'white',
+                          borderRadius: '40px',
+                          margin: '5px',
+                          justifyContent: 'center',
+                          fontSize: '0.875rem',
+                          minHeight: '30px',
+                          minWidth: '100px',
+                          '&:hover': { backgroundColor: '#f0f0f0' },
+                        }}
+                      >
+                        Edit
+                      </MenuItem>
+                    )}
+                    {user?.permissions.includes('Delete User') && (
+                      <MenuItem
+                        onClick={() => handleDeleteClick(row.id)}
+                        sx={{
+                          backgroundColor: 'white',
+                          borderRadius: '40px',
+                          margin: '5px',
+                          justifyContent: 'center',
+                          color: 'red',
+                          fontSize: '0.875rem',
+                          minHeight: '30px',
+                          minWidth: '100px',
+                          '&:hover': { backgroundColor: '#f0f0f0' },
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    )}
                   </Popover>
                 </TableCell>
               </TableRow>

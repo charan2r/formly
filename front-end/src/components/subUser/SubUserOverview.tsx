@@ -8,7 +8,6 @@ import {
   CardContent,
   IconButton,
   Tooltip,
-  useTheme,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -29,7 +28,7 @@ interface QuickAccessCardProps {
   isDisabled: boolean;
 }
 
-// Custom theme colors
+// Custom theme colors for black and white
 const themeColors = {
   background: '#ffffff',
   paper: '#ffffff',
@@ -39,14 +38,14 @@ const themeColors = {
   },
   card: {
     background: '#ffffff',
-    hover: '#f5f5f5',
+    hover: '#f0f0f0',
     disabled: 'rgba(0, 0, 0, 0.05)',
   },
   icon: {
     primary: '#000000',
     disabled: '#999999'
   },
-  border: '#e0e0e0'
+  border: '#e0e0e0',
 };
 
 const QuickAccessCard: React.FC<QuickAccessCardProps> = ({
@@ -63,15 +62,14 @@ const QuickAccessCard: React.FC<QuickAccessCardProps> = ({
       sx={{
         height: '100%',
         cursor: isDisabled ? 'not-allowed' : 'pointer',
-        transition: 'all 0.2s ease',
+        transition: 'all 0.3s ease',
         background: themeColors.card.background,
         opacity: isDisabled ? 0.5 : 1,
         border: `1px solid ${themeColors.border}`,
-        borderRadius: '12px',
+        borderRadius: '16px',
         '&:hover': {
           transform: isDisabled ? 'none' : 'translateY(-4px)',
           backgroundColor: isDisabled ? themeColors.card.background : themeColors.card.hover,
-          boxShadow: isDisabled ? 'none' : '0 4px 20px rgba(0, 0, 0, 0.1)',
         },
       }}
       onClick={() => !isDisabled && navigate(path)}
@@ -122,7 +120,6 @@ const QuickAccessCard: React.FC<QuickAccessCardProps> = ({
 
 const SubUserOverview: React.FC = () => {
   const { user } = useAuth();
-  console.log(user);
   const hasPermission = (permission: string) => {
     return user?.permissions?.includes(permission) || false;
   };
@@ -168,7 +165,6 @@ const SubUserOverview: React.FC = () => {
         borderRadius: '24px',
         backgroundColor: themeColors.paper,
         border: `1px solid ${themeColors.border}`,
-        boxShadow: '0 0 40px rgba(0,0,0,0.03)'
       }}
     >
       <Box display="flex" flexDirection="column" gap={3}>
@@ -183,11 +179,11 @@ const SubUserOverview: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Welcome Section with enhanced styling */}
+        {/* Welcome Section */}
         <Box 
           mb={4} 
           sx={{
-            background: 'linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%)',
+            background: themeColors.background,
             borderRadius: '20px',
             padding: '24px',
             border: '1px solid rgba(33, 150, 243, 0.1)'
@@ -199,9 +195,6 @@ const SubUserOverview: React.FC = () => {
             sx={{ 
               color: themeColors.text.primary,
               mb: 1,
-              background: 'linear-gradient(45deg, #1a1a1a 30%, #2196f3 90%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent'
             }}
           >
             Welcome back, {user?.email?.split('@')[0]}
@@ -218,7 +211,7 @@ const SubUserOverview: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Quick Access Section with enhanced grid spacing */}
+        {/* Quick Access Section */}
         <Box mt={4}>
           <Typography 
             variant="h5" 
@@ -253,7 +246,7 @@ const SubUserOverview: React.FC = () => {
           </Grid>
         </Box>
 
-        {/* Information Section with enhanced cards */}
+        {/* Information Section */}
         <Box mt={6}>
           <Typography 
             variant="h5" 
@@ -266,7 +259,7 @@ const SubUserOverview: React.FC = () => {
           <Grid container spacing={4} mt={1}>
             <Grid item xs={12} md={6}>
               <Card sx={{ 
-                background: themeColors.gradient,
+                background: themeColors.background,
                 borderRadius: '20px',
                 border: `1px solid ${themeColors.border}`,
                 height: '100%'
@@ -289,7 +282,7 @@ const SubUserOverview: React.FC = () => {
             </Grid>
             <Grid item xs={12} md={6}>
               <Card sx={{ 
-                background: themeColors.gradient,
+                background: themeColors.background,
                 borderRadius: '20px',
                 border: `1px solid ${themeColors.border}`,
                 height: '100%'

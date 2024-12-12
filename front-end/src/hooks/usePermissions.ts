@@ -4,6 +4,8 @@ export const usePermissions = () => {
   const { user } = useAuth();
 
   const hasPermission = (permission: string) => {
+    console.log('--- ---- -----',user?.permissions);
+    console.log(permission);
     return user?.permissions?.includes(permission) || false;
   };
 
@@ -14,6 +16,7 @@ export const usePermissions = () => {
       `Edit ${resource}`,
       `Delete ${resource}`
     ];
+
     return permissions.some(permission => hasPermission(permission));
   };
 

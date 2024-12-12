@@ -52,8 +52,9 @@ export class RolesGuard implements CanActivate {
         const userPermissionNames = userPermissions.map(
           (rp) => rp.permission.name,
         );
-
-        const hasPermission = requiredPermissions.every((permission) =>
+        console.log('userPermissionNames', userPermissionNames);
+        console.log('requiredPermissions', requiredPermissions);
+        const hasPermission = requiredPermissions.some((permission) =>
           userPermissionNames.includes(permission),
         );
         console.log('hasPermission', hasPermission);

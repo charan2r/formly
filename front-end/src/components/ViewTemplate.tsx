@@ -144,7 +144,7 @@ const ViewTemplate: React.FC = () => {
         margin: '4px',
         marginTop: '25px',
         borderRadius: 3,
-        overflow: 'auto',
+        overflow: 'hidden',
       }}
     >
       <Grid container spacing={3}>
@@ -188,10 +188,10 @@ const ViewTemplate: React.FC = () => {
               position: "relative",
               border: "1px solid #ccc",
               borderRadius: '15px',
-              overflow: "auto",
+              overflow: "hidden",
               backgroundColor: backgroundColor,
               transition: "all 0.3s ease",
-              padding: '10px',
+              padding: `${gridPadding.top}px ${gridPadding.right}px ${gridPadding.bottom}px ${gridPadding.left}px`,
               boxSizing: "border-box",
             }}
           >
@@ -207,6 +207,7 @@ const ViewTemplate: React.FC = () => {
               onAddOption={() => {}}
               isViewMode={true}
               appearanceSettings={appearanceSettings}
+              gridPadding={gridPadding}
             />
           </div>
         </Grid>

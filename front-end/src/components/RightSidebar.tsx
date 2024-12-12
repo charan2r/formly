@@ -510,19 +510,21 @@ const EditPageSettings: React.FC = () => {
   const calculateGridSize = () => {
     if (paperRef.current) {
       const { width, height } = pageSizes[selectedSize];
-      const isPortrait = orientation === "Portrait";
-      const effectiveWidth = isPortrait ? width : height;
-      const effectiveHeight = isPortrait ? height : width;
-  
       const parentWidth = paperRef.current.offsetWidth;
-      console.log(paperRef.current.offsetWidth)
-      const ratio = effectiveHeight / effectiveWidth;
-  
-      const gridWidth = Math.min(parentWidth, effectiveWidth); // Use parent width as max
-      const gridHeight = gridWidth * ratio; // Maintain aspect ratio
-      console.log(gridHeight/gridWidth)
-  
-      setGridSize({ width: gridWidth, height: gridHeight });
+      
+      // Calculate available space after margins
+      const availableWidth = width - (gridPadding.left + gridPadding.right);
+      const availableHeight = height - (gridPadding.top + gridPadding.bottom);
+      
+      // Maintain aspect ratio with the reduced space
+      const ratio = availableHeight / availableWidth;
+      const gridWidth = Math.min(parentWidth, availableWidth);
+      const gridHeight = gridWidth * ratio;
+      
+      setGridSize({ 
+        width: gridWidth, 
+        height: gridHeight 
+      });
     }
   };
 
@@ -1063,45 +1065,37 @@ const EditPageSettings: React.FC = () => {
 
              <div
   style={{
-    width: getContainerWidth(),
-    height: `${(getContainerWidth().replace('vw', '') as any) * (gridSize.height/gridSize.width)}vw`,
+    width: '70vw',
+    height: `${70 * (gridSize.height/gridSize.width)}vw`,
     position: "relative",
     border: "1px solid #ccc",
     borderRadius: '15px',
-    overflow: "auto",
+    overflow: "hidden",
     backgroundColor: backgroundColor,
     transition: "all 0.3s ease",
-    paddingTop: gridPadding.top,
-    paddingBottom: gridPadding.bottom,
-    paddingLeft: gridPadding.left,
-    paddingRight: gridPadding.right,
     boxSizing: "border-box",
-    maxWidth: "100%",
-    marginRight: 0,
   }}
 >
-
-  <div 
-    ref={rndContainerRef} 
-    style={{ 
-      position: "relative", 
-      width: "100%", 
-      height: "100%",
-      transition: "all 0.3s ease",
-      marginRight: 0,
-    }}
-  >
+  <div style={{
+    position: 'absolute',
+    top: gridPadding.top,
+    right: gridPadding.right,
+    bottom: gridPadding.bottom,
+    left: gridPadding.left,
+    width: `calc(100% - ${gridPadding.left + gridPadding.right}px)`,
+    height: `calc(100% - ${gridPadding.top + gridPadding.bottom}px)`,
+  }}>
     <DraggableQuestion
-      formTemplateId={formTemplateId!}
+      formTemplateId={formTemplateId || ''}
       items={items}
       gridSize={gridSize}
       selectedSize={selectedSize}
       pageSizes={pageSizes}
-      borderStyle={borderStyle}
       onQuestionChange={handleQuestionChange}
       onOptionChange={handleOptionChange}
       onDeleteOption={handleDeleteOption}
       onAddOption={handleAddOption}
+      isViewMode={false}
       appearanceSettings={appearanceSettings}
       onEditorFocus={handleEditorFocus}
       activeFieldId={activeFieldId}
