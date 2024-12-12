@@ -83,6 +83,21 @@ const DataTable: React.FC = () => {
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const defaultToastConfig = {
+    position: "top-right" as const,
+    autoClose: 5000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    style: {
+      backgroundColor: 'black',
+      color: 'white',
+      borderRadius: '10px',
+      fontWeight: 'bold',
+    },
+  };
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -171,14 +186,30 @@ const DataTable: React.FC = () => {
       const selectedRoleIds = Object.keys(selectedRoles).filter(key => selectedRoles[key]);
       
       const response = await api.delete('/roles', {
-        data: selectedRoleIds // Send array of IDs directly
+        data: selectedRoleIds
       });
 
       if (response.data.status === 'success') {
         setRoles(prevRoles => 
           prevRoles.filter(role => !selectedRoleIds.includes(role.roleId))
         );
-        toast.success(response.data.message || "Roles deleted successfully!");
+        
+        toast.success("Roles deleted successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
+        
         setSelectedRoles({});
       } else {
         throw new Error(response.data.message);
@@ -186,7 +217,21 @@ const DataTable: React.FC = () => {
       
       setConfirmationBulkOpen(false);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to delete roles");
+      toast.error(error.response?.data?.message || "Failed to delete roles", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     }
   };
 
@@ -198,14 +243,43 @@ const DataTable: React.FC = () => {
       
       if (response.data.status === 'success') {
         setRoles(prev => prev.filter(role => role.roleId !== roleToDelete));
-        toast.success(response.data.message || "Role deleted successfully!");
+        
+        toast.success("Role deleted successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
       } else {
         throw new Error(response.data.message);
       }
       
       setConfirmationOpen(false);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to delete role");
+      toast.error(error.response?.data?.message || "Failed to delete role", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     }
   };
 
@@ -235,7 +309,7 @@ const DataTable: React.FC = () => {
 
   const handleAddRole = () => {
     if (!user?.organizationId) {
-      toast.error("Organization context not found");
+      toast.error("Organization context not found", defaultToastConfig);
       return;
     }
     navigate('/addrole');
@@ -243,7 +317,7 @@ const DataTable: React.FC = () => {
 
   const handleEditRole = (roleId: string) => {
     if (!user?.organizationId) {
-      toast.error("Organization context not found");
+      toast.error("Organization context not found", defaultToastConfig);
       return;
     }
     navigate(`/editrole/${roleId}`);
@@ -559,35 +633,121 @@ const DataTable: React.FC = () => {
       </Box>
 
       {/* Confirmation Dialog */}
-      <Dialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete this role?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteRole} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
+      <Dialog 
+        open={confirmationOpen} 
+        onClose={() => setConfirmationOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            padding: '24px',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            Delete Role
+          </Typography>
+          <Typography sx={{ mb: 4, color: 'text.secondary' }}>
+            Are you sure you want to delete?
+          </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="contained"
+              onClick={() => setConfirmationOpen(false)}
+              sx={{
+                bgcolor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+              }}
+            >
+              No, Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleDeleteRole}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { 
+                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  borderColor: 'black'
+                }
+              }}
+            >
+              Yes, Delete
+            </Button>
+          </Box>
+        </Box>
       </Dialog>
 
-      {/* Confirmation Dialog */}
-      <Dialog open={confirmationBulkOpen} onClose={() => setConfirmationBulkOpen(false)} sx={{}}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
-        <DialogContent>
-          <Typography>Are you sure you want to delete these roles?</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfirmationBulkOpen(false)} color="black">
-            Cancel
-          </Button>
-          <Button onClick={handleDeleteRoles} sx={{ color: 'white', backgroundColor: 'black', borderRadius: '10px' }}>
-            Delete
-          </Button>
-        </DialogActions>
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog 
+        open={confirmationBulkOpen} 
+        onClose={() => setConfirmationBulkOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            padding: '24px',
+            minWidth: '400px'
+          }
+        }}
+      >
+        <Box sx={{ textAlign: 'center' }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+            Delete Roles
+          </Typography>
+          <Typography sx={{ mb: 4, color: 'text.secondary' }}>
+            Are you sure you want to delete these roles?
+          </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center'
+          }}>
+            <Button
+              variant="contained"
+              onClick={() => setConfirmationBulkOpen(false)}
+              sx={{
+                bgcolor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
+              }}
+            >
+              No, Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleDeleteRoles}
+              sx={{
+                borderColor: 'black',
+                color: 'black',
+                borderRadius: '20px',
+                px: 3,
+                py: 1,
+                '&:hover': { 
+                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                  borderColor: 'black'
+                }
+              }}
+            >
+              Yes, Delete
+            </Button>
+          </Box>
+        </Box>
       </Dialog>
       <ToastContainer></ToastContainer>
     </Paper>
