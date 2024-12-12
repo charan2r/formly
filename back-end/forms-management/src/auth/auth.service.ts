@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
@@ -9,6 +10,7 @@ import { TokenService } from 'src/auth/token.service';
 import { Request } from 'express';
 import { RolePermissionService } from '../role-permission/role-permission.service';
 import { PermissionService } from '../permission/permission.service';
+import { first } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -149,6 +151,8 @@ export class AuthService {
         const payload = {
             userId: user.id,
             email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
             userType: user.userType,
             roleId: user.roleId,
             organizationId: user.organizationId,
@@ -161,6 +165,8 @@ export class AuthService {
         const userData = {
             id: user.id,
             email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
             userType: user.userType,
             roleId: user.roleId,
             organizationId: user.organizationId,
@@ -214,6 +220,8 @@ export class AuthService {
             return {
                 id: user.id,
                 email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
                 userType: user.userType,
                 roleId: user.roleId,
                 organizationId: user.organizationId,
