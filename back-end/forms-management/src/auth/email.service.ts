@@ -1,4 +1,6 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import * as dotenv from 'dotenv';
@@ -12,12 +14,24 @@ export class EmailService {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT),
-      secure: false, 
+      secure: process.env.SMTP_SECURE === 'true', 
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      tls: {
+        rejectUnauthorized: process.env.SMTP_REJECT_UNAUTHORIZED === 'true', 
+      },
     });
+    
+    this.transporter.verify((error, success) => {
+      if (error) {
+        console.error('SMTP Configuration Error:', error);
+      } else {
+        console.log('SMTP Connection Successful');
+      }
+    });
+    
   }
   
 

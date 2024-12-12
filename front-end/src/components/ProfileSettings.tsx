@@ -1,16 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Button, Avatar, TextField, Grid, IconButton, Paper } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import CircleIcon from '@mui/icons-material/Circle';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+//import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+//import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useNavigate } from 'react-router-dom';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+import api from '../utils/axios';
 
 const ProfileSettings: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [profileData, setProfileData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+
+
+  useEffect(() => {
+    if (!user?.userId) return; 
+    const fetchProfileData = async () => {
+      try {
+        const response = await api.get(`/users/details?userId=${user?.userId}`);
+        setProfileData(response.data);
+      } catch (error) {
+        setError('Failed to fetch user details');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfileData();
+  }, [user?.userId]);
+  
+  const handleInputChange = (field: string, value: string) => {
+    setProfileData((prev: any) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      await api.patch(`/users/edit/${user.userId}`, profileData);
+      setIsEditing(false);
+    } catch (error) {
+      setError('Failed to update profile details');
+    }
+  };
 
   const commonTextFieldStyles = {
     backgroundColor: 'white',
@@ -78,8 +112,10 @@ const ProfileSettings: React.FC = () => {
             py: 0.5,
             minWidth: 'unset'
           }}
+          onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
         >
-          Edit
+          {isEditing ? 'Save' : 'Edit'}
+          
         </Button>
       </Box>
 
@@ -117,10 +153,10 @@ const ProfileSettings: React.FC = () => {
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box>
               <Typography variant="h6" sx={{ fontSize: '18px', fontWeight: '500' }}>
-                admin
+                {profileData?.firstName} {profileData?.lastName}
               </Typography>
               <Typography sx={{ color: '#666', fontSize: '14px' }}>
-              admin@example.com
+                {profileData?.email}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -179,6 +215,8 @@ const ProfileSettings: React.FC = () => {
             </Typography>
             <TextField
               name="firstName"
+              value={profileData?.firstName}
+              onChange={(e) => handleInputChange('firstName', e.target.value)}
               fullWidth
               placeholder="Your First Name"
               variant="outlined"
@@ -200,6 +238,8 @@ const ProfileSettings: React.FC = () => {
               name="lastName"
               fullWidth
               placeholder="Your Last Name"
+              value={profileData?.lastName}
+              onChange={(e) => handleInputChange('lastName', e.target.value)}
               variant="outlined"
               InputProps={{
                 sx: commonTextFieldStyles
@@ -230,6 +270,8 @@ const ProfileSettings: React.FC = () => {
             </Typography>
             <TextField
               name="email"
+              value={profileData?.email}
+              onChange={(e) => handleInputChange('email', e.target.value)}
               fullWidth
               placeholder="Your Email"
               variant="outlined"
@@ -249,6 +291,8 @@ const ProfileSettings: React.FC = () => {
             </Typography>
             <TextField
               name="phoneNumber"
+              value={profileData?.phoneNumber}
+              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
               fullWidth
               placeholder="+94 75 203 1111"
               variant="outlined"
@@ -281,6 +325,8 @@ const ProfileSettings: React.FC = () => {
             </Typography>
             <TextField
               name="lastLogin"
+              value={profileData?.lastLogin || ''}
+              onChange={(e) => handleInputChange('lastLogin', e.target.value)}
               fullWidth
               placeholder="14.10.2024 19:30"
               variant="outlined"
@@ -300,6 +346,8 @@ const ProfileSettings: React.FC = () => {
             </Typography>
             <TextField
               name="role"
+              value={profileData?.role}
+              onChange={(e) => handleInputChange('role', e.target.value)}
               fullWidth
               placeholder="Custom Role"
               variant="outlined"
