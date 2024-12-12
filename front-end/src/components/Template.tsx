@@ -964,7 +964,7 @@ const Template: React.FC = () => {
                         }}
                         onClick={() => setCreateTemplateOpen(false)}
                     >
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
                     </IconButton>
 
                     {/* Header section */}

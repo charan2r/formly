@@ -9,6 +9,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function ChangeOrganization() {
   const navigate = useNavigate();
@@ -116,9 +117,9 @@ function ChangeOrganization() {
                 backgroundColor: '#e0e0e0',
               },
             }}
-            onClick={handleBack}
+            onClick={() => navigate(-1)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
           <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />

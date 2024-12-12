@@ -40,7 +40,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useAuth } from '../context/AuthContext';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 
 interface Category {
     categoryId: string;
@@ -733,17 +732,21 @@ const Category: React.FC = () => {
                 onClose={() => {
                     setConfirmationOpen(false);
                     setCategoryToDelete(null);
-                }}
-                PaperProps={{
-                    sx: {
-                        borderRadius: '16px',
-                        padding: '24px',
-                        minWidth: '400px'
-                    }
-                }}
-            >
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                }}>
+                <Box sx={{ textAlign: 'center', pb: 2 }}>
+                    <IconButton
+                        sx={{
+                            backgroundColor: '#f5f5f5',
+                            color: 'black',
+                            '&:hover': {
+                              backgroundColor: '#e0e0e0',
+                            },
+                        }}
+                        onClick={() => setConfirmationOpen(false)}
+                    >
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
+                    </IconButton>
+                    <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
                         Delete Category
                     </Typography>
                     <Typography sx={{ mb: 4, color: 'text.secondary' }}>
@@ -798,71 +801,28 @@ const Category: React.FC = () => {
                 onClose={() => setConfirmationBulkOpen(false)}
                 PaperProps={{
                     sx: {
-                        borderRadius: '16px',
-                        padding: '24px',
-                        minWidth: '400px'
+                        borderRadius: '20px',
+                        padding: '16px',
+                        maxWidth: '550px',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
                     }
                 }}
             >
-                <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                        Delete Categories
-                    </Typography>
-                    <Typography sx={{ mb: 4, color: 'text.secondary' }}>
-                        Are you sure you want to delete these categories?
-                    </Typography>
-                    <Box sx={{ 
-                        display: 'flex', 
-                        gap: 2, 
-                        justifyContent: 'center'
-                    }}>
-                        <Button
-                            variant="contained"
-                            onClick={() => setConfirmationBulkOpen(false)}
-                            sx={{
-                                bgcolor: 'black',
-                                color: 'white',
-                                borderRadius: '20px',
-                                px: 3,
-                                py: 1,
-                                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.8)' }
-                            }}
-                        >
-                            No, Cancel
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            onClick={handleDeleteCategories}
-                            sx={{
-                                borderColor: 'black',
-                                color: 'black',
-                                borderRadius: '20px',
-                                px: 3,
-                                py: 1,
-                                '&:hover': { 
-                                    bgcolor: 'rgba(0, 0, 0, 0.04)',
-                                    borderColor: 'black'
-                                }
-                            }}
-                        >
-                            Yes, Delete
-                        </Button>
-                    </Box>
-                </Box>
-            </Dialog>
-
-            {/* Create category Dialog */}
-            <CustomDialog
-                open={createCategoryOpen}
-                onClose={() => setCreateCategoryOpen(false)}
-                fullWidth
-                maxWidth="sm"
-            >
                 <Box sx={{ position: 'relative' }}>
                     {/* Back button */}
-                    <BackButton onClick={() => setCreateCategoryOpen(false)}>
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </BackButton>
+                    <IconButton
+                        sx={{
+                            backgroundColor: '#f5f5f5',
+                            color: 'black',
+                            '&:hover': {
+                              backgroundColor: '#e0e0e0',
+                            },
+                        }}
+                        onClick={() => setCreateCategoryOpen(false)}
+                    >
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
+                    </IconButton>
 
                     {/* Header section */}
                     <DialogHeader>
@@ -976,9 +936,18 @@ const Category: React.FC = () => {
                 maxWidth="sm"
             >
                 <Box sx={{ position: 'relative' }}>
-                    <BackButton onClick={() => setViewCategoryOpen(false)}>
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </BackButton>
+                    <IconButton
+                        sx={{
+                            backgroundColor: '#f5f5f5',
+                            color: 'black',
+                            '&:hover': {
+                                transform: 'scale(1.1)'
+                            }
+                        }}
+                        onClick={() => setViewCategoryOpen(false)}
+                    >
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
+                    </IconButton>
 
                     <DialogHeader>
                         <Box sx={{ textAlign: 'left' }}>
@@ -1057,9 +1026,18 @@ const Category: React.FC = () => {
                 maxWidth="sm"
             >
                 <Box sx={{ position: 'relative' }}>
-                    <BackButton onClick={() => setEditCategoryOpen(false)}>
-                        <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
-                    </BackButton>
+                    <IconButton
+                        sx={{
+                            backgroundColor: '#f5f5f5',
+                            color: 'black',
+                            '&:hover': {
+                                transform: 'scale(1.1)'
+                            }
+                        }}
+                        onClick={() => setEditCategoryOpen(false)}
+                    >
+                        <ArrowBackIcon sx={{ fontSize: 22 }} />
+                    </IconButton>
 
                     <DialogHeader>
                         <Box sx={{ textAlign: 'left' }}>

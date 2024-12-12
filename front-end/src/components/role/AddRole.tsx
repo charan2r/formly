@@ -9,7 +9,9 @@ import {
 } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+ 
+
 
 interface Role {
   roleId: string;
@@ -316,7 +318,7 @@ function AddRole() {
             }}
             onClick={() => navigate(-1)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <IconButton onClick={() => console.log("Back arrow clicked")}>
             <CircleIcon style={{ color: 'black' }} />

@@ -751,7 +751,7 @@ const Users: React.FC = () => {
             }}
             onClick={() => setCreateUserOpen(false)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -948,7 +948,7 @@ const Users: React.FC = () => {
             }}
             onClick={handleCloseDialog}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -1082,7 +1082,7 @@ const Users: React.FC = () => {
             }}
             onClick={() => setEditDialogOpen(false)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
 
           {/* Header section */}
@@ -1227,20 +1227,22 @@ const Users: React.FC = () => {
         </Box>
       </Dialog>
 
-      {/* Confirmation Dialog for Single Delete */}
-      <Dialog 
-        open={confirmationOpen} 
-        onClose={() => setConfirmationOpen(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: '16px',
-            padding: '24px',
-            minWidth: '400px'
-          }
-        }}
-      >
-        <Box sx={{ textAlign: 'center' }}>
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+      {/* Confirmation Dialog for Delete User */}
+      <StyledDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)}>
+        <Box sx={{ textAlign: 'center', pb: 2 }}>
+          <IconButton
+            sx={{
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={() => setConfirmationOpen(false)}
+          >
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
+          </IconButton>
+          <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
             Delete User
           </Typography>
           <Typography sx={{ mb: 4, color: 'text.secondary' }}>

@@ -9,6 +9,7 @@ import CircleIcon from '@mui/icons-material/Circle';
 import UploadIcon from '@mui/icons-material/Upload';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 function CreateOrganization() {
   const navigate = useNavigate();
@@ -158,7 +159,7 @@ function CreateOrganization() {
             }}
             onClick={() => navigate(-1)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
           <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />

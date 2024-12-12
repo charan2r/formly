@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Paper, TextField, Typography, Grid, Box, IconButton, Button, CircularProgress } from '@mui/material';
 import { ArrowForward } from '@mui/icons-material';
 import CircleIcon from '@mui/icons-material/Circle';
-import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -178,7 +178,7 @@ function ViewOrganization() {
             }}
             onClick={() => navigate(-1)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <CircleIcon sx={{ fontSize: 22, color: 'black' }} />
           <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />

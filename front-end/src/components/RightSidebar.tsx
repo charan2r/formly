@@ -33,7 +33,6 @@ import api from '../utils/axios';
 import { useTemplate } from '../context/TemplateContext';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 import GlobalQuillToolbar from './GlobalQuillToolbar';
 
 import { ToastContainer, toast } from 'react-toastify';

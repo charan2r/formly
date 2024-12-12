@@ -791,9 +791,37 @@ const FormTable: React.FC = () => {
         const response = await api.post('/forms/create', formPayload);
         setForms([...forms, response.data]);
         setCreateFormOpen(false);
-        toast.success("Form created successfully!");
+        toast.success("Form created successfully!", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
     } catch (error) {
-        toast.error("Failed to create form");
+        toast.error("Failed to create form", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          style: {
+            backgroundColor: 'black',
+            color: 'white',
+            borderRadius: '10px',
+            fontWeight: 'bold',
+          },
+        });
     }
   };
 
@@ -844,7 +872,7 @@ const FormTable: React.FC = () => {
           fontWeight: 'bold',
         },
       });
-    };
+    }
   }
 
 
@@ -1033,7 +1061,7 @@ const FormTable: React.FC = () => {
           <IconButton onClick={() => console.log("Back arrow clicked")}>
             <CircleIcon style={{ color: 'black' }} />
           </IconButton>
-          <ArrowForward style={{ color: 'black' }} />
+          <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
           Forms Repository
           </Typography>
@@ -1435,6 +1463,19 @@ const FormTable: React.FC = () => {
         }}
       >
         <Box sx={{ position: 'relative' }}>
+          {/* Back button */}
+          <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={handleCloseCreateDialog}
+          >
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
+          </IconButton>
           {/* Header section with back button */}
           <Box sx={{ 
             display: 'flex', 
@@ -1444,18 +1485,6 @@ const FormTable: React.FC = () => {
             mt: { xs: 1, sm: 1 },
             px: { xs: 2, sm: 3 }
           }}>
-            <IconButton
-              onClick={handleCloseCreateDialog}
-              sx={{
-                p: 0,
-                '&:hover': {
-                  backgroundColor: 'transparent'
-                }
-              }}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-
             <Box>
               <Typography variant="h4" sx={{ 
                 fontWeight: 'bold',
@@ -1639,6 +1668,19 @@ const FormTable: React.FC = () => {
         }}
       >
         <Box sx={{ position: 'relative' }}>
+          {/* Back button */}
+          <IconButton 
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              color: 'black',
+              '&:hover': {
+                backgroundColor: '#e0e0e0',
+              },
+            }}
+            onClick={handleCloseEditDialog}
+          >
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
+          </IconButton>
           {/* Header section with back button */}
           <Box sx={{ 
             display: 'flex', 
@@ -1648,18 +1690,6 @@ const FormTable: React.FC = () => {
             mt: { xs: 1, sm: 1 },
             px: { xs: 2, sm: 3 }
           }}>
-            <IconButton
-              onClick={handleCloseEditDialog}
-              sx={{
-                p: 0,
-                '&:hover': {
-                  backgroundColor: 'transparent'
-                }
-              }}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-
             <Box>
               <Typography variant="h4" sx={{ 
                 fontWeight: 'bold',
@@ -1947,42 +1977,30 @@ const FormTable: React.FC = () => {
         PaperProps={{
           sx: {
             borderRadius: '20px',
-            padding: { xs: '16px', sm: '24px' },
+            padding: '24px',
             maxWidth: '600px',
             width: '100%',
             backgroundColor: '#f9f9f9',
-            margin: { xs: '16px', sm: '32px' },
+            margin: '16px',
             overflowY: 'visible',
             overflowX: 'visible'
           }
         }}
       >
         <Box sx={{ position: 'relative' }}>
-          {/* Header section with back button */}
+          {/* Header section */}
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center',
             gap: 2,
-            mb: { xs: 2, sm: 3 }, 
-            mt: { xs: 1, sm: 1 },
-            px: { xs: 2, sm: 3 }
+            mb: 2, 
+            mt: 1,
+            px: 2
           }}>
-            <IconButton
-              onClick={handleCloseViewDialog}
-              sx={{
-                p: 0,
-                '&:hover': {
-                  backgroundColor: 'transparent'
-                }
-              }}
-            >
-              <ArrowBackIcon />
-            </IconButton>
-
             <Box>
               <Typography variant="h4" sx={{ 
                 fontWeight: 'bold',
-                fontSize: { xs: '1.5rem', sm: '1.8rem' }
+                fontSize: '1.5rem'
               }}>
                 View Form
               </Typography>
@@ -1993,8 +2011,8 @@ const FormTable: React.FC = () => {
           </Box>
 
           <DialogContent sx={{ 
-            px: { xs: 2, sm: 3 },
-            py: { xs: 2, sm: 2 },
+            px: 2,
+            py: 2,
             overflowY: 'visible',
             overflowX: 'visible'
           }}>
@@ -2167,7 +2185,7 @@ const FormTable: React.FC = () => {
           </DialogContent>
 
           <DialogActions sx={{ 
-            p: { xs: 2, sm: 3 }, 
+            p: 2, 
             justifyContent: 'center'
           }}>
             <Button
@@ -2177,7 +2195,7 @@ const FormTable: React.FC = () => {
                 backgroundColor: 'black',
                 color: 'white',
                 borderRadius: '20px',
-                width: { xs: '45%', sm: '35%' },
+                width: '35%',
                 py: 1,
                 '&:hover': {
                   backgroundColor: '#333'

@@ -9,6 +9,7 @@ import api from '../../utils/axios';
 import { toast } from 'react-toastify';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 interface Permission {
   permissionId: string;
@@ -123,7 +124,7 @@ function ViewRole() {
             }}
             onClick={() => navigate(-1)}
           >
-            <KeyboardBackspaceRoundedIcon sx={{ fontSize: 22 }} />
+            <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           <IconButton onClick={() => console.log("Back arrow clicked")}>
             <CircleIcon style={{ color: 'black' }} />
