@@ -796,7 +796,7 @@ const Category: React.FC = () => {
             </Dialog>
 
             {/* Bulk Delete Confirmation Dialog */}
-            <Dialog 
+            <CustomDialog 
                 open={confirmationBulkOpen} 
                 onClose={() => setConfirmationBulkOpen(false)}
                 PaperProps={{

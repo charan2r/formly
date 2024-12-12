@@ -1286,7 +1286,7 @@ const Users: React.FC = () => {
             </Button>
           </Box>
         </Box>
-      </Dialog>
+      </StyledDialog>
 
       {/* Add this new Dialog for Bulk Delete */}
       <Dialog 
