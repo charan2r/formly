@@ -485,7 +485,7 @@ const Users: React.FC = () => {
                 </Button>
               )
             ) : (
-              user?.permissions.includes('Add User') && (
+              user?.permissions.includes('Add User') || user?.userType === 'Admin' && (
                 <Button
                   variant="contained"
                   sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
@@ -654,7 +654,7 @@ const Users: React.FC = () => {
                       },
                     }}
                   >
-                    {user?.permissions.includes('View User') && (
+                    {user?.permissions.includes('View User') || user?.userType === 'Admin' && (
                       <MenuItem
                         onClick={() => handleViewUser(row.id)}
                         sx={{
@@ -671,7 +671,7 @@ const Users: React.FC = () => {
                         View
                       </MenuItem>
                     )}
-                    {user?.permissions.includes('Edit User') && (
+                    {user?.permissions.includes('Edit User') || user?.userType === 'Admin' && (
                       <MenuItem
                         onClick={() => handleEditUser(row.id)}
                         sx={{
@@ -688,7 +688,7 @@ const Users: React.FC = () => {
                         Edit
                       </MenuItem>
                     )}
-                    {user?.permissions.includes('Delete User') && (
+                    {user?.permissions.includes('Delete User') || user?.userType === 'Admin' && (
                       <MenuItem
                         onClick={() => handleDeleteClick(row.id)}
                         sx={{
