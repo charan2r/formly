@@ -320,23 +320,27 @@ const DataTable: React.FC = () => {
               </Button>
             </Box>
             {selectedCount > 0 ? (
-              <Button
-                variant="contained"
-                onClick={() => handleBulkDeleteConfirmation()}
-                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-              >
-                <Delete sx={{ marginRight: 1 }} />
-                Delete
-              </Button>
+              (user?.userType === 'Admin' || user?.permissions?.includes('Delete Role')) && (
+                <Button
+                  variant="contained"
+                  onClick={() => handleBulkDeleteConfirmation()}
+                  sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                >
+                  <Delete sx={{ marginRight: 1 }} />
+                  Delete
+                </Button>
+              )
             ) : (
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                onClick={() => navigate('/addrole')}
-              >
-                <AddIcon sx={{ marginRight: 1 }} />
-                Add Role
-              </Button>
+              (user?.userType === 'Admin' || user?.permissions?.includes('Create Role')) && (
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                  onClick={() => navigate('/addrole')}
+                >
+                  <AddIcon sx={{ marginRight: 1 }} />
+                  Add Role
+                </Button>
+              )
             )}
           </Box>
         </Box>
@@ -385,7 +389,7 @@ const DataTable: React.FC = () => {
                         style: {
                           height: "10px",
                         },
-                      }}
+                      }}focused
                       placeholder="Filter"
                       value={filters.name}
                       onChange={(e) => handleFilterChange(e, 'name')}
@@ -489,58 +493,68 @@ const DataTable: React.FC = () => {
                       },
                     }}
                   >
-                    <MenuItem
-                      onClick={() => {
-                        handleMenuClose();
-                        navigate(`/viewrole/${row.roleId}`);
-                      }}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '10px',
-                        margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      View
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        handleMenuClose();
-                        handleEditRole(row.roleId);
-                      }}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '10px',
-                        margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Edit
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => handleDeleteConfirmation(row.roleId)}
-                      sx={{
-                        backgroundColor: 'white',
-                        borderRadius: '10px',
-                        margin: '5px',
-                        justifyContent: 'center', // Center align text
-                        color: 'red', // Red text color for "Delete"
-                        fontSize: '0.875rem', // Smaller font size
-                        minHeight: '30px', // Reduced height
-                        minWidth: '100px', // Increased width
-                        '&:hover': { backgroundColor: '#f0f0f0' },
-                      }}
-                    >
-                      Delete
-                    </MenuItem>
+                    {(user?.userType === 'Admin' || user?.permissions?.includes('View Role')) && (
+                      <MenuItem
+                        onClick={() => navigate(`/viewrole/${row.roleId}`)}
+                        sx={{
+                          backgroundColor: 'white',
+                          borderRadius: '10px',
+                          margin: '5px',
+                          justifyContent: 'center', // Center align text
+                          fontSize: '0.875rem', // Smaller font size
+                          minHeight: '30px', // Reduced height
+                          minWidth: '100px', // Increased width
+                          '&:hover': { backgroundColor: '#f0f0f0' },
+                        }}
+                      >
+                        View
+                      </MenuItem>
+                    )}
+                    {(user?.userType === 'Admin' || user?.permissions?.includes('Edit Role')) && (
+                      <MenuItem 
+                        onClick={() => handleEditRole(row.roleId)}
+                        disabled={row.roleId === user?.roleId}
+                        sx={{
+                          backgroundColor: 'white',
+                          borderRadius: '10px',
+                          margin: '5px',
+                          justifyContent: 'center', // Center align text
+                          fontSize: '0.875rem', // Smaller font size
+                          minHeight: '30px', // Reduced height
+                          minWidth: '100px', // Increased width
+                          '&:hover': { backgroundColor: '#f0f0f0' },
+                          '&.Mui-disabled': {
+                            color: 'gray',
+                            cursor: 'not-allowed'
+                          }
+                        }}
+                      >
+                        Edit
+                      </MenuItem>
+                    )}
+                    {(user?.userType === 'Admin' || user?.permissions?.includes('Delete Role')) && (
+                      <MenuItem 
+                        onClick={() => handleDeleteConfirmation(row.roleId)}
+                        disabled={row.roleId === user?.roleId}
+                        sx={{
+                          backgroundColor: 'white',
+                          borderRadius: '10px',
+                          margin: '5px',
+                          justifyContent: 'center', // Center align text
+                          color: 'red', // Red text color for "Delete"
+                          fontSize: '0.875rem', // Smaller font size
+                          minHeight: '30px', // Reduced height
+                          minWidth: '100px', // Increased width
+                          '&:hover': { backgroundColor: '#f0f0f0' },
+                          '&.Mui-disabled': {
+                            color: 'gray',
+                            cursor: 'not-allowed'
+                          }
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                    )}
                   </Popover>
                 </TableCell>
               </TableRow>

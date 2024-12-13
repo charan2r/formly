@@ -497,23 +497,27 @@ const Template: React.FC = () => {
                             </Button>
                         </Box>
                         {selectedCount > 0 ? (
-                            <Button
-                                variant="contained"
-                                onClick={() => handleBulkDeleteConfirmation()}
-                                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                            >
-                                <Delete sx={{ marginRight: 1 }} />
-                                Delete
-                            </Button>
+                            (user?.userType === 'Admin' || user?.permissions?.includes('Delete Template')) && (
+                                <Button
+                                    variant="contained"
+                                    onClick={() => handleBulkDeleteConfirmation()}
+                                    sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                                >
+                                    <Delete sx={{ marginRight: 1 }} />
+                                    Delete
+                                </Button>
+                            )
                         ) : (
-                            <Button
-                                variant="contained"
-                                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                                onClick={() => setCreateTemplateOpen(true)}
-                            >
-                                <AddIcon sx={{ marginRight: 1 }} />
-                                Add Templates
-                            </Button>
+                            (user?.userType === 'Admin' || user?.permissions?.includes('Create Template')) && (
+                                <Button
+                                    variant="contained"
+                                    sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                                    onClick={() => setCreateTemplateOpen(true)}
+                                >
+                                    <AddIcon sx={{ marginRight: 1 }} />
+                                    Add Templates
+                                </Button>
+                            )
                         )}
                     </Box>
                 </Box>
@@ -735,64 +739,70 @@ const Template: React.FC = () => {
                                             },
                                         }}
                                     >
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleMenuClose();
-                                                setSelectedTemplate(row);
-                                                navigate(`/viewtemplate/${row.formTemplateId}`, {
-                                                    state: { templateData: row }
-                                                });
-                                            }}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            View
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleMenuClose();
-                                                setSelectedTemplate(row);
-                                                navigate(`/edittemplate/${row.formTemplateId}`, {
-                                                    state: { templateData: row }
-                                                });
-                                            }}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            Edit
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => handleDeleteConfirmation(row.formTemplateId)}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                color: 'red',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            Delete
-                                        </MenuItem>
+                                        {(user?.userType === 'Admin' || user?.permissions?.includes('View Template')) && (
+                                            <MenuItem
+                                                onClick={() => {
+                                                    handleMenuClose();
+                                                    setSelectedTemplate(row);
+                                                    navigate(`/viewtemplate/${row.formTemplateId}`, {
+                                                        state: { templateData: row }
+                                                    });
+                                                }}
+                                                sx={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '10px',
+                                                    margin: '5px',
+                                                    justifyContent: 'center',
+                                                    fontSize: '0.875rem',
+                                                    minHeight: '30px',
+                                                    minWidth: '100px',
+                                                    '&:hover': { backgroundColor: '#f0f0f0' },
+                                                }}
+                                            >
+                                                View
+                                            </MenuItem>
+                                        )}
+                                        {(user?.userType === 'Admin' || user?.permissions?.includes('Edit Template')) && (
+                                            <MenuItem
+                                                onClick={() => {
+                                                    handleMenuClose();
+                                                    setSelectedTemplate(row);
+                                                    navigate(`/edittemplate/${row.formTemplateId}`, {
+                                                        state: { templateData: row }
+                                                    });
+                                                }}
+                                                sx={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '10px',
+                                                    margin: '5px',
+                                                    justifyContent: 'center',
+                                                    fontSize: '0.875rem',
+                                                    minHeight: '30px',
+                                                    minWidth: '100px',
+                                                    '&:hover': { backgroundColor: '#f0f0f0' },
+                                                }}
+                                            >
+                                                Edit
+                                            </MenuItem>
+                                        )}
+                                        {(user?.userType === 'Admin' || user?.permissions?.includes('Delete Template')) && (
+                                            <MenuItem
+                                                onClick={() => handleDeleteConfirmation(row.formTemplateId)}
+                                                sx={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '10px',
+                                                    margin: '5px',
+                                                    justifyContent: 'center',
+                                                    color: 'red',
+                                                    fontSize: '0.875rem',
+                                                    minHeight: '30px',
+                                                    minWidth: '100px',
+                                                    '&:hover': { backgroundColor: '#f0f0f0' },
+                                                }}
+                                            >
+                                                Delete
+                                            </MenuItem>
+                                        )}
                                     </Popover>
                                 </TableCell>
                             </TableRow>

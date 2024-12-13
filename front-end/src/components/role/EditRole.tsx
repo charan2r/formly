@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
 import { useAuth } from '../../context/AuthContext';
+
 interface Permissions {
   // Group headers
   userManagement: boolean;
@@ -87,6 +88,15 @@ function EditRole() {
   useEffect(() => {
     console.log('Permissions updated:', permissions);
   }, [permissions]);
+
+  useEffect(() => {
+    // Prevent editing own role
+    if (roleId === user?.roleId) {
+      toast.error("You cannot modify your own role");
+      navigate('/roles');
+      return;
+    }
+  }, [user, navigate, roleId]);
 
   useEffect(() => {
     const fetchPermissionsAndRoleData = async () => {

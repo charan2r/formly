@@ -1086,23 +1086,27 @@ const FormTable: React.FC = () => {
               </Button>
             </Box>
             {selectedCount > 0 ? (
-              <Button
-                variant="contained"
-                onClick={() => handleBulkDeleteConfirmation()}
-                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-              >
-                <Delete sx={{ marginRight: 1 }} />
-                Delete
-              </Button>
+              (user?.userType === 'Admin' || user?.permissions?.includes('Delete Form')) && (
+                <Button
+                  variant="contained"
+                  onClick={() => handleBulkDeleteConfirmation()}
+                  sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                >
+                  <Delete sx={{ marginRight: 1 }} />
+                  Delete
+                </Button>
+              )
             ) : (
-              <Button
-                variant="contained"
-                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                onClick={() => setCreateFormOpen(true)}
-              >
-                <AddIcon sx={{ marginRight: 1 }} />
-                Add Form
-              </Button>
+              (user?.userType === 'Admin' || user?.permissions?.includes('Create Form')) && (
+                <Button
+                  variant="contained"
+                  sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                  onClick={() => setCreateFormOpen(true)}
+                >
+                  <AddIcon sx={{ marginRight: 1 }} />
+                  Add Form
+                </Button>
+              )
             )}
           </Box>
         </Box>
@@ -2210,42 +2214,46 @@ const FormTable: React.FC = () => {
           },
         }}
       >
-        <MenuItem
-          onClick={() => {
-            handleViewClick(forms.find(form => form.formId === selectedRowId));
-            handleMenuClose();
-          }}
-          sx={{
-            backgroundColor: 'white',
-            borderRadius: '10px',
-            margin: '5px',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            minHeight: '30px',
-            minWidth: '100px',
-            '&:hover': { backgroundColor: '#f0f0f0' },
-          }}
-        >
-          View
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleEditClick(forms.find(form => form.formId === selectedRowId));
-            handleMenuClose();
-          }}
-          sx={{
-            backgroundColor: 'white',
-            borderRadius: '10px',
-            margin: '5px',
-            justifyContent: 'center',
-            fontSize: '0.875rem',
-            minHeight: '30px',
-            minWidth: '100px',
-            '&:hover': { backgroundColor: '#f0f0f0' },
-          }}
-        >
-          Edit
-        </MenuItem>
+        {(user?.userType === 'Admin' || user?.permissions?.includes('View Form')) && (
+          <MenuItem
+            onClick={() => {
+              handleViewClick(forms.find(form => form.formId === selectedRowId));
+              handleMenuClose();
+            }}
+            sx={{
+              backgroundColor: 'white',
+              borderRadius: '10px',
+              margin: '5px',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              minHeight: '30px',
+              minWidth: '100px',
+              '&:hover': { backgroundColor: '#f0f0f0' },
+            }}
+          >
+            View
+          </MenuItem>
+        )}
+        {(user?.userType === 'Admin' || user?.permissions?.includes('Edit Form')) && (
+          <MenuItem
+            onClick={() => {
+              handleEditClick(forms.find(form => form.formId === selectedRowId));
+              handleMenuClose();
+            }}
+            sx={{
+              backgroundColor: 'white',
+              borderRadius: '10px',
+              margin: '5px',
+              justifyContent: 'center',
+              fontSize: '0.875rem',
+              minHeight: '30px',
+              minWidth: '100px',
+              '&:hover': { backgroundColor: '#f0f0f0' },
+            }}
+          >
+            Edit
+          </MenuItem>
+        )}
         <MenuItem
           onClick={() => {
             handleShareClick(forms.find(form => form.formId === selectedRowId)!);
@@ -2264,25 +2272,27 @@ const FormTable: React.FC = () => {
         >
           Share
         </MenuItem>
-        <MenuItem
-          onClick={() => {
-            handleDeleteConfirmation(selectedRowId);
-            handleMenuClose();
-          }}
-          sx={{
-            backgroundColor: 'white',
-            borderRadius: '10px',
-            margin: '5px',
-            justifyContent: 'center',
-            color: 'red',
-            fontSize: '0.875rem',
-            minHeight: '30px',
-            minWidth: '100px',
-            '&:hover': { backgroundColor: '#f0f0f0' },
-          }}
-        >
-          Delete
-        </MenuItem>
+        {(user?.userType === 'Admin' || user?.permissions?.includes('Delete Form')) && (
+          <MenuItem
+            onClick={() => {
+              handleDeleteConfirmation(selectedRowId);
+              handleMenuClose();
+            }}
+            sx={{
+              backgroundColor: 'white',
+              borderRadius: '10px',
+              margin: '5px',
+              justifyContent: 'center',
+              color: 'red',
+              fontSize: '0.875rem',
+              minHeight: '30px',
+              minWidth: '100px',
+              '&:hover': { backgroundColor: '#f0f0f0' },
+            }}
+          >
+            Delete
+          </MenuItem>
+        )}
       </Popover>
 
       <PreviewDialog

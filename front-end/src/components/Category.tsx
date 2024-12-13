@@ -454,23 +454,27 @@ const Category: React.FC = () => {
                             </Button>
                         </Box>
                         {selectedCount > 0 ? (
-                            <Button
-                                variant="contained"
-                                onClick={() => handleBulkDeleteConfirmation()}
-                                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                            >
-                                <Delete sx={{ marginRight: 1 }} />
-                                Delete
-                            </Button>
+                            (user?.userType === 'Admin' || user?.permissions?.includes('Delete Category')) && (
+                                <Button
+                                    variant="contained"
+                                    onClick={() => handleBulkDeleteConfirmation()}
+                                    sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                                >
+                                    <Delete sx={{ marginRight: 1 }} />
+                                    Delete
+                                </Button>
+                            )
                         ) : (
-                            <Button
-                                variant="contained"
-                                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
-                                onClick={() => setCreateCategoryOpen(true)}
-                            >
-                                <AddIcon sx={{ marginRight: 1 }} />
-                                Add Categories
-                            </Button>
+                            (user?.userType === 'Admin' || user?.permissions?.includes('Create Category')) && (
+                                <Button
+                                    variant="contained"
+                                    sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                                    onClick={() => setCreateCategoryOpen(true)}
+                                >
+                                    <AddIcon sx={{ marginRight: 1 }} />
+                                    Add Categories
+                                </Button>
+                            )
                         )}
                     </Box>
                 </Box>
@@ -625,64 +629,70 @@ const Category: React.FC = () => {
                                             },
                                         }}
                                     >
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleMenuClose();
-                                                setSelectedCategory(row);
-                                                setViewCategoryOpen(true);
-                                            }}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            View
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => {
-                                                handleMenuClose();
-                                                setSelectedCategory(row);
-                                                setEditFormData({
-                                                    name: row.name,
-                                                    description: row.description
-                                                });
-                                                setEditCategoryOpen(true);
-                                            }}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            Edit
-                                        </MenuItem>
-                                        <MenuItem
-                                            onClick={() => handleDeleteConfirmation(row.categoryId)}
-                                            sx={{
-                                                backgroundColor: 'white',
-                                                borderRadius: '10px',
-                                                margin: '5px',
-                                                justifyContent: 'center',
-                                                color: 'red',
-                                                fontSize: '0.875rem',
-                                                minHeight: '30px',
-                                                minWidth: '100px',
-                                                '&:hover': { backgroundColor: '#f0f0f0' },
-                                            }}
-                                        >
-                                            Delete
-                                        </MenuItem>
+                                        {(user?.userType === 'Admin' || user?.permissions?.includes('View Category')) && (
+                                            <MenuItem
+                                                onClick={() => {
+                                                    handleMenuClose();
+                                                    setSelectedCategory(row);
+                                                    setViewCategoryOpen(true);
+                                                }}
+                                                sx={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '10px',
+                                                    margin: '5px',
+                                                    justifyContent: 'center',
+                                                    fontSize: '0.875rem',
+                                                    minHeight: '30px',
+                                                    minWidth: '100px',
+                                                    '&:hover': { backgroundColor: '#f0f0f0' },
+                                                }}
+                                            >
+                                                View
+                                            </MenuItem>
+                                        )}
+                                        {(user?.userType === 'Admin' || user?.permissions?.includes('Edit Category')) && (
+                                            <MenuItem
+                                                onClick={() => {
+                                                    handleMenuClose();
+                                                    setSelectedCategory(row);
+                                                    setEditFormData({
+                                                        name: row.name,
+                                                        description: row.description
+                                                    });
+                                                    setEditCategoryOpen(true);
+                                                }}
+                                                sx={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '10px',
+                                                    margin: '5px',
+                                                    justifyContent: 'center',
+                                                    fontSize: '0.875rem',
+                                                    minHeight: '30px',
+                                                    minWidth: '100px',
+                                                    '&:hover': { backgroundColor: '#f0f0f0' },
+                                                }}
+                                            >
+                                                Edit
+                                            </MenuItem>
+                                        )}
+                                        {(user?.userType === 'Admin' || user?.permissions?.includes('Delete Category')) && (
+                                            <MenuItem
+                                                onClick={() => handleDeleteConfirmation(row.categoryId)}
+                                                sx={{
+                                                    backgroundColor: 'white',
+                                                    borderRadius: '10px',
+                                                    margin: '5px',
+                                                    justifyContent: 'center',
+                                                    color: 'red',
+                                                    fontSize: '0.875rem',
+                                                    minHeight: '30px',
+                                                    minWidth: '100px',
+                                                    '&:hover': { backgroundColor: '#f0f0f0' },
+                                                }}
+                                            >
+                                                Delete
+                                            </MenuItem>
+                                        )}
 
                                     </Popover>
                                 </TableCell>
