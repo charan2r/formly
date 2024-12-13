@@ -22,5 +22,6 @@ import { PermissionService } from 'src/permission/permission.service';
   imports: [TypeOrmModule.forFeature([Organization, OrganizationRepository,RolePermission,Role,Permission]),UserModule, AuthModule],
   providers: [OrganizationService, OrganizationRepository,UserRepository,RolePermissionService,RolePermissionRepository,RoleService,RoleRepository,PermissionRepository, PermissionService],
   controllers: [OrganizationController],
+  exports: [OrganizationService, OrganizationModule]
 })
 export class OrganizationModule {}

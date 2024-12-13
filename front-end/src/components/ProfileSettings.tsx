@@ -3,7 +3,7 @@ import { Box, Typography, Button, Avatar, TextField, Grid, IconButton, Paper } f
 import { useAuth } from '../context/AuthContext';
 import CircleIcon from '@mui/icons-material/Circle';
 //import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-//import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { useNavigate } from 'react-router-dom';
 import KeyboardBackspaceRoundedIcon from '@mui/icons-material/KeyboardBackspaceRounded';
@@ -19,11 +19,14 @@ const ProfileSettings: React.FC = () => {
 
 
   useEffect(() => {
+    console.log(user?.userId);
     if (!user?.userId) return; 
     const fetchProfileData = async () => {
       try {
         const response = await api.get(`/users/details?userId=${user?.userId}`);
-        setProfileData(response.data);
+        console.log(response.data);
+        setProfileData(response.data.data);
+        console.log(response.data)
       } catch (error) {
         setError('Failed to fetch user details');
       } finally {
@@ -39,7 +42,7 @@ const ProfileSettings: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      await api.patch(`/users/edit/${user.userId}`, profileData);
+      await api.patch(`/users/edit?userId=${user.userId}`, profileData);
       setIsEditing(false);
     } catch (error) {
       setError('Failed to update profile details');
@@ -159,35 +162,7 @@ const ProfileSettings: React.FC = () => {
                 {profileData?.email}
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button 
-                variant="contained" 
-                sx={{ 
-                  backgroundColor: 'black',
-                  textTransform: 'none',
-                  borderRadius: '4px',
-                  px: 2,
-                  py: 1
-                }}
-              >
-                Upload new picture
-              </Button>
-              <Button 
-                variant="contained" 
-                sx={{ 
-                  backgroundColor: '#FF5B5B',
-                  textTransform: 'none',
-                  borderRadius: '4px',
-                  px: 2,
-                  py: 1,
-                  '&:hover': {
-                    backgroundColor: '#ff4444'
-                  }
-                }}
-              >
-                Delete
-              </Button>
-            </Box>
+           
           </Box>
         </Box>
       </Box>
@@ -219,6 +194,7 @@ const ProfileSettings: React.FC = () => {
               onChange={(e) => handleInputChange('firstName', e.target.value)}
               fullWidth
               placeholder="Your First Name"
+              disabled={!isEditing}
               variant="outlined"
               InputProps={{
                 sx: commonTextFieldStyles
@@ -241,6 +217,7 @@ const ProfileSettings: React.FC = () => {
               value={profileData?.lastName}
               onChange={(e) => handleInputChange('lastName', e.target.value)}
               variant="outlined"
+              disabled={!isEditing}
               InputProps={{
                 sx: commonTextFieldStyles
               }}
@@ -274,6 +251,7 @@ const ProfileSettings: React.FC = () => {
               onChange={(e) => handleInputChange('email', e.target.value)}
               fullWidth
               placeholder="Your Email"
+              disabled={!isEditing}
               variant="outlined"
               InputProps={{
                 sx: commonTextFieldStyles
@@ -295,6 +273,7 @@ const ProfileSettings: React.FC = () => {
               onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
               fullWidth
               placeholder="+94 75 203 1111"
+              disabled={!isEditing}
               variant="outlined"
               InputProps={{
                 sx: commonTextFieldStyles
@@ -325,10 +304,11 @@ const ProfileSettings: React.FC = () => {
             </Typography>
             <TextField
               name="lastLogin"
-              value={profileData?.lastLogin || ''}
+              value={profileData?.updatedAt || ''}
               onChange={(e) => handleInputChange('lastLogin', e.target.value)}
               fullWidth
               placeholder="14.10.2024 19:30"
+              disabled={!isEditing}
               variant="outlined"
               InputProps={{
                 sx: commonTextFieldStyles
@@ -346,11 +326,12 @@ const ProfileSettings: React.FC = () => {
             </Typography>
             <TextField
               name="role"
-              value={profileData?.role}
+              value={profileData?.userType}
               onChange={(e) => handleInputChange('role', e.target.value)}
               fullWidth
               placeholder="Custom Role"
               variant="outlined"
+              disabled={!isEditing}
               InputProps={{
                 sx: commonTextFieldStyles
               }}

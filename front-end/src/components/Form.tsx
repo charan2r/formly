@@ -102,67 +102,6 @@ const SquarePagination = styled(Pagination)(({ theme }) => ({
   },
 }));
 
-const FormPrintComponent = React.forwardRef<HTMLDivElement, any>((props, ref) => {
-  const { template, formFields, appearanceSettings, pageSizes } = props;
-  const pageSize = template.pageSize || 'A4';
-  const { width, height } = pageSizes[pageSize];
-
-  // Create a style object for the container
-  const containerStyle = {
-    width: `${width}px`,
-    height: `${height}px`,
-    minHeight: `${height}px`,
-    backgroundColor: template.backgroundColor || '#ffffff',
-    padding: `${template.marginTop || 10}px ${template.marginRight || 10}px 
-              ${template.marginBottom || 10}px ${template.marginLeft || 10}px`,
-    position: 'relative' as const,
-    overflow: 'visible',
-    boxSizing: 'border-box' as const,
-    display: 'flex',
-    flexDirection: 'column' as const,
-  };
-
-  // Create appearance settings object for form fields
-  const formFieldAppearance = {
-    border: {
-      width: template.borderWidth || 0,
-      style: template.borderStyle || 'none',
-      color: template.borderColor || '#000000',
-      radius: template.borderRadius || 0
-    },
-    boxShadow: {
-      x: template.boxShadowX || 0,
-      y: template.boxShadowY || 0,
-      blur: template.boxShadowBlur || 0,
-      spread: template.boxShadowSpread || 0,
-      color: template.boxShadowColor || '#000000',
-      opacity: template.boxShadowOpacity || 1
-    },
-    background: {
-      color: template.backgroundColor || '#ffffff',
-      opacity: 100
-    }
-
-  };
-
-  return (
-    <div ref={ref} style={containerStyle}>
-      <DraggableQuestion
-        formTemplateId={template.templateId}
-        items={formFields}
-        gridSize={{ width, height }}
-        selectedSize={pageSize}
-        pageSizes={pageSizes}
-        isViewMode={true}
-        appearanceSettings={formFieldAppearance}
-        onQuestionChange={() => {}}
-        onOptionChange={() => {}}
-        onDeleteOption={() => {}}
-        onAddOption={() => {}}
-      />
-    </div>
-  );
-});
 
 const PreviewDialog: React.FC<{
   open: boolean;

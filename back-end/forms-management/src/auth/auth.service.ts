@@ -11,6 +11,7 @@ import { Request } from 'express';
 import { RolePermissionService } from '../role-permission/role-permission.service';
 import { PermissionService } from '../permission/permission.service';
 import { first } from 'rxjs';
+import { OrganizationService } from 'src/organization/organization.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
         private readonly jwtService: JwtService,
         private readonly rolePermissionService: RolePermissionService,
         private readonly permissionService: PermissionService,
+        // private readonly organizationService: OrganizationService,
     ) {}
 
     // Register admin 
@@ -146,6 +148,7 @@ export class AuthService {
                 }
             }
         }
+        // const org = await this.organizationService.getOne(user.organizationId)
 
         // Generate JWT token with permissions (will be empty array if no roleId)
         const payload = {
@@ -155,7 +158,7 @@ export class AuthService {
             lastName: user.lastName,
             userType: user.userType,
             roleId: user.roleId,
-            organizationId: user.organizationId,
+            // organizationName: org.organization.name,
             permissions: permissions
         };
         
@@ -169,7 +172,7 @@ export class AuthService {
             lastName: user.lastName,
             userType: user.userType,
             roleId: user.roleId,
-            organizationId: user.organizationId,
+            // organizationName: org.organization.name,
             permissions: permissions
         };
         console.log(userData);
@@ -197,6 +200,8 @@ export class AuthService {
             // Initialize permissions array
             let permissions = [];
             console.log('----------------------',permissions);
+
+            // const org = await this.organizationService.getOne(user.organizationId)
             
             // Only fetch permissions if roleId exists
             if (user.roleId) {
@@ -224,7 +229,7 @@ export class AuthService {
                 lastName: user.lastName,
                 userType: user.userType,
                 roleId: user.roleId,
-                organizationId: user.organizationId,
+                // organizationName: org.organization.name,
                 permissions: permissions
             };
         } catch (error) {

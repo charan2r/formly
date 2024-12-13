@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { EmailModule } from './email.module';
@@ -26,6 +26,8 @@ import { UserRepository } from 'src/user/user.repository';
 import { OrganizationRepository } from 'src/organization/organization.repository';
 import { OrganizationService } from 'src/organization/organization.service';
 import { UserService } from 'src/user/user.service';
+import { EmailService } from './email.service';
+import { OrganizationModule } from 'src/organization/organization.module';
 
 const keysPath = path.resolve(process.cwd(), 'keys');
 
@@ -46,7 +48,7 @@ const keysPath = path.resolve(process.cwd(), 'keys');
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, RolePermissionService, PermissionService, RoleService, RoleRepository, PermissionRepository, RolePermissionRepository, UserRepository, OrganizationRepository, UserService, OrganizationService],
+  providers: [AuthService, JwtStrategy, RolePermissionService, PermissionService, RoleService, RoleRepository, PermissionRepository, RolePermissionRepository, UserRepository, OrganizationRepository, UserService, OrganizationService, JwtService, EmailService],
   exports: [AuthService],
 })
 export class AuthModule {}
