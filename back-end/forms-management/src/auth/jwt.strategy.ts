@@ -1,11 +1,12 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard, PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Observable } from 'rxjs';
+import { first, Observable } from 'rxjs';
 
 const keysPath = path.resolve(process.cwd(), 'keys');
 
@@ -27,6 +28,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     return {
       userId: payload.userId,
       email: payload.email,
+      firstName: payload.firstName,
+      lastName: payload.lastName,
       userType: payload.userType,
       organizationId: payload.organizationId,
       roleId: payload.roleId,
