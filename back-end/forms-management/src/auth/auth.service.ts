@@ -158,6 +158,7 @@ export class AuthService {
             lastName: user.lastName,
             userType: user.userType,
             roleId: user.roleId,
+            organizationId: user.organizationId,
             // organizationName: org.organization.name,
             permissions: permissions
         };
@@ -172,6 +173,7 @@ export class AuthService {
             lastName: user.lastName,
             userType: user.userType,
             roleId: user.roleId,
+            organizationId: user.organizationId,
             // organizationName: org.organization.name,
             permissions: permissions
         };
@@ -229,6 +231,7 @@ export class AuthService {
                 lastName: user.lastName,
                 userType: user.userType,
                 roleId: user.roleId,
+                organizationId: user.organizationId,
                 // organizationName: org.organization.name,
                 permissions: permissions
             };
