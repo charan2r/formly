@@ -729,11 +729,20 @@ const Category: React.FC = () => {
             {/* Single Delete Confirmation Dialog */}
             <Dialog 
                 open={confirmationOpen} 
+                PaperProps={{
+                    sx: {
+                        borderRadius: '20px',
+                        padding: '16px',
+                        maxWidth: '550px',
+                        backgroundColor: '#f9f9f9',
+                        boxShadow: '30px 30px 20px rgba(0, 0, 0, 0.2)'
+                    }}}
                 onClose={() => {
                     setConfirmationOpen(false);
                     setCategoryToDelete(null);
                 }}>
-                <Box sx={{ textAlign: 'center', pb: 2 }}>
+                <Box sx={{ pb: 2 }}>
+                
                     <IconButton
                         sx={{
                             backgroundColor: '#f5f5f5',
@@ -746,6 +755,7 @@ const Category: React.FC = () => {
                     >
                         <ArrowBackIcon sx={{ fontSize: 22 }} />
                     </IconButton>
+                    <Box sx={{ textAlign: 'center', pb: 2 }}>
                     <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
                         Delete Category
                     </Typography>
@@ -791,13 +801,14 @@ const Category: React.FC = () => {
                         >
                             Yes, Delete
                         </Button>
+                        </Box>
                     </Box>
                 </Box>
             </Dialog>
 
             {/* Bulk Delete Confirmation Dialog */}
             <CustomDialog 
-                open={confirmationBulkOpen} 
+                open={createCategoryOpen} 
                 onClose={() => setConfirmationBulkOpen(false)}
                 PaperProps={{
                     sx: {
@@ -837,7 +848,7 @@ const Category: React.FC = () => {
                     </DialogHeader>
 
                     {/* Form Content */}
-                    <DialogContent sx={{ px: 3, ml: 6, mr: 6 }}>
+                    <DialogContent  sx={{ px: 3, ml: 6, mr: 6 }}>
                         <Box display="flex" flexDirection="column" gap={2.5}>
                             <Grid item xs={12} sm={6} mt={-2.5}>
                                 <Typography variant="body2" gutterBottom sx={{ marginBottom: '1px' }}>Name</Typography>
@@ -898,7 +909,7 @@ const Category: React.FC = () => {
                                 backgroundColor: '#1a1a1a',
                                 color: 'white',
                                 borderRadius: '25px',
-                                width: '30%',
+                                width: '40%',
                                 marginTop: '-20px',
                                 marginBottom: '-25px',
                                 marginRight:'50px',                                                           
