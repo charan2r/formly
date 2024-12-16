@@ -19,11 +19,11 @@ const ProfileSettings: React.FC = () => {
 
 
   useEffect(() => {
-    console.log(user?.userId);
-    if (!user?.userId) return; 
+    console.log(user?.id);
+    if (!user?.id) return; 
     const fetchProfileData = async () => {
       try {
-        const response = await api.get(`/users/details?userId=${user?.userId}`);
+        const response = await api.get(`/users/details?userId=${user?.id}`);
         console.log(response.data);
         setProfileData(response.data.data);
         console.log(response.data)
