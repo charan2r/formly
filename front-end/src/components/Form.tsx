@@ -960,6 +960,7 @@ const FormTable: React.FC = () => {
   }, []);
 
   const handlePreviewClick = (templateId: string) => {
+    console.log(forms.find(form => form.formId === selectedRowId)?.templateId)
     if (!templateId) {
         toast.error("Template ID not found");
         return;
@@ -1556,7 +1557,7 @@ const FormTable: React.FC = () => {
           }}>
             <Button
               variant="contained"
-              onClick={() => console.log('Preview clicked')}
+              onClick={() => handlePreviewClick(newForm?.templateId)}
               sx={{
                 backgroundColor: 'black',
                 color: 'white',
@@ -2205,7 +2206,9 @@ const FormTable: React.FC = () => {
         </MenuItem>
         <MenuItem
           onClick={() => {
-            handleShareClick(forms.find(form => form.formId === selectedRowId)!);
+            console.log(selectedRowId,forms)
+            handlePreviewClick(forms.find(form => form.formId === selectedRowId)?.formTemplateId);
+            // handleShareClick(forms.find(form => form.formId === selectedRowId)!);
             handleMenuClose();
           }}
           sx={{
