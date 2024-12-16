@@ -101,17 +101,18 @@ export class UserController {
   @Roles("Admin","SubUser")
   @Permissions("Delete User")
   async deleteUser(
-    @Query('userid') id: string
+    @Body() body: { userId: string; organizationId: string }
   ): Promise<{ status: string; message: string }> {
-  
-    if (!id) {
-      throw new BadRequestException('User ID is required');
+    const { userId, organizationId } = body;
+ 
+    if (!userId) {
+     throw new BadRequestException('User ID is required');
     }
-  
-    const result = await this.userService.deleteUser(id);
-  
+   
+    const result = await this.userService.deleteUser(userId);
+   
     if (!result) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`User with ID ${userId} not found`);
     }
     return {
       status: 'success',
