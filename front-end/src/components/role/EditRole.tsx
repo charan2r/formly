@@ -269,33 +269,33 @@ function EditRole() {
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
-      {/* Top Navigation Section */}
-      <Box display="flex" flexDirection="column" gap={2}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-          <IconButton 
-              sx={{ 
-                  backgroundColor: '#f5f5f5',
-                  color: 'black',
-                  '&:hover': {
-                      backgroundColor: '#e0e0e0',
-                  },
-              }}
-              onClick={() => navigate(-1)}
-          >
-              <ArrowBackIcon sx={{ fontSize: 22 }} />
-          </IconButton>
-          <IconButton onClick={() => console.log("Back arrow clicked")}>
-            <CircleIcon style={{ color: 'black' }} />
-          </IconButton>
-          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
-          <Typography variant="body2" color="textSecondary">
-            Atlas corp.
-          </Typography>
-          <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
-          <Typography variant="body2" color="textSecondary">
-            Edit a Role
-          </Typography>
-        </Box>
+    {/* Top Navigation Section */}
+    <Box display="flex" flexDirection="column" gap={2}>
+      <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
+      <IconButton 
+          sx={{ 
+            backgroundColor: '#f5f5f5',
+            color: 'black',
+            '&:hover': {
+              backgroundColor: '#e0e0e0',
+            },
+          }}
+          onClick={() => navigate(-1)}
+        >
+          <ArrowBackIcon sx={{ fontSize: 22 }} />
+        </IconButton>
+        <IconButton onClick={() => console.log("Back arrow clicked")}>
+          <CircleIcon style={{ color: 'black' }} />
+        </IconButton>
+        <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
+        <Typography variant="body2" color="textSecondary">
+          Atlas corp.
+        </Typography>
+        <ChevronRightIcon sx={{ fontSize: 26, color: 'black' }} />
+        <Typography variant="body2" color="textSecondary">
+          Edit a Role
+        </Typography>
+      </Box>
         <Typography variant="h5" fontWeight="bold">Edit a Role</Typography>
         <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
           Edit role and assign permissions.
