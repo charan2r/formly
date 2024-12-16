@@ -19,7 +19,9 @@ export class UserService {
 // Method to get users for grid view without pagination
 async getUsers(organizationId?: string): Promise<[User[], number]> {
   const [users, total] = await this.userRepository.findAndCount({
-    where: organizationId ? { organizationId } : {},
+    where: organizationId ? 
+      { organizationId, isDeleted: false } : 
+      { isDeleted: false },
   });
   return [users, total];
 }

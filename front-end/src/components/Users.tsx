@@ -279,8 +279,12 @@ const Users: React.FC = () => {
 
   const handleDeleteUser = async () => {
     try {
-      console.log(userToDelete)
-      await api.delete(`/user/delete?userid=${userToDelete}`);
+      await api.delete('/users/delete', {
+        data: {
+          userId: userToDelete,
+          organizationId: user.organizationId
+        }
+      });  
       setUsers((prev) => prev.filter((org) => org.userId !== userToDelete));
       setConfirmationOpen(false);
       toast.success("User has been deleted successfully!", {
