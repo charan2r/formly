@@ -181,7 +181,7 @@ const SubUserOverview: React.FC = () => {
 
         {/* Welcome Section */}
         <Box 
-          mb={4} 
+          mb={2}
           sx={{
             background: themeColors.background,
             borderRadius: '20px',
@@ -212,7 +212,7 @@ const SubUserOverview: React.FC = () => {
         </Box>
 
         {/* Quick Access Section */}
-        <Box mt={4}>
+        <Box mt={1}>
           <Typography 
             variant="h5" 
             gutterBottom 
