@@ -44,6 +44,7 @@ interface Users {
   lastName: string;
   email: string;
   userType?: string;
+  phoneNumber?: string;
   updatedAt?: string;
 }
 
@@ -93,13 +94,14 @@ const Users: React.FC = () => {
   const [isEditDialogOpen, setEditDialogOpen] = useState(false);
   const [editFormData, setEditFormData] = useState<EditUserForm | null>(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [confirmationOpenBulk, setConfirmationOpenBulk] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
   const [createUserOpen, setCreateUserOpen] = useState(false);
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
     roleId: '',
     userType: 'SubUser',
     organizationId: ''
@@ -203,6 +205,7 @@ const Users: React.FC = () => {
 
   const handleCreateUser = async () => {
     try {
+      console.log(newUser)
       const response = await api.post('/users/create', newUser);
       setUsers([...users, response.data.data]);
       setCreateUserOpen(false);
@@ -215,7 +218,8 @@ const Users: React.FC = () => {
   const handleViewUser = async (userId: string) => {
     try {
       const response = await api.get(`/users/details?userId=${userId}`);
-      setUserDetails(response.data);
+      console.log(response.data.data)
+      setUserDetails(response.data.data);
       setDialogOpen(true);
       handleMenuClose();
     } catch (error) {
@@ -228,11 +232,12 @@ const Users: React.FC = () => {
     try {
       const response = await api.get(`/users/details?userId=${userId}`);
       setEditFormData({
-        firstName: response.data.firstName,
-        lastName: response.data.lastName,
-        email: response.data.email,
-        phoneNumber: response.data.phoneNumber || '',
-        roleId: response.data.roleId || ''
+        id: response.data.data.id,
+        firstName: response.data.data.firstName,
+        lastName: response.data.data.lastName,
+        email: response.data.data.email,
+        phoneNumber: response.data.data.phoneNumber || '',
+        roleId: response.data.data.roleId || ''
       });
       setEditDialogOpen(true);
       handleMenuClose();
@@ -254,10 +259,10 @@ const Users: React.FC = () => {
     if (!editFormData) return;
 
     try {
-      await api.put(`/users/edit/?id=${editFormData.id}`, editFormData);
+      await api.patch(`/users/edit?userid=${editFormData.id}`, editFormData);
       // Refresh the users list
       const response = await api.get(`/users?userId=${user.userId}`);
-      setUsers(response.data.data);
+      setUsers(response.data.data[0]);
       setEditDialogOpen(false);
       setEditFormData(null);
     } catch (error) {
@@ -274,7 +279,8 @@ const Users: React.FC = () => {
 
   const handleDeleteUser = async () => {
     try {
-      await api.delete(`/user/delete?id=${userToDelete}`);
+      console.log(userToDelete)
+      await api.delete(`/user/delete?userid=${userToDelete}`);
       setUsers((prev) => prev.filter((org) => org.userId !== userToDelete));
       setConfirmationOpen(false);
       toast.success("User has been deleted successfully!", {
@@ -474,10 +480,10 @@ const Users: React.FC = () => {
               </Button>
             </Box>
             {selectedCount > 0 ? (
-              user?.permissions.includes('Delete User') && (
+              user?.permissions.includes('Delete User') || user?.userType === 'Admin' && (
                 <Button
                   variant="contained"
-                  onClick={() => setConfirmationOpen(true)}
+                  onClick={() => setConfirmationOpenBulk(true)}
                 sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
                 >
                   <Delete sx={{ marginRight: 1 }} />
@@ -849,8 +855,8 @@ const Users: React.FC = () => {
               <Grid item xs={12} sm={6} mt={-2}>
                 <Typography variant="caption" gutterBottom sx={{ marginBottom: '1px' }}>Phone</Typography>
                 <TextField
-                  value={newUser.phone}
-                  onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+                  value={newUser.phoneNumber}
+                  onChange={(e) => setNewUser({ ...newUser, phoneNumber: e.target.value })}
                   fullWidth
                   placeholder='Enter your phone number'
                   variant="outlined"
@@ -1229,7 +1235,8 @@ const Users: React.FC = () => {
 
       {/* Confirmation Dialog for Delete User */}
       <StyledDialog open={confirmationOpen} onClose={() => setConfirmationOpen(false)}>
-        <Box sx={{ textAlign: 'center', pb: 2 }}>
+        <Box sx={{ pb: 2 }}>
+          
           <IconButton
             sx={{
               backgroundColor: '#f5f5f5',
@@ -1242,6 +1249,7 @@ const Users: React.FC = () => {
           >
             <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
+          <Box sx={{ textAlign: 'center'}}>
           <Typography variant="h6" sx={{ mt: 2, fontWeight: 'bold' }}>
             Delete User
           </Typography>
@@ -1284,14 +1292,15 @@ const Users: React.FC = () => {
             >
               Yes, Delete
             </Button>
+            </Box>
           </Box>
         </Box>
       </StyledDialog>
 
       {/* Add this new Dialog for Bulk Delete */}
       <Dialog 
-        open={selectedCount > 0 && confirmationOpen} 
-        onClose={() => setConfirmationOpen(false)}
+        open={selectedCount > 0 && confirmationOpenBulk} 
+        onClose={() => setConfirmationOpenBulk(false)}
         PaperProps={{
           sx: {
             borderRadius: '16px',
@@ -1314,7 +1323,7 @@ const Users: React.FC = () => {
           }}>
             <Button
               variant="contained"
-              onClick={() => setConfirmationOpen(false)}
+              onClick={() => setConfirmationOpenBulk(false)}
               sx={{
                 bgcolor: 'black',
                 color: 'white',
