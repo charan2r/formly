@@ -76,9 +76,9 @@ interface ViewFormData extends form {
 }
 
 const pageSizes = {
-    A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
-    A3: { width: 297 * 3.7795, height: 420 * 3.7795 },
-    Custom: { width: 800, height: 600 },
+  A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
+  A3: { width: 297 * 3.7795, height: 420 * 3.7795 },
+  Custom: { width: 800, height: 600 },
 };
 
 interface Template {
@@ -218,10 +218,10 @@ const PreviewDialog: React.FC<{
     if (printRef.current) {
       try {
         toast.info('Preparing document...');
-        
+
         const pageSize = template?.pageSize || 'A4';
         const { width: pageWidth, height: pageHeight } = pageSizes[pageSize];
-        
+
         // Create a temporary container with fixed dimensions
         const tempContainer = document.createElement('div');
         tempContainer.style.position = 'absolute';
@@ -320,10 +320,10 @@ const PreviewDialog: React.FC<{
     if (printRef.current) {
       try {
         toast.info('Preparing PDF...');
-        
+
         const pageSize = template?.pageSize || 'A4';
         const { width: pageWidth, height: pageHeight } = pageSizes[pageSize];
-        
+
         // Create temporary container with fixed dimensions
         const tempContainer = document.createElement('div');
         tempContainer.style.position = 'absolute';
@@ -385,22 +385,23 @@ const PreviewDialog: React.FC<{
   };
 
   return (
-    <Dialog 
-      open={open} 
-      onClose={onClose} 
+    <Dialog
+      open={open}
+      onClose={onClose}
       maxWidth={false}
       PaperProps={{
         sx: {
           width: 'auto',
           maxWidth: '95vw',
           maxHeight: '90vh',
-          overflow: 'auto'
+          overflow: 'auto',
+          borderRadius: '30px'
         }
       }}
     >
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         p: 3,
         width: '100%'
@@ -412,62 +413,49 @@ const PreviewDialog: React.FC<{
           <Typography variant="body2" color="textSecondary" mb={2}>
             {template?.description}
           </Typography>
-          <Button
-            startIcon={<PrintIcon />}
-            variant="outlined"
-            onClick={handlePrintClick}
-            sx={{
-              borderColor: 'black',
-              color: 'black',
-              borderRadius: '20px',
-              px: 3,
-              '&:hover': {
-                borderColor: '#333',
-                backgroundColor: 'rgba(0, 0, 0, 0.04)'
-              }
-            }}
-          >
-            Print / Download
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            PaperProps={{
-              sx: {
-                mt: 1,
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.15)',
-                borderRadius: '12px',
-              }
-            }}
-          >
-            <MenuItem 
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems:'flex-end', width: '100%' }}>
+            <Button
+              startIcon={<PrintIcon sx={{ color: 'white' }} />}
+              variant="contained"
               onClick={handleDirectPrint}
-              sx={{ 
-                py: 1.5,
-                px: 2,
-                '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+              sx={{
+                backgroundColor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 3,
+                ml: 95, // Add margin to the right
+                mr: 3,
+                '&:hover': {
+                  backgroundColor: '#333',
+                }
               }}
             >
-              <PrintIcon sx={{ mr: 2 }} /> Print Document
-            </MenuItem>
-            <MenuItem 
+              Print
+            </Button>
+            <Button
+              startIcon={<DescriptionIcon sx={{ color: 'white' }} />}
+              variant="contained"
               onClick={handleDownloadPDF}
-              sx={{ 
-                py: 1.5,
-                px: 2,
-                '&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+              sx={{
+                backgroundColor: 'black',
+                color: 'white',
+                borderRadius: '20px',
+                px: 3,
+                
+                '&:hover': {
+                  backgroundColor: '#333',
+                }
               }}
             >
-              <DescriptionIcon sx={{ mr: 2 }} /> Download as PDF
-            </MenuItem>
-          </Menu>
+              Download 
+            </Button>
+          </Box>
         </Box>
 
-        <Paper 
-          elevation={1} 
-          ref={paperRef} 
-          sx={{ 
+        <Paper
+          elevation={1}
+          ref={paperRef}
+          sx={{
             padding: '50px',
             margin: '0 auto',
             borderRadius: 3,
@@ -480,7 +468,7 @@ const PreviewDialog: React.FC<{
             ref={printRef}
             style={{
               width: '70vw',
-              height: `${70 * (gridSize.height/gridSize.width)}vw`,
+              height: `${70 * (gridSize.height / gridSize.width)}vw`,
               position: "relative",
               border: "1px solid #ccc",
               borderRadius: '15px',
@@ -497,10 +485,10 @@ const PreviewDialog: React.FC<{
               gridSize={gridSize}
               selectedSize={selectedSize}
               pageSizes={pageSizes}
-              onQuestionChange={() => {}}
-              onOptionChange={() => {}}
-              onDeleteOption={() => {}}
-              onAddOption={() => {}}
+              onQuestionChange={() => { }}
+              onOptionChange={() => { }}
+              onDeleteOption={() => { }}
+              onAddOption={() => { }}
               isViewMode={true}
               appearanceSettings={appearanceSettings}
               gridPadding={gridPadding}
@@ -514,7 +502,7 @@ const PreviewDialog: React.FC<{
 
 const FormTable: React.FC = () => {
   const navigate = useNavigate();
-  const {user} = useAuth();
+  const { user } = useAuth();
   const [forms, setForms] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedForms, setSelectedForms] = useState<Record<string, boolean>>({});
@@ -540,17 +528,17 @@ const FormTable: React.FC = () => {
     description: 'for office'
   });
   const [newForm, setNewForm] = useState({
-        name: '',
-        type: '',
-        formName: '',
-        description: '',
-        templateId: ''
+    name: '',
+    type: '',
+    formName: '',
+    description: '',
+    templateId: ''
   });
   const pageSizes = {
     A4: { width: 210 * 3.7795, height: 297 * 3.7795 },
     A3: { width: 297 * 3.7795, height: 420 * 3.7795 },
     Custom: { width: 800, height: 600 },
-};
+  };
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -573,7 +561,7 @@ const FormTable: React.FC = () => {
 
   const handleEditClick = (form: form | undefined) => {
     if (!form) return;
-    
+
     setEditFormData({
       name: form.name,
       type: templates.find(t => t.formTemplateId === form.formTemplateId)?.name || '',
@@ -657,19 +645,19 @@ const FormTable: React.FC = () => {
   // Method to get forms 
   useEffect(() => {
     const fetchForms = async () => {
-        try {
-            const response = await api.get('/forms');
-            if (response.data.status === 'success') {
-                // Filter forms to only include active ones
-                const activeForms = response.data.data.filter(
-                    (form: form) => form.status === 'active'
-                );
-                setForms(activeForms);
-            }
-        } catch (error) {
-            console.error('Error fetching forms:', error);
-            toast.error('Failed to fetch forms');
+      try {
+        const response = await api.get('/forms');
+        if (response.data.status === 'success') {
+          // Filter forms to only include active ones
+          const activeForms = response.data.data.filter(
+            (form: form) => form.status === 'active'
+          );
+          setForms(activeForms);
         }
+      } catch (error) {
+        console.error('Error fetching forms:', error);
+        toast.error('Failed to fetch forms');
+      }
     };
 
     fetchForms();
@@ -686,13 +674,13 @@ const FormTable: React.FC = () => {
       };
 
       const response = await api.patch(`/forms/${selectedRowId}`, updatePayload);
-      setForms(prevForms => prevForms.map(form => 
+      setForms(prevForms => prevForms.map(form =>
         form.formId === selectedRowId
           ? {
-              ...form,
-              ...response.data,
-              updatedAt: new Date().toISOString()
-            }
+            ...form,
+            ...response.data,
+            updatedAt: new Date().toISOString()
+          }
           : form
       ));
 
@@ -707,47 +695,47 @@ const FormTable: React.FC = () => {
   // Method to handle form creation
   const handleCreateForm = async () => {
     try {
-        const formPayload = {
-            name: newForm.name,
-            description: newForm.description,
-            formTemplateId: newForm.templateId,
-            status: 'active'
-        };
+      const formPayload = {
+        name: newForm.name,
+        description: newForm.description,
+        formTemplateId: newForm.templateId,
+        status: 'active'
+      };
 
-        const response = await api.post('/forms/create', formPayload);
-        setForms([...forms, response.data]);
-        setCreateFormOpen(false);
-        toast.success("Form created successfully!", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          style: {
-            backgroundColor: 'black',
-            color: 'white',
-            borderRadius: '10px',
-            fontWeight: 'bold',
-          },
-        });
+      const response = await api.post('/forms/create', formPayload);
+      setForms([...forms, response.data]);
+      setCreateFormOpen(false);
+      toast.success("Form created successfully!", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     } catch (error) {
-        toast.error("Failed to create form", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          style: {
-            backgroundColor: 'black',
-            color: 'white',
-            borderRadius: '10px',
-            fontWeight: 'bold',
-          },
-        });
+      toast.error("Failed to create form", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        style: {
+          backgroundColor: 'black',
+          color: 'white',
+          borderRadius: '10px',
+          fontWeight: 'bold',
+        },
+      });
     }
   };
 
@@ -850,7 +838,7 @@ const FormTable: React.FC = () => {
   const filteredData = forms
     .filter((form) => {
       const searchLower = searchTerm.toLowerCase();
-      
+
       // Search across multiple fields
       return (
         form.name.toLowerCase().includes(searchLower) ||
@@ -903,22 +891,22 @@ const FormTable: React.FC = () => {
   const handleShareClick = (form: form) => {
     // First fetch the form details to get the templateId
     const fetchFormDetails = async () => {
-        try {
-            const response = await api.get(`/forms/details?id=${form.formId}`);
-            if (response.data.status === 'success') {
-                const formDetails = response.data.data;
-                setViewFormData({
-                    ...form,
-                    formTemplateId: formDetails.formTemplateId // Make sure this matches your API response field
-                });
-                setShareDialogOpen(true);
-            } else {
-                toast.error('Failed to fetch form details');
-            }
-        } catch (error) {
-            console.error('Error fetching form details:', error);
-            toast.error('Failed to fetch form details');
+      try {
+        const response = await api.get(`/forms/details?id=${form.formId}`);
+        if (response.data.status === 'success') {
+          const formDetails = response.data.data;
+          setViewFormData({
+            ...form,
+            formTemplateId: formDetails.formTemplateId // Make sure this matches your API response field
+          });
+          setShareDialogOpen(true);
+        } else {
+          toast.error('Failed to fetch form details');
         }
+      } catch (error) {
+        console.error('Error fetching form details:', error);
+        toast.error('Failed to fetch form details');
+      }
     };
 
     fetchFormDetails();
@@ -931,16 +919,16 @@ const FormTable: React.FC = () => {
 
   useEffect(() => {
     const fetchTemplates = async () => {
-        try {
-            const response = await api.get('/form-templates');
-            // Filter templates to only include active ones
-            const activeTemplates = response.data.data.filter(
-                (template: any) => template.status === 'active'
-            );
-            setTemplates(activeTemplates);
-        } catch (error) {
-            console.error('Failed to fetch templates:', error);
-        }
+      try {
+        const response = await api.get('/form-templates');
+        // Filter templates to only include active ones
+        const activeTemplates = response.data.data.filter(
+          (template: any) => template.status === 'active'
+        );
+        setTemplates(activeTemplates);
+      } catch (error) {
+        console.error('Failed to fetch templates:', error);
+      }
     };
 
     fetchTemplates();
@@ -949,37 +937,37 @@ const FormTable: React.FC = () => {
   const handlePreviewClick = (templateId: string) => {
     console.log(forms.find(form => form.formId === selectedRowId)?.templateId)
     if (!templateId) {
-        toast.error("Template ID not found");
-        return;
+      toast.error("Template ID not found");
+      return;
     }
     setPreviewTemplateId(templateId);
     setPreviewOpen(true);
   };
 
-    // Add these state declarations at the top
-    const [appearanceSettings, setAppearanceSettings] = useState({
-      border: {
-        width: 0,
-        style: 'none',
-        color: '#e0e0e0',
-        radius: 12
-      },
-      boxShadow: {
-        x: 0,
-        y: 4,
-        blur: 12,
-        spread: 0,
-        color: 'rgba(0, 0, 0, 0.1)',
-        enabled: true
-      },
-      background: {
-        color: '#ffffff',
-        opacity: 100
-      }
-    });
-  
+  // Add these state declarations at the top
+  const [appearanceSettings, setAppearanceSettings] = useState({
+    border: {
+      width: 0,
+      style: 'none',
+      color: '#e0e0e0',
+      radius: 12
+    },
+    boxShadow: {
+      x: 0,
+      y: 4,
+      blur: 12,
+      spread: 0,
+      color: 'rgba(0, 0, 0, 0.1)',
+      enabled: true
+    },
+    background: {
+      color: '#ffffff',
+      opacity: 100
+    }
+  });
 
-  
+
+
 
   return (
     <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'hidden' }}>
@@ -990,12 +978,12 @@ const FormTable: React.FC = () => {
           </IconButton>
           <ChevronRightIcon sx={{ fontSize: 22, color: 'black' }} />
           <Typography variant="body2" color="textSecondary">
-          Forms Repository
+            Forms Repository
           </Typography>
         </Box>
         <Typography variant="h5" fontWeight="bold">Forms Repository</Typography>
         <Typography variant="body2" color="textSecondary" marginBottom="20px" marginTop="-10px">
-        Manage your forms here.
+          Manage your forms here.
         </Typography>
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Typography variant="h6" component="span">
@@ -1071,10 +1059,10 @@ const FormTable: React.FC = () => {
         <Table stickyHeader sx={{ marginTop: '25px' }}>
           <TableHead>
             <TableRow>
-              <TableCell 
-                padding="checkbox" 
-                sx={{ 
-                  backgroundColor: '#f9f9f9', 
+              <TableCell
+                padding="checkbox"
+                sx={{
+                  backgroundColor: '#f9f9f9',
                   borderTopLeftRadius: '12px',
                   width: '48px'
                 }}
@@ -1085,8 +1073,8 @@ const FormTable: React.FC = () => {
                   indeterminate={forms.some((frm) => selectedForms[frm.formId]) && !forms.every((frm) => selectedForms[frm.formId])}
                 />
               </TableCell>
-              <TableCell 
-                sx={{ 
+              <TableCell
+                sx={{
                   backgroundColor: '#f9f9f9',
                   fontWeight: 600,
                   color: '#333'
@@ -1100,8 +1088,8 @@ const FormTable: React.FC = () => {
                   Form Name
                 </TableSortLabel>
               </TableCell>
-              <TableCell 
-                sx={{ 
+              <TableCell
+                sx={{
                   backgroundColor: '#f9f9f9',
                   fontWeight: 600,
                   color: '#333'
@@ -1115,8 +1103,8 @@ const FormTable: React.FC = () => {
                   Status
                 </TableSortLabel>
               </TableCell>
-              <TableCell 
-                sx={{ 
+              <TableCell
+                sx={{
                   backgroundColor: '#f9f9f9',
                   fontWeight: 600,
                   color: '#333',
@@ -1131,8 +1119,8 @@ const FormTable: React.FC = () => {
                   Created Date
                 </TableSortLabel>
               </TableCell>
-              <TableCell 
-                sx={{ 
+              <TableCell
+                sx={{
                   backgroundColor: '#f9f9f9',
                   fontWeight: 600,
                   color: '#333',
@@ -1147,9 +1135,9 @@ const FormTable: React.FC = () => {
                   Last Modified Date
                 </TableSortLabel>
               </TableCell>
-              <TableCell 
-                padding="checkbox" 
-                sx={{ 
+              <TableCell
+                padding="checkbox"
+                sx={{
                   backgroundColor: '#f9f9f9',
                   borderTopRightRadius: '12px',
                   width: '48px'
@@ -1160,8 +1148,8 @@ const FormTable: React.FC = () => {
 
           <TableBody>
             {paginatedData.map((row) => (
-              <TableRow 
-                key={row.formId} 
+              <TableRow
+                key={row.formId}
                 sx={{
                   height: '48px',
                   '&:hover': { backgroundColor: '#f5f5f5' }
@@ -1190,7 +1178,7 @@ const FormTable: React.FC = () => {
                   })}
                 </TableCell>
                 <TableCell padding="checkbox" sx={{ width: '48px' }}>
-                  <IconButton 
+                  <IconButton
                     onClick={(event) => handleMenuOpen(event, row.formId)}
                     sx={{ color: 'rgba(0, 0, 0, 0.54)' }}
                   >
@@ -1214,8 +1202,8 @@ const FormTable: React.FC = () => {
       </Box>
 
       {/* Confirmation Dialog */}
-      <Dialog 
-        open={confirmationOpen} 
+      <Dialog
+        open={confirmationOpen}
         onClose={() => setConfirmationOpen(false)}
         PaperProps={{
           sx: {
@@ -1240,24 +1228,24 @@ const FormTable: React.FC = () => {
           </IconButton>
 
           {/* Content */}
-          <Box sx={{ 
-            textAlign: 'center', 
-            mt: 3 
+          <Box sx={{
+            textAlign: 'center',
+            mt: 3
           }}>
-            <Typography variant="h6" sx={{ 
+            <Typography variant="h6" sx={{
               fontWeight: 'bold',
               mb: 2
             }}>
               Delete Form
             </Typography>
-            
+
             <Typography variant="body1" sx={{ mb: 4 }}>
               Are you sure you want to delete?
             </Typography>
 
             {/* Buttons */}
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               justifyContent: 'center',
               gap: 2
             }}>
@@ -1275,7 +1263,7 @@ const FormTable: React.FC = () => {
               >
                 No, Cancel
               </Button>
-              
+
               <Button
                 onClick={handleDeleteForm}
                 sx={{
@@ -1297,8 +1285,8 @@ const FormTable: React.FC = () => {
       </Dialog>
 
       {/* Confirmation Dialog */}
-      <Dialog 
-        open={confirmationBulkOpen} 
+      <Dialog
+        open={confirmationBulkOpen}
         onClose={() => setConfirmationBulkOpen(false)}
         PaperProps={{
           sx: {
@@ -1321,23 +1309,23 @@ const FormTable: React.FC = () => {
             <ArrowBackIcon />
           </IconButton>
 
-          <Box sx={{ 
-            textAlign: 'center', 
-            mt: 3 
+          <Box sx={{
+            textAlign: 'center',
+            mt: 3
           }}>
-            <Typography variant="h6" sx={{ 
+            <Typography variant="h6" sx={{
               fontWeight: 'bold',
               mb: 2
             }}>
               Delete Forms
             </Typography>
-            
+
             <Typography variant="body1" sx={{ mb: 4 }}>
               Are you sure you want to delete selected forms?
             </Typography>
 
-            <Box sx={{ 
-              display: 'flex', 
+            <Box sx={{
+              display: 'flex',
               justifyContent: 'center',
               gap: 2
             }}>
@@ -1355,7 +1343,7 @@ const FormTable: React.FC = () => {
               >
                 No, Cancel
               </Button>
-              
+
               <Button
                 onClick={handleDeleteForms}
                 sx={{
@@ -1395,8 +1383,8 @@ const FormTable: React.FC = () => {
       >
         <Box sx={{ position: 'relative' }}>
           {/* Back button */}
-          <IconButton 
-            sx={{ 
+          <IconButton
+            sx={{
               backgroundColor: '#f5f5f5',
               color: 'black',
               '&:hover': {
@@ -1408,16 +1396,16 @@ const FormTable: React.FC = () => {
             <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           {/* Header section with back button */}
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             alignItems: 'center',
             gap: 2,
-            mb: { xs: 2, sm: 3 }, 
+            mb: { xs: 2, sm: 3 },
             mt: { xs: 1, sm: 1 },
             px: { xs: 2, sm: 3 }
           }}>
             <Box>
-              <Typography variant="h4" sx={{ 
+              <Typography variant="h4" sx={{
                 fontWeight: 'bold',
                 fontSize: { xs: '1.5rem', sm: '1.8rem' }
               }}>
@@ -1429,7 +1417,7 @@ const FormTable: React.FC = () => {
             </Box>
           </Box>
 
-          <DialogContent sx={{ 
+          <DialogContent sx={{
             px: { xs: 2, sm: 3 },
             py: { xs: 2, sm: 2 }
           }}>
@@ -1444,15 +1432,15 @@ const FormTable: React.FC = () => {
                     select
                     value={newForm.templateId}
                     size="small"
-                    onChange={(e) => setNewForm({ 
-                      ...newForm, 
+                    onChange={(e) => setNewForm({
+                      ...newForm,
                       templateId: e.target.value,
-                      type: templates.find(t => t.formTemplateId.toString() === e.target.value)?.name || '' 
+                      type: templates.find(t => t.formTemplateId.toString() === e.target.value)?.name || ''
                     })}
                     fullWidth
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1478,8 +1466,8 @@ const FormTable: React.FC = () => {
                     onChange={(e) => setNewForm({ ...newForm, formName: e.target.value })}
                     fullWidth
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1502,8 +1490,8 @@ const FormTable: React.FC = () => {
                     fullWidth
                     size="small"
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1527,8 +1515,8 @@ const FormTable: React.FC = () => {
                     value={newForm.description}
                     onChange={(e) => setNewForm({ ...newForm, description: e.target.value })}
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1541,9 +1529,9 @@ const FormTable: React.FC = () => {
             </Box>
           </DialogContent>
 
-          <DialogActions sx={{ 
-            p: { xs: 2, sm: 3 }, 
-            justifyContent: 'center', 
+          <DialogActions sx={{
+            p: { xs: 2, sm: 3 },
+            justifyContent: 'center',
             gap: { xs: 2, sm: 3 }
           }}>
             <Button
@@ -1581,7 +1569,7 @@ const FormTable: React.FC = () => {
           </DialogActions>
         </Box>
       </Dialog>
-       {/* Edit Form Dialog */}
+      {/* Edit Form Dialog */}
       <Dialog
         open={isEditDialogOpen}
         onClose={handleCloseEditDialog}
@@ -1600,8 +1588,8 @@ const FormTable: React.FC = () => {
       >
         <Box sx={{ position: 'relative' }}>
           {/* Back button */}
-          <IconButton 
-            sx={{ 
+          <IconButton
+            sx={{
               backgroundColor: '#f5f5f5',
               color: 'black',
               '&:hover': {
@@ -1613,16 +1601,16 @@ const FormTable: React.FC = () => {
             <ArrowBackIcon sx={{ fontSize: 22 }} />
           </IconButton>
           {/* Header section with back button */}
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             alignItems: 'center',
             gap: 2,
-            mb: { xs: 2, sm: 3 }, 
+            mb: { xs: 2, sm: 3 },
             mt: { xs: 1, sm: 1 },
             px: { xs: 2, sm: 3 }
           }}>
             <Box>
-              <Typography variant="h4" sx={{ 
+              <Typography variant="h4" sx={{
                 fontWeight: 'bold',
                 fontSize: { xs: '1.5rem', sm: '1.8rem' }
               }}>
@@ -1634,7 +1622,7 @@ const FormTable: React.FC = () => {
             </Box>
           </Box>
 
-          <DialogContent sx={{ 
+          <DialogContent sx={{
             px: { xs: 2, sm: 3 },
             py: { xs: 2, sm: 2 }
           }}>
@@ -1653,8 +1641,8 @@ const FormTable: React.FC = () => {
                     onChange={handleEditFormChange}
                     fullWidth
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1681,8 +1669,8 @@ const FormTable: React.FC = () => {
                     onChange={handleEditFormChange}
                     fullWidth
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1706,8 +1694,8 @@ const FormTable: React.FC = () => {
                     fullWidth
                     size="small"
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1732,8 +1720,8 @@ const FormTable: React.FC = () => {
                     value={editFormData.description}
                     onChange={handleEditFormChange}
                     InputProps={{
-                      sx: { 
-                        backgroundColor: '#ffffff', 
+                      sx: {
+                        backgroundColor: '#ffffff',
                         borderRadius: '8px',
                         '& fieldset': {
                           borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1746,8 +1734,8 @@ const FormTable: React.FC = () => {
             </Box>
           </DialogContent>
 
-          <DialogActions sx={{ 
-            p: { xs: 2, sm: 3 }, 
+          <DialogActions sx={{
+            p: { xs: 2, sm: 3 },
             justifyContent: 'space-between'
           }}>
             <Button
@@ -1818,10 +1806,10 @@ const FormTable: React.FC = () => {
           </Typography>
 
           {/* Share options */}
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-around', 
-            mb: 4 
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            mb: 4
           }}>
             <IconButton
               onClick={() => {
@@ -1838,7 +1826,7 @@ const FormTable: React.FC = () => {
             >
               <EmailIcon />
             </IconButton>
-            
+
             <IconButton
               // onClick={() => handlePrintClick()}
               sx={{
@@ -1850,7 +1838,7 @@ const FormTable: React.FC = () => {
             >
               <PrintIcon />
             </IconButton>
-            
+
             <IconButton
               sx={{
                 backgroundColor: '#FFF0F0',
@@ -1867,8 +1855,8 @@ const FormTable: React.FC = () => {
           <Typography variant="caption" color="textSecondary" sx={{ mb: 1 }}>
             Or share with link
           </Typography>
-          
-          <Box sx={{ 
+
+          <Box sx={{
             display: 'flex',
             alignItems: 'center',
             backgroundColor: '#F5F5F5',
@@ -1920,16 +1908,16 @@ const FormTable: React.FC = () => {
       >
         <Box sx={{ position: 'relative' }}>
           {/* Header section */}
-          <Box sx={{ 
-            display: 'flex', 
+          <Box sx={{
+            display: 'flex',
             alignItems: 'center',
             gap: 2,
-            mb: 2, 
+            mb: 2,
             mt: 1,
             px: 2
           }}>
             <Box>
-              <Typography variant="h4" sx={{ 
+              <Typography variant="h4" sx={{
                 fontWeight: 'bold',
                 fontSize: '1.5rem'
               }}>
@@ -1941,7 +1929,7 @@ const FormTable: React.FC = () => {
             </Box>
           </Box>
 
-          <DialogContent sx={{ 
+          <DialogContent sx={{
             px: 2,
             py: 2,
             overflowY: 'visible',
@@ -1961,8 +1949,8 @@ const FormTable: React.FC = () => {
                       size="small"
                       InputProps={{
                         readOnly: true,
-                        sx: { 
-                          backgroundColor: '#ffffff', 
+                        sx: {
+                          backgroundColor: '#ffffff',
                           borderRadius: '8px',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -1986,8 +1974,8 @@ const FormTable: React.FC = () => {
                       size="small"
                       InputProps={{
                         readOnly: true,
-                        sx: { 
-                          backgroundColor: '#ffffff', 
+                        sx: {
+                          backgroundColor: '#ffffff',
                           borderRadius: '8px',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -2014,8 +2002,8 @@ const FormTable: React.FC = () => {
                       size="small"
                       InputProps={{
                         readOnly: true,
-                        sx: { 
-                          backgroundColor: '#ffffff', 
+                        sx: {
+                          backgroundColor: '#ffffff',
                           borderRadius: '8px',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -2043,8 +2031,8 @@ const FormTable: React.FC = () => {
                       rows={4}
                       InputProps={{
                         readOnly: true,
-                        sx: { 
-                          backgroundColor: '#ffffff', 
+                        sx: {
+                          backgroundColor: '#ffffff',
                           borderRadius: '8px',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -2071,8 +2059,8 @@ const FormTable: React.FC = () => {
                       size="small"
                       InputProps={{
                         readOnly: true,
-                        sx: { 
-                          backgroundColor: '#ffffff', 
+                        sx: {
+                          backgroundColor: '#ffffff',
                           borderRadius: '8px',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -2096,8 +2084,8 @@ const FormTable: React.FC = () => {
                       size="small"
                       InputProps={{
                         readOnly: true,
-                        sx: { 
-                          backgroundColor: '#ffffff', 
+                        sx: {
+                          backgroundColor: '#ffffff',
                           borderRadius: '8px',
                           '& fieldset': {
                             borderColor: 'rgba(0, 0, 0, 0.1)'
@@ -2115,8 +2103,8 @@ const FormTable: React.FC = () => {
             )}
           </DialogContent>
 
-          <DialogActions sx={{ 
-            p: 2, 
+          <DialogActions sx={{
+            p: 2,
             justifyContent: 'center'
           }}>
             <Button
@@ -2201,7 +2189,7 @@ const FormTable: React.FC = () => {
         )}
         <MenuItem
           onClick={() => {
-            console.log(selectedRowId,forms)
+            console.log(selectedRowId, forms)
             handlePreviewClick(forms.find(form => form.formId === selectedRowId)?.formTemplateId);
             // handleShareClick(forms.find(form => form.formId === selectedRowId)!);
             handleMenuClose();
