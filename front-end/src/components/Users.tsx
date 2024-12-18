@@ -488,14 +488,14 @@ const Users: React.FC = () => {
                 <Button
                   variant="contained"
                   onClick={() => setConfirmationOpenBulk(true)}
-                sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
+                  sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
                 >
                   <Delete sx={{ marginRight: 1 }} />
                   Delete
                 </Button>
               )
             ) : (
-              user?.permissions.includes('Add User') || user?.userType === 'Admin' && (
+              (user?.permissions.includes('Create User') || user?.userType === 'Admin') && (
                 <Button
                   variant="contained"
                   sx={{ backgroundColor: 'black', color: 'white', borderRadius: '20px', display: 'flex', alignItems: 'center' }}
@@ -664,7 +664,7 @@ const Users: React.FC = () => {
                       },
                     }}
                   >
-                    {user?.permissions.includes('View User') || user?.userType === 'Admin' && (
+                    {(user?.permissions?.includes('View User') || user?.userType === 'Admin') && (
                       <MenuItem
                         onClick={() => handleViewUser(row.id)}
                         sx={{
@@ -681,7 +681,7 @@ const Users: React.FC = () => {
                         View
                       </MenuItem>
                     )}
-                    {user?.permissions.includes('Edit User') || user?.userType === 'Admin' && (
+                    {(user?.permissions?.includes('Edit User') || user?.userType === 'Admin') && (
                       <MenuItem
                         onClick={() => handleEditUser(row.id)}
                         sx={{
@@ -698,7 +698,7 @@ const Users: React.FC = () => {
                         Edit
                       </MenuItem>
                     )}
-                    {user?.permissions.includes('Delete User') || user?.userType === 'Admin' && (
+                    {(user?.permissions?.includes('Delete User') || user?.userType === 'Admin') && (
                       <MenuItem
                         onClick={() => handleDeleteClick(row.id)}
                         sx={{
