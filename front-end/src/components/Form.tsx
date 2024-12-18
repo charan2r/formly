@@ -222,30 +222,34 @@ const PreviewDialog: React.FC<{
         const pageSize = template?.pageSize || 'A4';
         const { width: pageWidth, height: pageHeight } = pageSizes[pageSize];
         
-        const originalStyle = printRef.current.style.cssText;
-        Object.assign(printRef.current.style, {
-          width: `${pageWidth}px`,
-          height: `${pageHeight}px`,
-          position: 'absolute',
-          left: '0',
-          top: '0',
-          transform: 'none',
-          transformOrigin: 'top left'
-        });
+        // Create a temporary container with fixed dimensions
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '-9999px';
+        document.body.appendChild(tempContainer);
 
-        const dataUrl = await domtoimage.toPng(printRef.current, {
-          quality: 1.0,
+        // Clone the content and set exact dimensions
+        const contentClone = printRef.current.cloneNode(true) as HTMLElement;
+        contentClone.style.width = `${pageWidth}px`;
+        contentClone.style.height = `${pageHeight}px`;
+        contentClone.style.transform = 'none';
+        tempContainer.appendChild(contentClone);
+
+        const dataUrl = await domtoimage.toPng(contentClone, {
           width: pageWidth,
           height: pageHeight,
           style: {
-            '-webkit-print-color-adjust': 'exact',
-            'print-color-adjust': 'exact'
-          },
-          cacheBust: true
+            transform: 'none',
+            transformOrigin: 'top left',
+            width: `${pageWidth}px`,
+            height: `${pageHeight}px`
+          }
         });
-        
-        printRef.current.style.cssText = originalStyle;
-        
+
+        // Clean up temporary elements
+        document.body.removeChild(tempContainer);
+
         const printWindow = window.open('', '_blank');
         if (printWindow) {
           printWindow.document.write(`
@@ -261,25 +265,12 @@ const PreviewDialog: React.FC<{
                   body {
                     margin: 0;
                     padding: 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: flex-start;
-                    background-color: white;
-                  }
-                  .print-container {
-                    width: ${pageWidth}px;
-                    height: ${pageHeight}px;
-                    position: relative;
-                    margin: 0;
-                    padding: 0;
                   }
                   img {
-                    width: 100%;
-                    height: 100%;
+                    width: 100vw;
+                    height: 100vh;
                     object-fit: contain;
-                    display: block;
-                    margin: 0;
-                    padding: 0;
+                    page-break-inside: avoid;
                   }
                   @media print {
                     html, body {
@@ -288,31 +279,26 @@ const PreviewDialog: React.FC<{
                       margin: 0;
                       padding: 0;
                     }
-                    .print-container {
-                      break-inside: avoid;
+                    img {
+                      width: 100%;
+                      height: 100%;
+                      object-fit: contain;
                       page-break-inside: avoid;
                     }
                   }
                 </style>
               </head>
               <body>
-                <div class="print-container">
-                  <img 
-                    src="${dataUrl}" 
-                    alt="Form Preview"
-                  />
-                </div>
+                <img 
+                  src="${dataUrl}" 
+                  alt="Form Preview"
+                />
                 <script>
                   window.onload = () => {
-                    const img = document.querySelector('img');
-                    if (img) {
-                      img.onload = () => {
-                        requestAnimationFrame(() => {
-                          window.print();
-                          window.close();
-                        });
-                      };
-                    }
+                    setTimeout(() => {
+                      window.print();
+                      window.close();
+                    }, 250);
                   };
                 </script>
               </body>
@@ -320,8 +306,6 @@ const PreviewDialog: React.FC<{
           `);
           printWindow.document.close();
           toast.success('Document printed successfully!');
-        } else {
-          throw new Error('Could not open print window');
         }
         handleClose();
       } catch (error) {
@@ -340,41 +324,44 @@ const PreviewDialog: React.FC<{
         const pageSize = template?.pageSize || 'A4';
         const { width: pageWidth, height: pageHeight } = pageSizes[pageSize];
         
-        const originalStyle = printRef.current.style.cssText;
-        Object.assign(printRef.current.style, {
-          width: `${pageWidth}px`,
-          height: `${pageHeight}px`,
-          position: 'absolute',
-          left: '0',
-          top: '0',
-          transform: 'none',
-          transformOrigin: 'top left'
-        });
+        // Create temporary container with fixed dimensions
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '-9999px';
+        document.body.appendChild(tempContainer);
 
-        const dataUrl = await domtoimage.toPng(printRef.current, {
-          quality: 1.0,
+        // Clone the content and set exact dimensions
+        const contentClone = printRef.current.cloneNode(true) as HTMLElement;
+        contentClone.style.width = `${pageWidth}px`;
+        contentClone.style.height = `${pageHeight}px`;
+        contentClone.style.transform = 'none';
+        tempContainer.appendChild(contentClone);
+
+        const dataUrl = await domtoimage.toPng(contentClone, {
           width: pageWidth,
           height: pageHeight,
           style: {
-            '-webkit-print-color-adjust': 'exact',
-            'print-color-adjust': 'exact'
-          },
-          cacheBust: true
+            transform: 'none',
+            transformOrigin: 'top left',
+            width: `${pageWidth}px`,
+            height: `${pageHeight}px`
+          }
         });
-        
-        printRef.current.style.cssText = originalStyle;
 
-        // Convert pixels to millimeters for A4 size
+        // Clean up temporary elements
+        document.body.removeChild(tempContainer);
+
+        // Convert pixels to millimeters for PDF
         const mmWidth = 210; // A4 width in mm
         const mmHeight = 297; // A4 height in mm
 
         const pdf = new jsPDF({
-          orientation: 'portrait',
+          orientation: pageHeight > pageWidth ? 'portrait' : 'landscape',
           unit: 'mm',
-          format: 'a4'
+          format: pageSize.toLowerCase()
         });
 
-        // Add the image to PDF with correct A4 dimensions
         pdf.addImage(
           dataUrl,
           'PNG',

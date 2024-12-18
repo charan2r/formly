@@ -19,11 +19,11 @@ const ProfileSettings: React.FC = () => {
 
 
   useEffect(() => {
-    console.log(user?.id);
-    if (!user?.id) return; 
+    console.log(user.userId);
+    if (!user?.userId) return; 
     const fetchProfileData = async () => {
       try {
-        const response = await api.get(`/users/details?userId=${user?.id}`);
+        const response = await api.get(`/users/details?userId=${user?.userId}`);
         console.log(response.data);
         setProfileData(response.data.data);
         console.log(response.data)
@@ -96,7 +96,7 @@ const ProfileSettings: React.FC = () => {
 
       {/* Welcome and Edit button section */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-        <Typography 
+     <Typography 
           variant="h4" 
           sx={{ 
             fontSize: '24px',

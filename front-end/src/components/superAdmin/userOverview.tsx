@@ -274,8 +274,14 @@ const UserOverview: React.FC = () => {
   }, [user?.organizationId]);
 
   return (
-    <Paper elevation={4} sx={{ padding: '36px', margin: '16px', width: '100%', borderRadius: 3, overflow: 'auto' }}>
-    <Box display="flex" flexDirection="column" gap={2}>
+    <Paper elevation={4} sx={{ 
+      padding: { xs: '16px', sm: '24px', md: '36px' }, // Responsive padding
+      margin: { xs: '8px', sm: '16px' }, 
+      width: '100%', 
+      borderRadius: 3, 
+      overflow: 'auto' 
+    }}>
+      <Box display="flex" flexDirection="column" gap={2}>
         <Box display="flex" alignItems="center" gap={1} marginLeft="-10px">
         <IconButton onClick={() => console.log("Back arrow clicked")}>
           <CircleIcon style={{ color: 'black' }} />
@@ -295,41 +301,107 @@ const UserOverview: React.FC = () => {
         </Typography>
 
         {/* Chart Section */}
-        <Box display="flex" justifyContent="space-between" mt={8} height="300px" flexWrap="wrap">
+        <Box 
+          display="flex" 
+          flexDirection={{ xs: 'column', md: 'row' }} // Stack on mobile, row on desktop
+          justifyContent="space-between" 
+          mt={{ xs: 4, md: 8 }}
+          gap={4} // Add gap between stacked items
+          minHeight={{ xs: 'auto', md: '300px' }}
+        >
+          {/* Left Section - Bar Chart and Activities */}
           <Box
-            width={{ xs: '100%', sm: '45%' }}
-            height="100%"
+            width={{ xs: '100%', md: '45%' }}
             display="flex"
             flexDirection="column"
-            ml={5} 
+            ml={{ xs: 0, md: 5 }}
           >
-            <Typography variant="h5" fontWeight='bold' gutterBottom>Sub Users </Typography>
-            {/* Date Range */}
-           
-            <Bar
-              data={barData}
-              options={{
-                maintainAspectRatio: true,
-                responsive: true,
-                plugins: {
-                  legend: {
-                    display: false,
-                    position: 'bottom',
+            <Typography variant="h5" fontWeight='bold' gutterBottom>
+              Users
+            </Typography>
+            
+            <Box height={{ xs: '200px', sm: '250px', md: '300px' }}>
+              <Bar
+                data={barData}
+                options={{
+                  maintainAspectRatio: false,
+                  responsive: true,
+                  plugins: {
+                    legend: {
+                      display: false,
+                    },
+                    tooltip: {
+                      backgroundColor: 'rgba(0,0,0,0.8)',
+                      padding: 12,
+                      titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                      },
+                      bodyFont: {
+                        size: 13
+                      },
+                      displayColors: false,
+                      callbacks: {
+                        title: (tooltipItems) => {
+                          return `Date: ${tooltipItems[0].label}`;
+                        },
+                        label: (context) => {
+                          return `Users: ${context.parsed.y}`;
+                        }
+                      }
+                    }
                   },
-                },
-                scales: {
-                  x: {
-                    display: false,
+                  scales: {
+                    x: {
+                      grid: {
+                        display: true,
+                        color: 'rgba(0,0,0,0.05)'
+                      },
+                      ticks: {
+                        display: true,
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: {
+                          size: 11
+                        },
+                        maxTicksLimit: 8
+                      }
+                    },
+                    y: {
+                      display: true,
+                      grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                      },
+                      ticks: {
+                        font: {
+                          size: 11
+                        },
+                        stepSize: 1,
+                        callback: (value) => value.toFixed(0)
+                      }
+                    }
                   },
-                  y: {
-                    display: false,
-                    beginAtZero:true
+                  animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
                   },
-                },
-              }}
-              height={25}
-            />
-
+                  interaction: {
+                    intersect: false,
+                    mode: 'index'
+                  },
+                  elements: {
+                    bar: {
+                      borderRadius: 4,
+                      borderSkipped: false
+                    }
+                  }
+                }}
+              />
+            </Box>
+            {/* Recent Audit Trails Section */}   
+            <Typography variant="h5" fontWeight='bold' sx={{marginTop: '50px'}} gutterBottom>
+              Recent Audit Trails
+            </Typography>
             {topActivities.map((activity, index) => {
               const label = formatDateLabel(activity.createdAt);
               return (
@@ -434,15 +506,24 @@ const UserOverview: React.FC = () => {
               );
             })}
           </Box>
+
+          {/* Right Section - Pie and Doughnut Charts */}
           <Box
-            width={{ xs: '100%', sm: '35%' }}
-            height="100%"
+            width={{ xs: '100%', md: '35%' }}
             display="flex"
             flexDirection="column"
-            justifyContent="space-between"
+            gap={4}
           >
-            <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" height="50%">
-              <Typography variant="h6" gutterBottom>Categories</Typography>
+            {/* Pie Chart Section */}
+            <Box 
+              height={{ xs: '250px', sm: '300px' }}
+              display="flex" 
+              flexDirection="column" 
+              justifyContent="center"
+            >
+              <Typography variant="h6" gutterBottom align="center">
+                Categories
+              </Typography>
               <Pie
                 data={categoryData}
                 options={{
@@ -474,8 +555,16 @@ const UserOverview: React.FC = () => {
                 style={{ height: '100%', width: '100%' }}
               />
             </Box>
-            <Box display="flex" flexDirection="column" alignItems="center" height="50%" marginTop={7}>
-              <Typography variant="h6" gutterBottom>Users by Roles</Typography>
+
+            {/* Doughnut Chart Section */}
+            <Box 
+              height={{ xs: '250px', sm: '300px' }}
+              display="flex" 
+              flexDirection="column"
+            >
+              <Typography variant="h6" gutterBottom align="center">
+                Users by Roles
+              </Typography>
               <Doughnut
                 data={doughnutData}
                 options={{
