@@ -1215,17 +1215,6 @@ const FormTable: React.FC = () => {
         }}
       >
         <Box sx={{ position: 'relative' }}>
-          {/* Back arrow */}
-          <IconButton
-            onClick={() => setConfirmationOpen(false)}
-            sx={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-            }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
 
           {/* Content */}
           <Box sx={{
