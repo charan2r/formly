@@ -1,0 +1,57 @@
+.draggable-question {
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+  position: relative;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.draggable-question::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  display: none;
+}
+
+.draggable-question:hover::-webkit-scrollbar {
+  display: block;
+}
+
+.draggable-question::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.draggable-question::-webkit-scrollbar-thumb {
+  background: #bdbdbd;
+  border-radius: 4px;
+}
+
+.draggable-question::-webkit-scrollbar-thumb:hover {
+  background: #9e9e9e;
+}
+
+.draggable-question::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.draggable-question:hover {
+  scrollbar-width: thin;
+  scrollbar-color: #bdbdbd transparent;
+}
+
+.draggable-question:hover .MuiIconButton-root {
+  opacity: 1;
+}
+
+.form-field-container {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.draggable-question:hover .color-picker-button {
+  opacity: 1 !important;
+}
+
+.color-picker-button {
+  cursor: pointer;
+}
