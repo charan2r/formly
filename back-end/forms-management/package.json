@@ -23,7 +23,8 @@
     "migration:generate": "npm run typeorm -- -d ./ormconfig.ts migration:generate migrations/$npm_config_name",
     "migration:create": "npm run typeorm -- migration:create migrations/$npm_config_name",
     "seed:run": "npx tsx src/seeds/seed.ts",
-    "seed:permission": "npx tsx src/seeds/SeedPermission.ts"
+    "seed:permission": "npx tsx src/seeds/SeedPermission.ts",
+    "seed:superAdmin": "npx tsx src/seeds/SeedSuperAdmin.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
